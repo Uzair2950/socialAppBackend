@@ -1,21 +1,23 @@
 import { connectDB } from "./database/db.js";
 import { Types } from "mongoose";
 import {
-  Users, // ✅
-  Friends, // ✅
-  Courses, // ✅
-  Sections, // ✅
-  Teachers, // ✅
-  Students, // ✅
+  Users,
+  Friends,
+  Courses,
+  Sections,
+  Teachers,
+  Students,
   Messages,
-  Comments, // ✅
-  Posts, // ✅
-  PostGroups, // ✅
+  Comments,
+  Posts,
+  PostGroups,
   Chats,
   ChatGroups,
-  GroupMembers, // ✅
+  GroupMembers,
   Communities,
   CommunityMembers,
+  Notifications,
+  Stories
 } from "./database/models/models.js";
 
 let connection = await connectDB();
@@ -237,21 +239,21 @@ console.log(chat.getChatHead('6718996d858731ebee090545'))
 //   user: "6717f6e059df07b266e7eebd",
 // });
 
-// await Courses.insertMany([
-//   { "code": "CSC-101", "title": "Programming Fundamentals", "creditHours": 4 },
-//   { "code": "CSC-102", "title": "Object Oriented Programming", "creditHours": 4 },
-//   { "code": "CSC-103", "title": "Database Systems", "creditHours": 4 },
-//   { "code": "CSC-111", "title": "Digital Logic Design", "creditHours": 4 },
-//   { "code": "CSC-201", "title": "Data Structures", "creditHours": 4 },
-//   { "code": "CSC-203", "title": "Artificial Intelligence", "creditHours": 4 },
-//   { "code": "CSC-211", "title": "Computer Organization & Assembly Language", "creditHours": 4 },
-//   { "code": "CSC-251", "title": "Web Technologies", "creditHours": 3 },
-//   { "code": "CSC-351", "title": "Web Engineering", "creditHours": 3 },
-//   { "code": "CSC-352", "title": "Visual Programming", "creditHours": 3 },
-//   { "code": "CSC-542", "title": "Analysis of Algorithm", "creditHours": 3 },
-//   { "code": "CSC-577", "title": "Computer Networks", "creditHours": 4 },
-//   { "code": "CSC-582", "title": "Operating Systems", "creditHours": 4 },
-//   { "code": "ELE-401", "title": "Basic Electronics", "creditHours": 3 }
-// ])
+await Courses.insertMany([
+  { "code": "CSC-101", "title": "Programming Fundamentals", "creditHours": 4 },
+  { "code": "CSC-102", "title": "Object Oriented Programming", "creditHours": 4 },
+  { "code": "CSC-103", "title": "Database Systems", "creditHours": 4 },
+  { "code": "CSC-111", "title": "Digital Logic Design", "creditHours": 4 },
+  { "code": "CSC-201", "title": "Data Structures", "creditHours": 4 },
+  { "code": "CSC-203", "title": "Artificial Intelligence", "creditHours": 4 },
+  { "code": "CSC-211", "title": "Computer Organization & Assembly Language", "creditHours": 4 },
+  { "code": "CSC-251", "title": "Web Technologies", "creditHours": 3 },
+  { "code": "CSC-351", "title": "Web Engineering", "creditHours": 3 },
+  { "code": "CSC-352", "title": "Visual Programming", "creditHours": 3 },
+  { "code": "CSC-542", "title": "Analysis of Algorithm", "creditHours": 3 },
+  { "code": "CSC-577", "title": "Computer Networks", "creditHours": 4 },
+  { "code": "CSC-582", "title": "Operating Systems", "creditHours": 4 },
+  { "code": "ELE-401", "title": "Basic Electronics", "creditHours": 3 }
+])
 
 connection.disconnect();
