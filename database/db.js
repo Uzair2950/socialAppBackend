@@ -1,7 +1,7 @@
 import { connect } from "mongoose";
 
 const MONGOURL = "mongodb://127.0.0.1:27017/";
-const DB_NAME = "SocialAppDB2";
+const DB_NAME = "SocialAppDB3";
 
 const connectDB = async () => {
   try {

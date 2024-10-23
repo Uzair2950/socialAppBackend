@@ -4,7 +4,7 @@ const _User = new Schema(
   {
     username: { type: String, required: true },
     password: { type: String, required: true },
-    name: { type: String, default: "" },
+    name: { type: String, required: true },
     avatarURL: { type: String, default: "" },
     bio: { type: String, default: "" },
     posts: [{ type: Types.ObjectId, ref: "post", default: [] }],
@@ -53,6 +53,7 @@ const _Teacher = new Schema({
 const _Student = new Schema({
   cgpa: { type: Number, default: 0 },
   user: { type: Types.ObjectId, ref: "user", required: true },
+  reg_no: { type: String, required: true },
   section: { type: Types.ObjectId, ref: "section", required: true },
   courses: [{ type: Types.ObjectId, ref: "course", default: [] }],
   // program: { type: String, default: "" },
@@ -65,7 +66,6 @@ const _Message = new Schema({
   readBy: [{ type: Types.ObjectId, ref: "user" }],
   // Why This? To Make Blue Ticks Easy! just compare readBy Count with total chat participants :)))))
   reply: {
-    content: { type: String, default: "" },
     repliedTo: { type: Types.ObjectId, ref: "message" },
   },
   attachements: [{ type: String, default: "" }],
@@ -122,9 +122,20 @@ const _Chat = new Schema(
   {
     methods: {
       getTitle(current_user_id) {
+        // Chat Head Title Is Different for every user.s
         return this.participants.filter(
-          (y) => y.toString() != current_user_id
+          (y) => y._id.toString() != current_user_id
         )[0];
+      },
+      getChatHead(current_user_id) {
+        let chatHead = {
+          chatInfo: this.participants.filter(
+            (y) => y._id.toString() != current_user_id
+          )[0],
+          lastMessage: this.messages[0] ?? {},
+        };
+        console.log(chatHead)
+        return chatHead;
       },
     },
   }
