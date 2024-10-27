@@ -30,7 +30,7 @@ const _Friends = new Schema({
 const _Story = new Schema({
   author: { type: Types.ObjectId, ref: "user" },
   content: { type: String, default: "" },
-  privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
+  privacyLevel: { type: Number, enum: [0, 1], default: 0 }, // 0 => Public, 1 => Friends Only
   attachements: [{ type: String, default: "" }],
   views: [{ type: Types.ObjectId, ref: "user" }],
 });
@@ -45,13 +45,33 @@ const _Section = new Schema({
   title: { type: String, required: true },
 });
 
+const _Session = new Schema(
+  {
+    year: { type: Number, required: true },
+    name: { type: String, enum: ["Fall", "Spring", "Summer"], required: true },
+    has_commenced: { type: Boolean, default: false },
+  },
+  {
+    virtuals: {
+      computed_session: {
+        get() {
+          return `${this.name}-${this.year}`;
+        },
+      },
+    },
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
 const _Teacher = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
   allocated_courses: {
     type: [
       {
-        section: _Section,
-        courses: [{ type: Types.ObjectId, ref: "course" }],
+        course: { type: Types.ObjectId, ref: "course" },
+        section: { type: Types.ObjectId, ref: "section" },
+        session: { type: Types.ObjectId, ref: "session" },
       },
     ],
     default: [],
@@ -59,16 +79,24 @@ const _Teacher = new Schema({
 });
 
 const _Student = new Schema({
-  cgpa: { type: Number, default: 0 },
-  user: { type: Types.ObjectId, ref: "user", required: true },
   reg_no: { type: String, required: true },
-  section: { type: Types.ObjectId, ref: "section", required: true },
-  courses: [{ type: Types.ObjectId, ref: "course", default: [] }],
+  user: { type: Types.ObjectId, ref: "user", required: true },
+  cgpa: { type: Number, default: 0 },
+  enrolled_courses: {
+    type: [
+      {
+        course: { type: Types.ObjectId, ref: "course" },
+        section: { type: Types.ObjectId, ref: "section" },
+        session: { type: Types.ObjectId, ref: "session" },
+      },
+    ],
+    default: [],
+  },
 });
 
 const _DataCellMember = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
-})
+});
 
 const _Message = new Schema({
   senderId: { type: Types.ObjectId, ref: "user" },
@@ -188,6 +216,32 @@ const _Notification = new Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
+// const _SlotModel = new Schema({
+//   courseCode: { type: String, required: true },
+//   courseTitle: { type: String, required: true },
+//   instructor: { type: String, required: true },
+//   venue: { type: String, required: true },
+//   start_time: { type: String, required: true },
+//   end_time: { type: String, required: true },
+// });
+
+const _TimeTable = new Schema({
+  section: { type: Types.ObjectId, ref: "section" },
+  slots: {
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+  },
+});
+
+const _DateSheet = new Schema({
+  session: { type: Types.ObjectId, ref: "session" },
+  course_id: { type: Types.ObjectId, ref: "course" },
+  date: Date,
+});
+
 const Users = model("user", _User);
 const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
@@ -205,7 +259,11 @@ const GroupMembers = model("groupmembers", _GroupMembers);
 const Communities = model("community", _Community);
 const CommunityMembers = model("communitymembers", _CommunityMembers);
 const Notifications = model("notification", _Notification);
-const Stories = model("communitymembers", _Story);
+const Stories = model("stories", _Story);
+const Sessions = model("session", _Session);
+// const Slots = model("slots", _SlotModel);
+const TimeTable = model("timetable", _TimeTable);
+const Datesheet = model("datesheet", _DateSheet);
 
 export {
   Users,
@@ -225,5 +283,8 @@ export {
   CommunityMembers,
   Notifications,
   Stories,
-  DataCellMembers
+  DataCellMembers,
+  Sessions,
+  TimeTable,
+  Datesheet,
 };
