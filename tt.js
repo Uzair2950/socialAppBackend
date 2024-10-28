@@ -417,8 +417,15 @@
 //   { "code": "CSC-542", "title": "Analysis of Algorithm", "creditHours": 3 },
 //   { "code": "CSC-577", "title": "Computer Networks", "creditHours": 4 },
 //   { "code": "CSC-582", "title": "Operating Systems", "creditHours": 4 },
-//   { "code": "ELE-401", "title": "Basic Electronics", "creditHours": 3 }
+//   { "code": "ELE-401", "title": "Basic Electronics", "creditHours": 3 },
 //   { "code": "CSC-693", "title": "MAP", "creditHours": 3 },
 // ])
 
 //
+
+// let te = await Teachers.findOne()
+// te.allocated_courses.addToSet({
+//   course: "671fca1e525bb4fd2899b6cd",
+//   session: "671fcaaf2589cac67a2ea249",
+//   section: ["671fca9828d6e955a5ecdbb0", "671fca9828d6e955a5ecdbb2"],
+// });

@@ -17,23 +17,17 @@ import {
   Communities,
   CommunityMembers,
   Notifications,
-  Stories,
   Sessions,
   TimeTable,
 } from "./database/models/models.js";
 
 let connection = await connectDB();
 
-let stu_sections = await Students.findOne().distinct(
-  "enrolled_courses.section"
-);
+let user = await Users.findOne();
 
-let timeTable = await TimeTable.find({ section: { $in: stu_sections } }).select(
-  "slots"
-);
+let posts = await Posts.find({ author: user._id }).populate('likes', 'name avatarURL');
 
-console.log(timeTable[0].slots)
-console.log(timeTable[1].slots)
 
+console.log(posts[0]);
 
 connection.disconnect();

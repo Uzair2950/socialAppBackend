@@ -6,8 +6,17 @@ const _User = new Schema(
     password: { type: String, required: true },
     name: { type: String, required: true },
     avatarURL: { type: String, default: "" },
+    is_private: { type: Boolean, default: false },
     bio: { type: String, default: "" },
-    posts: [{ type: Types.ObjectId, ref: "post", default: [] }],
+    // posts: [
+    //   {
+    //     type: {
+    //       isPinned: { type: Boolean, default: false },
+    //       post: { type: Types.ObjectId, ref: "post" },
+    //     },
+    //     default: [],
+    //   },
+    // ],
     friends: [{ type: Types.ObjectId, ref: "friend", default: [] }],
     activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }],
   },
@@ -27,13 +36,15 @@ const _Friends = new Schema({
   status: { type: String, enum: ["accepted", "pending"], default: "pending" },
 });
 
-const _Story = new Schema({
-  author: { type: Types.ObjectId, ref: "user" },
-  content: { type: String, default: "" },
-  privacyLevel: { type: Number, enum: [0, 1], default: 0 }, // 0 => Public, 1 => Friends Only
-  attachements: [{ type: String, default: "" }],
-  views: [{ type: Types.ObjectId, ref: "user" }],
-});
+// const _Story = new Schema({
+//   author: { type: Types.ObjectId, ref: "user" },
+//   content: { type: String, default: "" },
+//   is_private: { type: Boolean, default: false },
+//   attachements: [{ type: String, default: "" }],
+//   views: [{ type: Types.ObjectId, ref: "user" }],
+//   add_time: { type: Date, default: Date.now },
+//   expired: { type: Boolean, default: false },
+// });
 
 const _Course = new Schema({
   code: { type: String, required: true },
@@ -70,7 +81,7 @@ const _Teacher = new Schema({
     type: [
       {
         course: { type: Types.ObjectId, ref: "course" },
-        section: { type: Types.ObjectId, ref: "section" },
+        section: [{ type: Types.ObjectId, ref: "section" }],
         session: { type: Types.ObjectId, ref: "session" },
       },
     ],
@@ -98,47 +109,50 @@ const _DataCellMember = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
 });
 
-const _Message = new Schema({
-  senderId: { type: Types.ObjectId, ref: "user" },
-  content: { type: String, default: "" },
-  isReply: { type: Boolean, default: false },
-  readBy: [{ type: Types.ObjectId, ref: "user" }],
-  // ^ Why This? To Make Blue Ticks Easy!
-  // just compare readBy Count with total chat participants :)))))
-  reply: {
-    repliedTo: { type: Types.ObjectId, ref: "message" },
-  },
-  attachements: [{ type: String, default: "" }],
-  timestamp: { type: Date, default: Date.now },
-});
-
-const _Comment = new Schema({
-  author: { type: Types.ObjectId, ref: "user" },
-  content: { type: String, default: "" },
-  timestamp: { type: Date, default: Date.now },
-});
-
-const _Post = new Schema({
-  author: { type: Types.ObjectId, ref: "user" },
-  // Group Posts will be public by default.!
-  privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
-  content: { type: String, default: "" },
-  attachements: [{ type: String, default: "" }],
-  likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
-  comments: [
-    {
-      type: {
-        comment: { type: Types.ObjectId, ref: "comment" },
-      },
-      default: [],
+const _Message = new Schema(
+  {
+    senderId: { type: Types.ObjectId, ref: "user" },
+    content: { type: String, default: "" },
+    isReply: { type: Boolean, default: false },
+    readBy: [{ type: Types.ObjectId, ref: "user" }],
+    // ^ Why This? To Make Blue Ticks Easy!
+    // just compare readBy Count with total chat participants :)))))
+    reply: {
+      repliedTo: { type: Types.ObjectId, ref: "message" },
     },
-  ],
-  timestamp: { type: Date, default: Date.now },
-});
+    attachements: [{ type: String, default: "" }],
+  },
+  { timestamps: true }
+);
 
+const _Comment = new Schema(
+  {
+    author: { type: Types.ObjectId, ref: "user" },
+    content: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+const _Post = new Schema(
+  {
+    author: { type: Types.ObjectId, ref: "user" },
+    type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal , 1 => Group Post
+    is_pinned: { type: Boolean, default: false },
+    content: { type: String, default: "" },
+    attachements: [{ type: String, default: "" }],
+    privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
+    likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
+    comments: [{ type: Types.ObjectId, ref: "comment", default: [] }],
+    // timestamp: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+// Members in _GroupMembers
 const _PostGroup = new Schema({
   title: { type: String, required: true },
   admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  is_private: { type: Boolean, default: false },
   posts: [
     {
       type: {
@@ -240,6 +254,7 @@ const _DateSheet = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
   course_id: { type: Types.ObjectId, ref: "course" },
   date: Date,
+  // start_time:
 });
 
 const Users = model("user", _User);
@@ -259,7 +274,7 @@ const GroupMembers = model("groupmembers", _GroupMembers);
 const Communities = model("community", _Community);
 const CommunityMembers = model("communitymembers", _CommunityMembers);
 const Notifications = model("notification", _Notification);
-const Stories = model("stories", _Story);
+// const Stories = model("stories", _Story);
 const Sessions = model("session", _Session);
 // const Slots = model("slots", _SlotModel);
 const TimeTable = model("timetable", _TimeTable);
@@ -282,7 +297,7 @@ export {
   Communities,
   CommunityMembers,
   Notifications,
-  Stories,
+  // Stories,
   DataCellMembers,
   Sessions,
   TimeTable,
