@@ -5,19 +5,10 @@ const _User = new Schema(
     username: { type: String, required: true, index: true },
     password: { type: String, required: true },
     name: { type: String, required: true },
+    type: { type: Number, enum: [0, 1, 2], default: 0 }, //0 => Student , 1 => Teacher, 2 => DataCell
     avatarURL: { type: String, default: "" },
     is_private: { type: Boolean, default: false },
     bio: { type: String, default: "" },
-    // posts: [
-    //   {
-    //     type: {
-    //       isPinned: { type: Boolean, default: false },
-    //       post: { type: Types.ObjectId, ref: "post" },
-    //     },
-    //     default: [],
-    //   },
-    // ],
-    friends: [{ type: Types.ObjectId, ref: "friend", default: [] }],
     activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }],
   },
   {
@@ -31,10 +22,14 @@ const _User = new Schema(
   }
 );
 
-const _Friends = new Schema({
-  friend_id: { type: Types.ObjectId, ref: "user" },
-  status: { type: String, enum: ["accepted", "pending"], default: "pending" },
-});
+const _Friends = new Schema(
+  {
+    uid: { type: Types.ObjectId, ref: "user" },
+    friend_id: { type: Types.ObjectId, ref: "user" },
+    status: { type: String, enum: ["accepted", "pending"], default: "pending" },
+  },
+  { timestamps: true }
+);
 
 // const _Story = new Schema({
 //   author: { type: Types.ObjectId, ref: "user" },
@@ -105,7 +100,7 @@ const _Student = new Schema({
   },
 });
 
-const _DataCellMember = new Schema({
+const _Administrator = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
 });
 
@@ -135,15 +130,27 @@ const _Comment = new Schema(
 
 const _Post = new Schema(
   {
-    author: { type: Types.ObjectId, ref: "user" },
+    author: { type: Types.ObjectId, ref: "user", required: true },
     type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal , 1 => Group Post
+    group_id: { type: Types.ObjectId, ref: "postgroup", default: null },
     is_pinned: { type: Boolean, default: false },
     content: { type: String, default: "" },
     attachements: [{ type: String, default: "" }],
+    // Group posts will be public by default.
+    // self => <= 2
+    // friend => <= 1
+    // public => <= 0
     privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
     likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
     comments: [{ type: Types.ObjectId, ref: "comment", default: [] }],
-    // timestamp: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
+
+const _GroupRequests = new Schema(
+  {
+    gid: { type: Types.ObjectId, required: true }, // ref => groups
+    user: { type: Types.ObjectId, ref: "user", required: true },
   },
   { timestamps: true }
 );
@@ -153,15 +160,15 @@ const _PostGroup = new Schema({
   title: { type: String, required: true },
   admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
   is_private: { type: Boolean, default: false },
-  posts: [
-    {
-      type: {
-        author: { type: Types.ObjectId, ref: "user" },
-        post: { type: Types.ObjectId, ref: "post" },
-      },
-      default: [],
-    },
-  ],
+  // posts: [
+  //   {
+  //     type: {
+  //       author: { type: Types.ObjectId, ref: "user" },
+  //       post: { type: Types.ObjectId, ref: "post" },
+  //     },
+  //     default: [],
+  //   },
+  // ],
 });
 
 const _ChatGroup = new Schema({
@@ -257,11 +264,17 @@ const _DateSheet = new Schema({
   // start_time:
 });
 
+const _AutoReply = new Schema({
+  user: { type: Types.ObjectId, ref: "user" },
+  message: { type: String, required: true },
+  reply: { type: String, required: true },
+});
+
 const Users = model("user", _User);
 const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
 const Sections = model("section", _Section);
-const DataCellMembers = model("datacellmember", _DataCellMember);
+const Administrators = model("administrator", _Administrator);
 const Teachers = model("teacher", _Teacher);
 const Students = model("student", _Student);
 const Messages = model("message", _Message);
@@ -271,6 +284,7 @@ const PostGroups = model("postgroup", _PostGroup);
 const ChatGroups = model("chatgroup", _ChatGroup);
 const Chats = model("chat", _Chat); // for personal
 const GroupMembers = model("groupmembers", _GroupMembers);
+const GroupRequests = model("grouprequest", _GroupRequests);
 const Communities = model("community", _Community);
 const CommunityMembers = model("communitymembers", _CommunityMembers);
 const Notifications = model("notification", _Notification);
@@ -279,6 +293,7 @@ const Sessions = model("session", _Session);
 // const Slots = model("slots", _SlotModel);
 const TimeTable = model("timetable", _TimeTable);
 const Datesheet = model("datesheet", _DateSheet);
+const AutoReply = model("autoreply", _AutoReply);
 
 export {
   Users,
@@ -298,8 +313,9 @@ export {
   CommunityMembers,
   Notifications,
   // Stories,
-  DataCellMembers,
+  Administrators,
   Sessions,
   TimeTable,
   Datesheet,
+  AutoReply,
 };

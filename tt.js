@@ -150,38 +150,50 @@
 //     username: "cyber",
 //     password: "212",
 //     name: "Syed Shah Meer Haider",
+//     type: 0,
 //   },
 //   {
 //     username: "epsilon",
 //     password: "212",
 //     name: "Hassan Shahzad",
+//     type: 0,
 //   },
 //   {
 //     username: "theta",
 //     password: "212",
 //     name: "Ch. Attique",
+//     type: 0,
 //   },
 //   {
 //     username: "eta",
 //     password: "212",
 //     name: "Abdul Rafe",
+//     type: 0,
 //   },
 //   {
 //     username: "beta",
 //     password: "212",
 //     name: "Muhammad Abdullah",
+//     type: 0,
 //   },
 //   {
 //     username: "shahid",
 //     password: "212",
 //     name: "Shahid Jamil",
+//     type: 1,
 //   },
 //   {
 //     username: "zahid",
 //     password: "212",
 //     name: "Zahid",
+//     type: 1,
 //   },
-
+//   {
+//     username: "admin",
+//     password: "212",
+//     name: "ADmin",
+//     type: 2,
+//   },
 // ]);
 
 // let users = await Users.findOne();
