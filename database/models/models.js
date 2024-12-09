@@ -140,6 +140,7 @@ const _Post = new Schema(
     // self => <= 2
     // friend => <= 1
     // public => <= 0
+    allowCommenting: { type: Boolean, default: true },
     privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
     likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
     comments: [{ type: Types.ObjectId, ref: "comment", default: [] }],

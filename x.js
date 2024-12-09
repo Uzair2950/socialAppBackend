@@ -34,11 +34,12 @@ import { connectDB } from "./database/db.js";
 // db.disconnect();
 
 import userController from "./controllers/userController.js";
+import postController from "./controllers/postController.js";
 
 let db = await connectDB()
 
 
-console.log(await userController.getFriends('6754a9268db89992d5b8221e', true, 2))
+console.log(await userController.getProfile('6754a9268db89992d5b8221e', '6754a9268db89992d5b8221e'))
 
 db.disconnect()
 

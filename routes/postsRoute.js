@@ -2,6 +2,8 @@ import path from "path";
 import express from "express";
 import postController from "../controllers/postController.js";
 import multer from "multer";
+import { validateRequest } from "zod-express-middleware";
+import { z } from "zod";
 
 const storage = multer.diskStorage({
   destination: "./static/posts",
@@ -39,6 +41,26 @@ router.post(
 router.get("/getPosts/:uid", async (req, res) => {
   res.json(await postController.getPosts(req.params.uid, 0));
 });
+
+router.post("/likePost/:pid/:uid", async (req, res) => {
+  console.log(req.params)
+  await postController.likePost(pid, uid);
+  return res.json({ message: "Liked!" });
+});
+
+router.post(
+  "/addComment/:pid",
+  validateRequest({
+    body: z.object({
+      author: z.string(),
+      content: z.string(),
+    }),
+  }),
+  async(req, res) => {
+    await postController.addComment(req.params.pid, req.body.author, req.body.content)
+    return res.json({message: "Comment Added"})
+  }
+);
 
 export default router;
 

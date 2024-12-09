@@ -7,6 +7,8 @@ import {
   Posts,
 } from "../database/models/models.js";
 
+import postController from "./postController.js";
+
 export default {
   isFriend: async function (uid, fid) {
     let res = await Friends.findOne({
@@ -41,15 +43,20 @@ export default {
   },
 
   getProfile: async function (uid, rid) {
-    let user_data = await Users.findById(uid).select(
-      "_-activeChats -_password"
-    );
+    let user_data = await Users.findById(uid).select("-activeChats -password");
     let isSelf = uid == rid;
-    let isFriend = this.isFriend(uid, rid);
-    let isPublic = user_data.is_private;
+    let isFriend = await this.isFriend(uid, rid);
+    let isPublic = !user_data.is_private;
     if (isSelf || isPublic || isFriend) {
-      let friends = this.getFriends(uid, true, 3);
-      let posts = this.getPosts(uid, uid == rid ? 2 : isFriend ? 1 : 0);
+      let friends = await this.getFriends(uid, true, 3);
+      let posts = await postController.getPosts(
+        uid,
+        isSelf ? 2 : isFriend ? 1 : 0
+      );
+
+      return { user_data, friends, posts };
+    } else {
+      return { user_data };
     }
   },
 
@@ -108,6 +115,4 @@ export default {
 
     return [...friends, ...friends2];
   },
-
-  
 };

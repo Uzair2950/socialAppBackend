@@ -39,11 +39,13 @@ router.get(
     if (!user)
       return res.status(401).json({ message: "Invalid username or password!" });
 
-    console.log(user);
-
     return res.send(user);
   }
 );
+
+router.get("/", (req, res) => {
+  return res.send("Wow")
+})
 
 /*
 
@@ -151,7 +153,7 @@ router.post("/acceptRequest/:request_id", async (req, res) => {
 */
 
 router.get("/getProfile/:id/:requester_id", async (req, res) => {
-  return await userController.getProfile(req.params.id, req.params.requester_id)
+  return res.json(await userController.getProfile(req.params.id, req.params.requester_id))
 });
 
 export default router;
