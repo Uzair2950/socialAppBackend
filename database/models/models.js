@@ -209,8 +209,8 @@ const _Chat = new Schema(
 
 const _GroupMembers = new Schema({
   // easier to lookup
-  uid: { type: Types.ObjectId, required: true }, // ref => Users
-  gid: { type: Types.ObjectId, required: true }, // ref => groups
+  uid: { type: Types.ObjectId, ref: "user", required: true }, // ref => Users
+  gid: { type: Types.ObjectId, ref: "postgroup", required: true }, // ref => groups
 });
 
 const _CommunityMembers = new Schema({
@@ -221,22 +221,34 @@ const _CommunityMembers = new Schema({
 
 const _Community = new Schema({
   title: { type: String, required: true },
-  admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
-  groups: [{ type: Types.ObjectId, ref: "postgroup" }],
+  communityAdmins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  groups: [
+    {
+      group_type: {
+        type: Number,
+        enum: [0, 1], // 0 => Post Group / Chat Group
+        default: 0,
+      },
+      gid: { type: Types.ObjectId, ref: "postgroup" },
+      default: [],
+    },
+  ],
   // Add announcement channel by default.
 });
 
-const _Notification = new Schema({
-  user: { type: Types.ObjectId, ref: "user" },
-  content: { type: String, required: true },
-  type: {
-    type: String,
-    enum: ["message", "post", "friendRequest"],
-    required: true,
+const _Notification = new Schema(
+  {
+    user: { type: Types.ObjectId, ref: "user" },
+    content: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ["message", "post", "friendRequest"],
+      required: true,
+    },
+    isRead: { type: Boolean, default: false },
   },
-  isRead: { type: Boolean, default: false },
-  timestamp: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
 
 // const _SlotModel = new Schema({
 //   courseCode: { type: String, required: true },
@@ -250,12 +262,22 @@ const _Notification = new Schema({
 const _TimeTable = new Schema({
   section: { type: Types.ObjectId, ref: "section" },
   slots: {
-    monday: [],
-    tuesday: [],
-    wednesday: [],
-    thursday: [],
-    friday: [],
+    monday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
+    tuesday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
+    wednesday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
+    thursday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
+    friday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
   },
+});
+
+const _Slot = new Schema({
+  cousre: { type: Types.ObjectId, ref: "course", required: true },
+  instructors: [
+    { type: Types.ObjectId, ref: "user", required: true, default: [] },
+  ],
+  venue: { type: String, required: true },
+  start_time: { type: String, required: true },
+  end_time: { type: String, required: true },
 });
 
 const _DateSheet = new Schema({
@@ -291,7 +313,7 @@ const CommunityMembers = model("communitymembers", _CommunityMembers);
 const Notifications = model("notification", _Notification);
 // const Stories = model("stories", _Story);
 const Sessions = model("session", _Session);
-// const Slots = model("slots", _SlotModel);
+const Slots = model("slots", _Slot);
 const TimeTable = model("timetable", _TimeTable);
 const Datesheet = model("datesheet", _DateSheet);
 const AutoReply = model("autoreply", _AutoReply);
@@ -313,7 +335,7 @@ export {
   Communities,
   CommunityMembers,
   Notifications,
-  // Stories,
+  Slots,
   Administrators,
   Sessions,
   TimeTable,

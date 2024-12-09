@@ -1,47 +1,201 @@
 import { connectDB } from "./database/db.js";
-// import { Friends } from "./database/models/models.js";
+import {
+  Courses,
+  Slots,
+  Students,
+  Teachers,
+  TimeTable,
+  Users,
+} from "./database/models/models.js";
 
-// let db = await connectDB();
-// // let uid = "6754a9268db89992d5b8221e";
-// // let friends = await Friends.find({ status: "accepted", uid })
-// //   .populate("friend_id", "name avatarURL")
-// //   .select("friend_id");
-// // // 2. Get Friends who added this user.
-// // let friends2 = await Friends.find({ status: "accepted", friend_id: uid })
-// //   .populate("uid", "name avatarURL")
-// //   .select("uid");
+let db = await connectDB();
 
-// // // console.log(friends)
-// // // console.log("+=====================================================================================+")
-// // // console.log(friends2)
+let tbw = "675736d0c90ab67482af2162";
+let map = "675736d0c90ab67482af215c";
+let toq3 = "675736d0c90ab67482af2173";
+let cc = "675736d0c90ab67482af2155";
+// await Slots.insertMany([
+//   // 7C
+//   // monday
+//   {
+//     cousre: tbw,
+//     instructors: ["67573f6611a71256e4e32d5f"],
+//     venue: "LAB-11",
+//     start_time: "8:30AM",
+//     end_time: "9:30AM",
+//   },
+//   {
+//     cousre: cc,
+//     instructors: ["67573f6611a71256e4e32d60"],
+//     venue: "LT-2",
+//     start_time: "2:00PM",
+//     end_time: "3:00PM",
+//   },
+//   {
+//     cousre: cc,
+//     instructors: ["67573f6611a71256e4e32d60"],
+//     venue: "LAB-7",
+//     start_time: "4:00PM",
+//     end_time: "5:00PM",
+//   },
 
-// // console.log([...friends, ...friends2]);
+//   // wednesday
+//   {
+//     cousre: tbw,
+//     instructors: ["67573f6611a71256e4e32d5f"],
+//     venue: "LT-2",
+//     start_time: "9:30AM",
+//     end_time: "10:30AM",
+//   },
 
-// const isFriend = async (uid, fid) => {
-//   let res = await Friends.findOne({
-//     $or: [
-//       { uid: uid, friend_id: fid },
-//       { uid: fid, friend_id: uid },
-//     ],
-//     status: "accepted",
-//   });
+//   // Thursday
+//   {
+//     cousre: tbw,
+//     instructors: ["67573f6611a71256e4e32d5f"],
+//     venue: "LAB-11",
+//     start_time: "8:30AM",
+//     end_time: "9:30AM",
+//   },
+//   {
+//     cousre: cc,
+//     instructors: ["67574c458542cc4835b614cf"],
+//     venue: "LAB-9",
+//     start_time: "8:30AM",
+//     end_time: "9:30AM",
+//   },
+//   {
+//     cousre: toq3,
+//     instructors: ["67573f6611a71256e4e32d61"],
+//     venue: "LT-12",
+//     start_time: "8:30AM",
+//     end_time: "9:30AM",
+//   },
+//   // Friday
 
-//   return res ? true : false;
-// };
+//   {
+//     cousre: cc,
+//     instructors: ["67573f6611a71256e4e32d60"],
+//     venue: "LT-7",
+//     start_time: "9:30AM",
+//     end_time: "10:30AM",
+//   },
+//   {
+//     cousre: cc,
+//     instructors: ["67573f6611a71256e4e32d60", "67574c458542cc4835b614cf"],
+//     venue: "LAB-8",
+//     start_time: "10:30AM",
+//     end_time: "11:30AM",
+//   },
+//   // IOS SECTION
+//   // Monday
+//   {
+//     cousre: map,
+//     instructors: ["67573f6611a71256e4e32d66"],
+//     venue: "LAB-9",
+//     start_time: "5:00PM",
+//     end_time: "6:00PM",
+//   },
+//   // Wedensday
+//   {
+//     cousre: map,
+//     instructors: ["6754a9268db89992d5b82224"],
+//     venue: "LAB-3",
+//     start_time: "4:00PM",
+//     end_time: "5:00PM",
+//   },
+//   {
+//     cousre: map,
+//     instructors: ["6754a9268db89992d5b82224"],
+//     venue: "LAB-3",
+//     start_time: "5:00PM",
+//     end_time: "6:00PM",
+//   },
 
-// console.log(await isFriend("6754a9268db89992d5b8221f", "6754a9268db89992d5b82222"));
+//   // Friday
+//   {
+//     cousre: map,
+//     instructors: ["6754a9268db89992d5b82224"],
+//     venue: "LAB-3",
+//     start_time: "11:30AM",
+//     end_time: "12:30PM",
+//   },
+//   {
+//     cousre: map,
+//     instructors: ["6754a9268db89992d5b82224", "67573f6611a71256e4e32d66"],
+//     venue: "LAB-3",
+//     start_time: "12:30PM",
+//     end_time: "1:30PM",
+//   },
+// ]);
 
-// db.disconnect();
+// await TimeTable.insertMany([
+//   {
+//     section: "671fca9828d6e955a5ecdbb0", // 7C
+//     slots: {
+//       monday: [
+//         "67574e9993bed7e59c4d9f4d",
+//         "67574e9993bed7e59c4d9f4e",
+//         "67574e9993bed7e59c4d9f4f",
+//       ],
+//       wednesday: ["67574e9993bed7e59c4d9f50"],
+//       thursday: [
+//         "67574e9993bed7e59c4d9f51",
+//         "67574e9993bed7e59c4d9f52",
+//         "67574e9993bed7e59c4d9f53",
+//       ],
+//       friday: ["67574e9993bed7e59c4d9f54", "67574e9993bed7e59c4d9f55"],
+//     },
+//   },
+//   {
+//     section: "671fca9828d6e955a5ecdbb4", // IOS
+//     slots: {
+//       monday: ["67574e9993bed7e59c4d9f56"],
+//       wednesday: ["67574e9993bed7e59c4d9f57", "67574e9993bed7e59c4d9f58"],
+//       friday: ["67574e9993bed7e59c4d9f59", "67574e9993bed7e59c4d9f5a"],
+//     },
+//   },
+// ]);
 
-import userController from "./controllers/userController.js";
-import postController from "./controllers/postController.js";
+// let stu = await Students.findOne()
+// stu.enrolled_courses.push({
+//   section: "671fca9828d6e955a5ecdbb0",
+//   course: tbw,
+//   session: "671fcaaf2589cac67a2ea249"
+// })
+// stu.enrolled_courses.push({
+//   section: "671fca9828d6e955a5ecdbb0",
+//   course: cc,
+//   session: "671fcaaf2589cac67a2ea249"
+// })
+// stu.enrolled_courses.push({
+//   section: "671fca9828d6e955a5ecdbb0",
+//   course: toq3,
+//   session: "671fcaaf2589cac67a2ea249"
+// })
+// stu.enrolled_courses.push({
+//   section: "671fca9828d6e955a5ecdbb4",
+//   course: map,
+//   session: "671fcaaf2589cac67a2ea249"
+// })
 
-let db = await connectDB()
+// await stu.save()
+
+let stu_sections = await Students.findOne().distinct(
+  "enrolled_courses.section"
+);
+let timeTable = await TimeTable.find({ section: { $in: stu_sections } }).select(
+  "slots"
+)
+.populate({
+  path: "slots.monday slots.thursday slots.wednesday slots.thursday slots.friday",
+  populate: [
+    { path: "cousre", model: "course", select: "title" },
+    { path: "instructors", model: "user", select: "name" },
+  ]
+})
 
 
-console.log(await userController.getProfile('6754a9268db89992d5b8221e', '6754a9268db89992d5b8221e'))
 
-db.disconnect()
+console.log(timeTable)
 
-
-
+db.disconnect();

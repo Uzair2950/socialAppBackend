@@ -19,8 +19,6 @@ const router = express.Router();
 
 //Routes
 
-
-
 // Authorize User {username, password}
 router.get(
   "/authorize",
@@ -44,8 +42,8 @@ router.get(
 );
 
 router.get("/", (req, res) => {
-  return res.send("Wow")
-})
+  return res.send("Wow");
+});
 
 /*
 
@@ -130,13 +128,13 @@ router.put(
 
 */
 
-router.get("/getFriends/:uid", async(req, res) => {
+router.get("/getFriends/:uid", async (req, res) => {
   return res.json(await userController.getFriends(req.params.uid));
-})
+});
 
-router.get("/getPendingRequests/:uid", async(req, res) => {
+router.get("/getPendingRequests/:uid", async (req, res) => {
   return res.json(await userController.getPendingRequests(req.params.uid));
-})
+});
 
 router.post("/addFriend/:uid/:fid", async (req, res) => {
   await userController.addFriend(req.params.uid, req.params.fid);
@@ -153,7 +151,9 @@ router.post("/acceptRequest/:request_id", async (req, res) => {
 */
 
 router.get("/getProfile/:id/:requester_id", async (req, res) => {
-  return res.json(await userController.getProfile(req.params.id, req.params.requester_id))
+  return res.json(
+    await userController.getProfile(req.params.id, req.params.requester_id)
+  );
 });
 
 export default router;

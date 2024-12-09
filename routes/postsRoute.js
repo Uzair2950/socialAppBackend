@@ -43,8 +43,7 @@ router.get("/getPosts/:uid", async (req, res) => {
 });
 
 router.post("/likePost/:pid/:uid", async (req, res) => {
-  console.log(req.params)
-  await postController.likePost(pid, uid);
+  await postController.likePost(req.params.pid, req.params.uid);
   return res.json({ message: "Liked!" });
 });
 
@@ -56,9 +55,13 @@ router.post(
       content: z.string(),
     }),
   }),
-  async(req, res) => {
-    await postController.addComment(req.params.pid, req.body.author, req.body.content)
-    return res.json({message: "Comment Added"})
+  async (req, res) => {
+    await postController.addComment(
+      req.params.pid,
+      req.body.author,
+      req.body.content
+    );
+    return res.json({ message: "Comment Added" });
   }
 );
 

@@ -211,10 +211,10 @@
 //   { title: "GC-7A" },
 //   { title: "GC-7B" },
 //   { title: "AI-7A" },
-// { title: "IOS" },
-// { title: "ReactNative" },
-// { title: "Flutter" },
-// { title: "Android" },
+//   { title: "IOS" },
+//   { title: "ReactNative" },
+//   { title: "Flutter" },
+//   { title: "Android" },
 // ]);
 
 // * Sessions

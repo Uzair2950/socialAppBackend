@@ -37,6 +37,8 @@ export default {
   addComment: async function (pid, author, content) {
     let comment = new Comments({ author, content });
     await comment.save();
-    await Posts.findByIdAndUpdate(pid, { $push: { comments: uid } });
+    await Posts.findByIdAndUpdate(pid, {
+      $push: { comments: comment._id },
+    });
   },
 };
