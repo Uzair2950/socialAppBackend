@@ -25,14 +25,14 @@ router.post(
   "/addPost",
   postsAttachments.array("postsImages"),
   async (req, res) => {
-    let attachements = req.files.map((e) => e.path);
-    let { author, type, content, privacyLevel } = req.body;
+    let attachements = req.files?.map((e) => e.path);
+    let { author, content, privacyLevel, group_id } = req.body;
     await postController.addPost(
       author,
-      type,
       privacyLevel,
       content,
-      attachements
+      attachements,
+      group_id
     );
     return res.json({ message: "Posted!" });
   }
@@ -64,6 +64,26 @@ router.post(
     return res.json({ message: "Comment Added" });
   }
 );
+
+router.post("/pinPost/:pId", async (req, res) => {
+  await postController.pinPost(req.params.pId);
+  return res.json({message: "Post Pinned"});
+});
+
+router.post("/unpinPost/:pId", async (req, res) => {
+  await postController.unpinPost(req.params.pId);
+  return res.json({message: "Post Un-Pinned"});
+});
+
+
+// Delete Post
+router.delete("/deletePost/:pId", async (req, res) => {
+  await postController.deletePost(req.params.pId);
+  return res.json({message: "Post Deleted"});
+});
+
+
+
 
 export default router;
 

@@ -5,17 +5,12 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import morgan from "morgan";
 import { connectDB } from "./database/db.js";
-import {
-  Administrators,
-  Students,
-  Teachers,
-  Users,
-} from "./database/models/models.js";
-// Routes
 
+// Routes
 import userRoutes from "./routes/userRoutes.js";
 import postsRoute from "./routes/postsRoute.js";
 import studentsRoute from "./routes/studentRoute.js";
+import postGroupRoute from "./routes/postGroupRoute.js"
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -51,6 +46,7 @@ app.get("/", (req, res) => {
 app.use("/api/user", userRoutes);
 app.use("/api/posts", postsRoute);
 app.use("/api/student", studentsRoute);
+app.use("/api/postgroup", postGroupRoute);
 
 const startServer = async () => {
   let db = await connectDB();

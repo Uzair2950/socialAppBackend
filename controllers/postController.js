@@ -9,10 +9,16 @@ import {
 } from "../database/models/models.js";
 
 export default {
-  addPost: async function (author, type, privacyLevel, content, attachements) {
+  addPost: async function (
+    author,
+    privacyLevel,
+    content,
+    attachements,
+    group_id
+  ) {
     let post = new Posts({
       author,
-      type,
+      group_id,
       content,
       attachements,
       privacyLevel,
@@ -30,6 +36,32 @@ export default {
     return posts;
   },
 
+  pinPost: async function (postId) {
+    let post = await Posts.findById(postId)
+
+    console.log(post)
+
+    // Case 1: The Post Being pinned is a "User Post" - Posted on a user's timeline
+    let filter = { author: post.author, is_pinned: true };
+
+    if (post.group_id) {
+      // Case 2: The Post Being pinned is a "GroupPost"
+      filter = { group_id: post.group_id, is_pinned: true };
+    }
+    // Unpin that post
+    await Posts.updateMany(filter, { is_pinned: false });
+
+    // Pin the new one
+    post.is_pinned = true;
+    await post.save();
+
+    
+  },
+
+  unpinPost: async function (postId) {
+    await Posts.findByIdAndUpdate(postId, { is_pinned: false });
+  },
+
   likePost: async function (pid, uid) {
     await Posts.findByIdAndUpdate(pid, { $push: { likes: uid } });
   },
@@ -41,4 +73,9 @@ export default {
       $push: { comments: comment._id },
     });
   },
+
+
+  deletePost: async function(pid) {
+    await Posts.findByIdAndDelete(pid)
+  }
 };

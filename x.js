@@ -1,12 +1,20 @@
 import { connectDB } from "./database/db.js";
 import {
   Courses,
+  Datesheet,
+  Enrollment,
+  Posts,
+  Sessions,
   Slots,
   Students,
   Teachers,
   TimeTable,
   Users,
+  PostGroups,
 } from "./database/models/models.js";
+import postgroupController from "./controllers/postgroupController.js";
+import { getCurrentSession, getStudentSections } from "./utils/utils.js";
+import postController from "./controllers/postController.js";
 
 let db = await connectDB();
 
@@ -156,46 +164,19 @@ let cc = "675736d0c90ab67482af2155";
 //   },
 // ]);
 
-// let stu = await Students.findOne()
-// stu.enrolled_courses.push({
-//   section: "671fca9828d6e955a5ecdbb0",
-//   course: tbw,
-//   session: "671fcaaf2589cac67a2ea249"
-// })
-// stu.enrolled_courses.push({
-//   section: "671fca9828d6e955a5ecdbb0",
-//   course: cc,
-//   session: "671fcaaf2589cac67a2ea249"
-// })
-// stu.enrolled_courses.push({
-//   section: "671fca9828d6e955a5ecdbb0",
-//   course: toq3,
-//   session: "671fcaaf2589cac67a2ea249"
-// })
-// stu.enrolled_courses.push({
-//   section: "671fca9828d6e955a5ecdbb4",
-//   course: map,
-//   session: "671fcaaf2589cac67a2ea249"
-// })
+// let enrollments = await Enrollment.find({session: ""})
 
-// await stu.save()
+// console.log(await getStudentSections("6754a9268db89992d5b8221e"))
 
-let stu_sections = await Students.findOne().distinct(
-  "enrolled_courses.section"
-);
-let timeTable = await TimeTable.find({ section: { $in: stu_sections } }).select(
-  "slots"
-)
-.populate({
-  path: "slots.monday slots.thursday slots.wednesday slots.thursday slots.friday",
-  populate: [
-    { path: "cousre", model: "course", select: "title" },
-    { path: "instructors", model: "user", select: "name" },
-  ]
+// let group = await PostGroups.findById(gId);
+// console.log(await postgroupController.getGroup('67589273249c63d277b41a53', '6754a9268db89992d5b82222'));
+
+let post = await Posts.findByIdAndUpdate("6755f106b4748cf30754e3ec", {
+  is_pinned: true,
 })
 
+console.log(post)
 
+db.disconnect()
 
-console.log(timeTable)
-
-db.disconnect();
+// 00

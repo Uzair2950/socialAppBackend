@@ -56,48 +56,42 @@ const _Session = new Schema(
     year: { type: Number, required: true },
     name: { type: String, enum: ["Fall", "Spring", "Summer"], required: true },
     has_commenced: { type: Boolean, default: false },
-  },
-  {
-    virtuals: {
-      computed_session: {
-        get() {
-          return `${this.name}-${this.year}`;
-        },
-      },
-    },
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
+  // {
+  //   virtuals: {
+  //     computed_session: {
+  //       get() {
+  //         return `${this.name}-${this.year}`;
+  //       },
+  //     },
+  //   },
+  //   toJSON: { virtuals: true },
+  //   toObject: { virtuals: true },
+  // }
 );
 
 const _Teacher = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
-  allocated_courses: {
-    type: [
-      {
-        course: { type: Types.ObjectId, ref: "course" },
-        section: [{ type: Types.ObjectId, ref: "section" }],
-        session: { type: Types.ObjectId, ref: "session" },
-      },
-    ],
-    default: [],
-  },
 });
 
 const _Student = new Schema({
   reg_no: { type: String, required: true },
   user: { type: Types.ObjectId, ref: "user", required: true },
   cgpa: { type: Number, default: 0 },
-  enrolled_courses: {
-    type: [
-      {
-        course: { type: Types.ObjectId, ref: "course" },
-        section: { type: Types.ObjectId, ref: "section" },
-        session: { type: Types.ObjectId, ref: "session" },
-      },
-    ],
-    default: [],
-  },
+});
+
+const _Enrollment = new Schema({
+  student: { type: Types.ObjectId, ref: "user" },
+  course: { type: Types.ObjectId, ref: "course" },
+  section: { type: Types.ObjectId, ref: "section" },
+  session: { type: Types.ObjectId, ref: "session" },
+});
+
+const _Allocation = new Schema({
+  teacher: { type: Types.ObjectId, ref: "user" },
+  course: { type: Types.ObjectId, ref: "course" },
+  section: [{ type: Types.ObjectId, ref: "section" }],
+  session: { type: Types.ObjectId, ref: "session" },
 });
 
 const _Administrator = new Schema({
@@ -131,8 +125,7 @@ const _Comment = new Schema(
 const _Post = new Schema(
   {
     author: { type: Types.ObjectId, ref: "user", required: true },
-    type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal , 1 => Group Post
-    group_id: { type: Types.ObjectId, ref: "postgroup", default: null },
+    group_id: { type: Types.ObjectId, ref: "postgroup", default: undefined },
     is_pinned: { type: Boolean, default: false },
     content: { type: String, default: "" },
     attachements: [{ type: String, default: "" }],
@@ -157,27 +150,29 @@ const _GroupRequests = new Schema(
 );
 
 // Members in _GroupMembers
-const _PostGroup = new Schema({
-  title: { type: String, required: true },
-  admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
-  is_private: { type: Boolean, default: false },
-  // posts: [
-  //   {
-  //     type: {
-  //       author: { type: Types.ObjectId, ref: "user" },
-  //       post: { type: Types.ObjectId, ref: "post" },
-  //     },
-  //     default: [],
-  //   },
-  // ],
-});
+const _PostGroup = new Schema(
+  {
+    title: { type: String, required: true },
+    admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+    imgUrl: { type: String, default: "/static/avatars/default_group.png" },
+    allowPosting: { type: Boolean, default: true },
+    aboutGroup: String,
+    is_private: { type: Boolean, default: false },
+    totalMembers: { type: Number, default: 1 },
+  },
+  { timestamps: true }
+);
 
-const _ChatGroup = new Schema({
-  title: { type: String, required: true },
-  chat: { type: Types.ObjectId, ref: "chat", required: true },
-  privacyLevel: { type: Number, enum: [0, 1] }, //0 => Everyone can send , 1 => Only admins.
-  admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
-});
+const _ChatGroup = new Schema(
+  {
+    title: { type: String, required: true },
+    hasPostGroup: { type: Types.ObjectId, default: null },
+    chat: { type: Types.ObjectId, ref: "chat", required: true },
+    privacyLevel: { type: Number, enum: [0, 1] }, //0 => Everyone can send , 1 => Only admins.
+    admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  },
+  { timestamps: true }
+);
 
 // for personal
 const _Chat = new Schema(
@@ -242,9 +237,11 @@ const _Notification = new Schema(
     content: { type: String, required: true },
     type: {
       type: String,
-      enum: ["message", "post", "friendRequest"],
+      enum: ["message", "post", "friendRequest", "welcome", "general"],
       required: true,
     },
+    image1: { type: String, default: "" },
+    image2: { type: String, default: "" },
     isRead: { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -282,9 +279,10 @@ const _Slot = new Schema({
 
 const _DateSheet = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
+  type: { type: String, enum: ["mids", "finals"], default: "mids" },
   course_id: { type: Types.ObjectId, ref: "course" },
-  date: Date,
-  // start_time:
+  date_time: Date,
+  commenced: { type: Boolean, default: false },
 });
 
 const _AutoReply = new Schema({
@@ -300,6 +298,8 @@ const Sections = model("section", _Section);
 const Administrators = model("administrator", _Administrator);
 const Teachers = model("teacher", _Teacher);
 const Students = model("student", _Student);
+const Enrollment = model("enrollment", _Enrollment);
+const Allocation = model("allocation", _Allocation);
 const Messages = model("message", _Message);
 const Comments = model("comment", _Comment);
 const Posts = model("post", _Post);
@@ -341,4 +341,7 @@ export {
   TimeTable,
   Datesheet,
   AutoReply,
+  Enrollment,
+  Allocation,
+  GroupRequests,
 };
