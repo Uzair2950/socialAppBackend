@@ -29,17 +29,17 @@ export default {
   getPosts: async function (uid, num) {
     let posts = await Posts.find({
       author: uid,
-      type: 0, // Personal Posts
       privacyLevel: { $lte: num },
-    });
-
+      group_id: null,
+    }).populate("author", "name avatarURL");
+    // TODO: // TODO: Sort by createdAt As well!
     return posts;
   },
 
   pinPost: async function (postId) {
-    let post = await Posts.findById(postId)
+    let post = await Posts.findById(postId);
 
-    console.log(post)
+
 
     // Case 1: The Post Being pinned is a "User Post" - Posted on a user's timeline
     let filter = { author: post.author, is_pinned: true };
@@ -54,8 +54,6 @@ export default {
     // Pin the new one
     post.is_pinned = true;
     await post.save();
-
-    
   },
 
   unpinPost: async function (postId) {
@@ -74,8 +72,21 @@ export default {
     });
   },
 
+  toggleCommenting: async function (pid) {
+    let post = await Posts.findById(pid);
+    post.allowCommenting = !post.allowCommenting;
+    await post.save();
+  },
 
-  deletePost: async function(pid) {
-    await Posts.findByIdAndDelete(pid)
-  }
+  changeVisibility: async function (pId, vis) {
+    await Posts.findByIdAndUpdate(pId, { privacyLevel: vis });
+  },
+
+  // editPost: async function(pid, data) {
+  //   await Post =
+  // }
+
+  deletePost: async function (pid) {
+    await Posts.findByIdAndDelete(pid);
+  },
 };

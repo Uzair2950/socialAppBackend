@@ -10,7 +10,9 @@ import { connectDB } from "./database/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import postsRoute from "./routes/postsRoute.js";
 import studentsRoute from "./routes/studentRoute.js";
-import postGroupRoute from "./routes/postGroupRoute.js"
+import postGroupRoute from "./routes/postGroupRoute.js";
+import chatGroupRoute from "./routes/chatGroupRoute.js";
+import communityRoute from "./routes/communityRoute.js"
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +49,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/posts", postsRoute);
 app.use("/api/student", studentsRoute);
 app.use("/api/postgroup", postGroupRoute);
+app.use("/api/chatgroup", chatGroupRoute);
+app.use("/api/community", communityRoute);
 
 const startServer = async () => {
   let db = await connectDB();

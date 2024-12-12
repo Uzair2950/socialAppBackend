@@ -11,6 +11,9 @@ import {
   TimeTable,
   Users,
   PostGroups,
+  GroupMembers,
+  Chats,
+  Communities,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import { getCurrentSession, getStudentSections } from "./utils/utils.js";
@@ -171,12 +174,43 @@ let cc = "675736d0c90ab67482af2155";
 // let group = await PostGroups.findById(gId);
 // console.log(await postgroupController.getGroup('67589273249c63d277b41a53', '6754a9268db89992d5b82222'));
 
-let post = await Posts.findByIdAndUpdate("6755f106b4748cf30754e3ec", {
-  is_pinned: true,
-})
+let groupMembers = await postgroupController.getGroupMembers(
+  "67589273249c63d277b41a53"
+);
 
-console.log(post)
+// let x  = (await Users.find().select('_id')).map(e => e._id.toString())
 
-db.disconnect()
+// console.log(x)
+
+// await Users.updateMany(
+//   { _id: { $in: groupMembers } },
+//   { $push: { groupChats: gid } }
+// );
+
+
+let y = `"members": [
+      '6754a9268db89992d5b8221f',
+  '6754a9268db89992d5b82220',
+  '6754a9268db89992d5b82221',
+  '6754a9268db89992d5b82222',
+  '6754a9268db89992d5b82223',
+  '6754a9268db89992d5b82224',
+  '6754a9268db89992d5b82225',
+  '67573f6611a71256e4e32d5f',
+  '67573f6611a71256e4e32d60',
+  '67573f6611a71256e4e32d61',
+  '67573f6611a71256e4e32d62',
+  '67573f6611a71256e4e32d63',
+  '67573f6611a71256e4e32d64',
+  '67573f6611a71256e4e32d65',
+  '67573f6611a71256e4e32d66',
+  '67573f6611a71256e4e32d67',
+  '67573f6611a71256e4e32d68',
+  '67574c458542cc4835b614cf'
+   ]`
+
+   console.log(y.replaceAll('\'', "\""))
+
+db.disconnect();
 
 // 00

@@ -3,6 +3,7 @@ import express from "express";
 import multer from "multer";
 import { z } from "zod";
 import postgroupController from "../controllers/postgroupController.js";
+import chatGroupController from "../controllers/chatGroupController.js";
 
 const storage = multer.diskStorage({
   destination: "./static/avatars",
@@ -52,6 +53,23 @@ router.get("/getGroup/:gId/:rId", async (req, res) => {
 });
 
 router.post(
+  "/createHybridGroup/:creatorId",
+  async (req, res) => {
+
+
+    await postgroupController.newGroup(
+      req.params.creatorId,
+      req.body.title,
+      req.body.imgUrl,
+      req.body.aboutGroup,
+      req.body.allowPosting,
+      req.body.is_private
+    );
+    return res.send({ message: `Group ${req.body.title} Created` });
+  }
+);
+
+router.post(
   "/createGroup/:creatorId",
   validateRequest(createGroupSchema),
   async (req, res) => {
@@ -67,9 +85,16 @@ router.post(
   }
 );
 
+// Add GroupChat to existing Posting Group
+router.post("/addGroupChat/:gid", async (req, res) => {
+  await postgroupController.addChatGroup(req.params.gid);
+  return res.json({ message: "Group Chat Added" });
+});
+
 // TESTING REQUIRED
 router.put("/updateGroup/:gId", async (req, res) => {
   await postgroupController.updateGroupSettings(req.params.gId, req.body);
+  return res.json({ message: "Updated" });
 });
 
 router.post("/addGroupAdmins/:gid", async (req, res) => {
@@ -81,6 +106,13 @@ router.post("/joinGroup/:gid/:uid", async (req, res) => {
   return res.json(
     await postgroupController.joinGroup(req.params.gid, req.params.uid)
   );
+});
+
+// Bulk add Users to group
+// Body => Array of ids
+router.post("/addMembers/:gid", async (req, res) => {
+  await postgroupController.bulkAddMembers(req.params.gid, req.body.members);
+  return res.json({ message: req.body + "Added" });
 });
 
 ///////////////////

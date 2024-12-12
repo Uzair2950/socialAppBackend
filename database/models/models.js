@@ -9,7 +9,8 @@ const _User = new Schema(
     avatarURL: { type: String, default: "" },
     is_private: { type: Boolean, default: false },
     bio: { type: String, default: "" },
-    activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }],
+    activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }], // personal chats
+    groupChats: [{ type: Types.ObjectId, ref: "chatgroup", default: [] }],
   },
   {
     virtuals: {
@@ -51,24 +52,11 @@ const _Section = new Schema({
   title: { type: String, required: true },
 });
 
-const _Session = new Schema(
-  {
-    year: { type: Number, required: true },
-    name: { type: String, enum: ["Fall", "Spring", "Summer"], required: true },
-    has_commenced: { type: Boolean, default: false },
-  }
-  // {
-  //   virtuals: {
-  //     computed_session: {
-  //       get() {
-  //         return `${this.name}-${this.year}`;
-  //       },
-  //     },
-  //   },
-  //   toJSON: { virtuals: true },
-  //   toObject: { virtuals: true },
-  // }
-);
+const _Session = new Schema({
+  year: { type: Number, required: true },
+  name: { type: String, enum: ["Fall", "Spring", "Summer"], required: true },
+  has_commenced: { type: Boolean, default: false },
+});
 
 const _Teacher = new Schema({
   user: { type: Types.ObjectId, ref: "user", required: true },
@@ -107,9 +95,10 @@ const _Message = new Schema(
     // ^ Why This? To Make Blue Ticks Easy!
     // just compare readBy Count with total chat participants :)))))
     reply: {
-      repliedTo: { type: Types.ObjectId, ref: "message" },
+      type: Types.ObjectId,
+      ref: "message",
     },
-    attachements: [{ type: String, default: "" }],
+    attachments: [{ type: String, default: [] }],
   },
   { timestamps: true }
 );
@@ -155,10 +144,12 @@ const _PostGroup = new Schema(
     title: { type: String, required: true },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
     imgUrl: { type: String, default: "/static/avatars/default_group.png" },
+    hasGroupChat: { type: Types.ObjectId, default: null },
     allowPosting: { type: Boolean, default: true },
-    aboutGroup: String,
+    aboutGroup: { type: String, default: "" },
     is_private: { type: Boolean, default: false },
     totalMembers: { type: Number, default: 1 },
+    isOfficial: { type: Boolean, default: false }, // Won't allow people to exit group!
   },
   { timestamps: true }
 );
@@ -166,9 +157,10 @@ const _PostGroup = new Schema(
 const _ChatGroup = new Schema(
   {
     title: { type: String, required: true },
-    hasPostGroup: { type: Types.ObjectId, default: null },
     chat: { type: Types.ObjectId, ref: "chat", required: true },
-    privacyLevel: { type: Number, enum: [0, 1] }, //0 => Everyone can send , 1 => Only admins.
+    allowChatting: { type: Boolean, enum: [false, true], default: true }, //0 => Everyone can send , 1 => Only admins.
+    imgUrl: { type: String, default: "/static/avatars/default_group.png" },
+    aboutGroup: { type: String, default: "" },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
   },
   { timestamps: true }
@@ -177,13 +169,14 @@ const _ChatGroup = new Schema(
 // for personal
 const _Chat = new Schema(
   {
+    type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal, 1 => GroupChat
     participants: [{ type: Types.ObjectId, ref: "user", default: [] }],
     messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
   },
   {
     methods: {
       getTitle(current_user_id) {
-        // Chat Head Title Is Different for every user.s
+        // Chat Head Title Is Different for every user
         return this.participants.filter(
           (y) => y._id.toString() != current_user_id
         )[0];
@@ -195,10 +188,11 @@ const _Chat = new Schema(
           )[0],
           lastMessage: this.messages[0] ?? {},
         };
-        console.log(chatHead);
+
         return chatHead;
       },
     },
+    timestamps: true,
   }
 );
 
@@ -210,21 +204,32 @@ const _GroupMembers = new Schema({
 
 const _CommunityMembers = new Schema({
   // easier to lookup
-  uid: { type: Types.ObjectId, required: true }, // ref => Users
-  cid: { type: Types.ObjectId, required: true }, // ref => Community
+  uid: { type: Types.ObjectId, required: true, ref: "user" }, // ref => Users
+  cid: { type: Types.ObjectId, required: true, ref: "community" }, // ref => Community
 });
 
 const _Community = new Schema({
   title: { type: String, required: true },
   communityAdmins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  imgUrl: { type: String, default: "/static/avatars/default_community.png" },
+  annoucementGroup: { type: Types.ObjectId, ref: "chatgroup" },
+  aboutCommunity: { type: String, default: "" },
+  // await community.populate('groups.gid', 'title imgUrl')
   groups: [
     {
-      group_type: {
-        type: Number,
-        enum: [0, 1], // 0 => Post Group / Chat Group
-        default: 0,
+      type: {
+        group_type: {
+          type: String,
+          enum: ["postgroup", "chatgroup"],
+          required: true,
+        },
+        gid: {
+          type: Types.ObjectId,
+          ref: function () {
+            return this.group_type;
+          },
+        },
       },
-      gid: { type: Types.ObjectId, ref: "postgroup" },
       default: [],
     },
   ],
@@ -239,6 +244,7 @@ const _Notification = new Schema(
       type: String,
       enum: ["message", "post", "friendRequest", "welcome", "general"],
       required: true,
+      default: "general",
     },
     image1: { type: String, default: "" },
     image2: { type: String, default: "" },
@@ -246,15 +252,6 @@ const _Notification = new Schema(
   },
   { timestamps: true }
 );
-
-// const _SlotModel = new Schema({
-//   courseCode: { type: String, required: true },
-//   courseTitle: { type: String, required: true },
-//   instructor: { type: String, required: true },
-//   venue: { type: String, required: true },
-//   start_time: { type: String, required: true },
-//   end_time: { type: String, required: true },
-// });
 
 const _TimeTable = new Schema({
   section: { type: Types.ObjectId, ref: "section" },

@@ -5,12 +5,14 @@ import {
   ChatGroups,
   GroupRequests,
   Notifications,
+  Chats,
+  Users,
 } from "../database/models/models.js";
 
 export default {
   getGroup: async function (gId, requesterId) {
     let group = await PostGroups.findById(gId);
-    if (!group) return {}
+    if (!group) return {};
     let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
 
     if (!isMember && group.is_private) {
@@ -29,13 +31,30 @@ export default {
     // Sort by pinned to bring pinned on top
     // Not sure what impact it will have on performance.
     // TODO: ADD PAGINATION FOR INIFINITE SCROLLING
-    let posts = await Posts.find({ group_id: gId }).populate('author', 'name avatarURL').select('-group_id -privacyLevel -updatedAt').sort({ is_pinned: -1 });
-    let hasChatGroup = (await ChatGroups.findOne({ hasPostGroup: gId }))
-      ? true
-      : false;
+    let posts = await Posts.find({ group_id: gId })
+      .populate("author", "name avatarURL")
+      .select("-group_id -privacyLevel -updatedAt")
+      .sort({ is_pinned: -1 }); // TODO: Sort by createdAt As well!
 
-    return { groupInfo: group, isCreator, isAdmin, hasChatGroup, posts };
+    return { groupInfo: group, isCreator, isAdmin, posts };
   },
+
+  newHybribGroup: async function(
+    creator_id,
+    title,
+    imgUrl,
+    aboutGroup,
+    allowPosting,
+    allowChatting,
+    is_private,
+
+  ) {
+    let postGroup = await this.newGroup(creator_id, title, imgUrl, allowPosting, is_private);
+    await this.addChatGroup(postGroup, allowChatting)
+    return postGroup;
+  },
+
+
   newGroup: async function (
     creator_id,
     title,
@@ -55,6 +74,35 @@ export default {
 
     await group.save();
     await this.addToGroup(group._id, creator_id);
+    return group._id;
+  },
+
+  addChatGroup: async function (gid, allowChatting = true) {
+    let group = await PostGroups.findById(gid);
+
+    let groupMembers = await this.getGroupMembers(gid);
+    let chat = new Chats({
+      type: 1,
+      participants: groupMembers,
+    });
+
+    await chat.save();
+    let chatGroup = new ChatGroups({
+      title: group.title,
+      imgUrl: group.imgUrl,
+      admins: group.admins,
+      chat: chat._id,
+      allowChatting
+    });
+    await chatGroup.save();
+
+    await Users.updateMany(
+      { _id: { $in: groupMembers } },
+      { $push: { groupChats: chatGroup._id } }
+    );
+
+    group.hasGroupChat = chatGroup._id;
+    await group.save();
   },
 
   addToGroup: async function (gid, uid) {
@@ -64,6 +112,15 @@ export default {
         uid,
       },
     ]);
+  },
+
+
+  bulkAddMembers: async function (gid, users) {
+    let membersArray = users.map((uid) => ({
+      gid,
+      uid,
+    }));
+    await GroupMembers.insertMany(membersArray);
   },
 
   addAdmins: async function (gid, admins) {
@@ -121,8 +178,12 @@ export default {
 
   deleteGroup: async function (gId) {
     await PostGroups.findByIdAndDelete(gId); // Delete Group
-    await GroupMembers.deleteMany({ gid: gId }); // Delete GroupMember
-    await Posts.deleteMany({ group_id: gId }); // Delete Post
+    await GroupMembers.deleteMany({ gid: gId }); // Remove all group members
+    await Posts.deleteMany({ group_id: gId }); // Delete Posts
     await GroupRequests.deleteMany({ gid: gId }); // Delete Group Requests
+  },
+
+  getGroupMembers: async function (gid) {
+    return (await GroupMembers.find({ gid }).select("uid")).map((e) => e.uid);
   },
 };

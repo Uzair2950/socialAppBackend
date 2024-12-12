@@ -19,14 +19,19 @@ const storage = multer.diskStorage({
 const postsAttachments = multer({ storage });
 const router = express.Router();
 
-router.get("/", (req, res) => res.json({ message: "OK" }));
+router.get("/", (req, res) => {
+  res.json({ message: "OK" });
+});
 
 router.post(
   "/addPost",
   postsAttachments.array("postsImages"),
   async (req, res) => {
-    let attachements = req.files?.map((e) => e.path);
+    let attachements = req.files?.map(
+      (e) => `/${e.path.replaceAll("\\", "/")}`
+    );
     let { author, content, privacyLevel, group_id } = req.body;
+
     await postController.addPost(
       author,
       privacyLevel,
@@ -37,6 +42,11 @@ router.post(
     return res.json({ message: "Posted!" });
   }
 );
+
+// TODO:
+// router.put("/editPost/:pId", async (req, res) => {
+//   return res.json({message: "success"});
+// });
 
 router.get("/getPosts/:uid", async (req, res) => {
   res.json(await postController.getPosts(req.params.uid, 0));
@@ -65,25 +75,31 @@ router.post(
   }
 );
 
+router.put("/toggleCommenting/:pId", async (req, res) => {
+  await postController.toggleCommenting(req.params.pId);
+  return res.json({ message: "success" });
+});
+
+router.put("/changeVisbility/:pId/:vis", async (req, res) => {
+  await postController.changeVisibility(req.params.pId, req.params.vis);
+  return res.json({ message: "success" });
+});
+
 router.post("/pinPost/:pId", async (req, res) => {
   await postController.pinPost(req.params.pId);
-  return res.json({message: "Post Pinned"});
+  return res.json({ message: "Post Pinned" });
 });
 
 router.post("/unpinPost/:pId", async (req, res) => {
   await postController.unpinPost(req.params.pId);
-  return res.json({message: "Post Un-Pinned"});
+  return res.json({ message: "Post Un-Pinned" });
 });
-
 
 // Delete Post
 router.delete("/deletePost/:pId", async (req, res) => {
   await postController.deletePost(req.params.pId);
-  return res.json({message: "Post Deleted"});
+  return res.json({ message: "Post Deleted" });
 });
-
-
-
 
 export default router;
 
