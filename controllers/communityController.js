@@ -26,6 +26,12 @@ export default {
     return community._id;
   },
 
+  addAdmins: async function (cid, admins) {
+    let community = await Communities.findById(cid);
+    community.admins.addToSet(...admins);
+    await community.save();
+  },
+
   addGroupToCommunity: async function (cid, group_type, group_id) {
     await Communities.findByIdAndUpdate(cid, {
       $push: { groups: { gid: group_id, group_type } },
@@ -64,5 +70,9 @@ export default {
     return { community, isAdmin, isCreator };
   },
 
-  //TODO: Remove from community & leave community
+  leaveCommunity: async function (cid, uid) {
+    await CommunityMembers.deleteOne({ cid, uid });
+  },
+
+
 };

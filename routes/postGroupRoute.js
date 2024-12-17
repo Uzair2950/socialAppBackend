@@ -16,6 +16,7 @@ const storage = multer.diskStorage({
   },
 });
 
+//TODO: Add avatar support
 const groupAvatars = multer({ storage });
 const router = express.Router();
 
@@ -131,6 +132,9 @@ router.post("/rejectRequest/:reqId", async (req, res) => {
   await postgroupController.rejectRequest(req.params.reqId);
   return res.json({ message: "success" });
 });
+
+
+// Leave Group
 
 // The Posting is handled by Posts-Routes
 

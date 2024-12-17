@@ -21,7 +21,7 @@
     "prefix": "router-method",
     "body": [
       "router.${1|get,post,put,delete|}(\"${2:/route}\", async (req, res) => {",
-      "  return res.json({message: \"success\"});",
+      "  return res.json({ message: \"success\" });",
       "});"
     ],
     "description": "Creates a router method with placeholders for the HTTP method and route."

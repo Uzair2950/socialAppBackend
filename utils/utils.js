@@ -1,18 +1,18 @@
-import { Sessions, Students, Enrollment } from "../database/models/models.js";
+import { Sessions, Chats, Enrollment } from "../database/models/models.js";
 
 const getCurrentSession = async () => {
   return await Sessions.findOne({ has_commenced: false }).lean();
 };
 
-const getCurrentSessionId = async() => {
+const getCurrentSessionId = async () => {
   return (await getCurrentSession())._id;
-}
+};
 
 const getStudentSections = async (sid) => {
   return await Enrollment.find({
     student: sid,
     session: (await getCurrentSession())._id,
-  }).distinct("section")
+  }).distinct("section");
 };
 
 const convertTo24Hour = (time) => {
@@ -29,4 +29,19 @@ const convertTo24Hour = (time) => {
   return formattedTime;
 };
 
-export { getCurrentSession, getStudentSections, getCurrentSessionId };
+const getNewMessageCount = async (lastMessage, uid, chatId) => {
+  if (!lastMessage || lastMessage.senderId == uid) return 0;
+
+  return (
+    await Chats.findById(chatId)
+      .select("messages")
+      .populate("messages", "readBy")
+  ).messages.filter((i) => i.readBy.length != 2).length;
+};
+
+export {
+  getCurrentSession,
+  getStudentSections,
+  getCurrentSessionId,
+  getNewMessageCount,
+};

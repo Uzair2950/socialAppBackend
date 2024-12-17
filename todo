@@ -1,0 +1,5 @@
+1. Implement Feed Fetching 
+    i.   Needs to be paginated for infinite scrolling smh
+    ii.  Feed will require the user id to check for likes
+
+2. Chat Implementation

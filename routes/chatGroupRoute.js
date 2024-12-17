@@ -33,4 +33,10 @@ router.post("/joinGroup/:gid/:uid", async (req, res) => {
   return res.json({ message: "Group Joined!" });
 });
 
+// Kick / Leave
+router.put("/removeMember/:gid/:uid", async (req, res) => {
+  await chatGroupController.removeMember(req.params.gid, req.params.uid);
+  return res.json({ message: "success" });
+});
+
 export default router;

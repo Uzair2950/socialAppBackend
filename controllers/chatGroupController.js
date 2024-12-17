@@ -1,4 +1,9 @@
-import { Chats, ChatGroups, Users } from "../database/models/models.js";
+import {
+  Chats,
+  ChatGroups,
+  Users,
+  GroupMembers,
+} from "../database/models/models.js";
 
 export default {
   newGroupChat: async function (
@@ -43,6 +48,7 @@ export default {
     await Chats.findByIdAndUpdate(chatGroup.chat, {
       // Add participant
       $push: { participants: uid },
+      $inc: { totalParticipants: 1 },
     });
   },
 
@@ -54,5 +60,19 @@ export default {
 
   updateGroupSettings: async function (gid, settings) {
     await ChatGroups.findByIdAndUpdate(gid, settings);
+  },
+
+  removeMember: async function (gid, uid) {
+    let chatid = await ChatGroups.findById(gid).select("chat");
+
+    await Chats.findByIdAndUpdate(chatid.chat, {
+      $pull: { participants: uid },
+      $inc: { totalParticipants: -1 },
+    });
+
+    let x = await Users.findByIdAndUpdate(uid, {
+      $pull: { groupChats: chatid._id },
+    }); // Remove from users
+    console.log(x);
   },
 };

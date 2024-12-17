@@ -35,4 +35,14 @@ router.get("/getCommunity/:cid/:rid", async (req, res) => {
   );
 });
 
+router.post("/addAdmins/:cid", async (req, res) => {
+  await communityController.addAdmins(req.params.cid, req.body.admins);
+  return res.json({ message: "Admins Added!" });
+});
+
+router.put("/leaveCommunity/:cid/:uid", async (req, res) => {
+  await communityController.leaveCommunity(req.params.cid, req.params.uid);
+  return res.json({ message: "success" });
+});
+
 export default router;

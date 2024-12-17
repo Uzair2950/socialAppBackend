@@ -4,6 +4,7 @@ import userController from "../controllers/userController.js";
 import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
 import multer from "multer";
+import { AutoReply } from "../database/models/models.js";
 
 const storage = multer.diskStorage({
   destination: "./static/avatars",
@@ -154,6 +155,32 @@ router.get("/getProfile/:id/:requester_id", async (req, res) => {
   return res.json(
     await userController.getProfile(req.params.id, req.params.requester_id)
   );
+});
+
+/*
+
+  == AUTO-REPLY
+
+*/
+
+router.post("/toggleAutoReply/:uid", async (req, res) => {
+  await userController.toggleAutoReply(req.params.uid);
+  return res.json({ message: "success" });
+});
+
+router.get("/getAutoReplies/:uid", async (req, res) => {
+  return res.json(await userController.getAutoReplies(req.params.uid));
+});
+
+router.post("/addAutoReply/:uid", async (req, res) => {
+  let autoReply = await userController.addAutoReply(req.params.uid, req.body);
+
+  return res.json({ autoReply, message: "success" });
+});
+
+router.delete("/removeAutoReply/:id", async (req, res) => {
+  await userController.removeAutoReply(req.params.id);
+  return res.json({ message: "success" });
 });
 
 export default router;

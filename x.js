@@ -14,10 +14,12 @@ import {
   GroupMembers,
   Chats,
   Communities,
+  Messages,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import { getCurrentSession, getStudentSections } from "./utils/utils.js";
 import postController from "./controllers/postController.js";
+import chatController from "./controllers/chatController.js";
 
 let db = await connectDB();
 
@@ -25,6 +27,9 @@ let tbw = "675736d0c90ab67482af2162";
 let map = "675736d0c90ab67482af215c";
 let toq3 = "675736d0c90ab67482af2173";
 let cc = "675736d0c90ab67482af2155";
+
+let myId = "6754a9268db89992d5b8221e";
+let id2 = "6754a9268db89992d5b8221f";
 // await Slots.insertMany([
 //   // 7C
 //   // monday
@@ -174,43 +179,42 @@ let cc = "675736d0c90ab67482af2155";
 // let group = await PostGroups.findById(gId);
 // console.log(await postgroupController.getGroup('67589273249c63d277b41a53', '6754a9268db89992d5b82222'));
 
-let groupMembers = await postgroupController.getGroupMembers(
-  "67589273249c63d277b41a53"
-);
+// let chats = await Users.findOne().populate('activeChats')
 
-// let x  = (await Users.find().select('_id')).map(e => e._id.toString())
+// console.log(await chats.activeChats[0].getChatHead(myId).populate('chatInfo'))
 
-// console.log(x)
+// let msg = new Messages({
+//   senderId: myId,
+//   content: "🤣",
+// });
+// await Chats.findByIdAndUpdate("675c95af52ec11f80a0b8a0c", {
+//   $addToSet: { messages: msg },
+// });
 
-// await Users.updateMany(
-//   { _id: { $in: groupMembers } },
-//   { $push: { groupChats: gid } }
-// );
+// let c = await Chats.findOne()
+// c.messages.addToSet()
+
+// console.log()
+
+// console.log((await Messages.findOne()))
+
+// let chat = await Chats.findById("675c95af52ec11f80a0b8a0c")
+//   .select("messages")
+//   .populate({
+//     path: "messages",
+//     select: "content attachment readBy senderId isRead",
+//     options: { virtuals: true },
+//   });
+
+// console.log(chat);
+
+let messages = await Messages.find().select("_id readBy");
 
 
-let y = `"members": [
-      '6754a9268db89992d5b8221f',
-  '6754a9268db89992d5b82220',
-  '6754a9268db89992d5b82221',
-  '6754a9268db89992d5b82222',
-  '6754a9268db89992d5b82223',
-  '6754a9268db89992d5b82224',
-  '6754a9268db89992d5b82225',
-  '67573f6611a71256e4e32d5f',
-  '67573f6611a71256e4e32d60',
-  '67573f6611a71256e4e32d61',
-  '67573f6611a71256e4e32d62',
-  '67573f6611a71256e4e32d63',
-  '67573f6611a71256e4e32d64',
-  '67573f6611a71256e4e32d65',
-  '67573f6611a71256e4e32d66',
-  '67573f6611a71256e4e32d67',
-  '67573f6611a71256e4e32d68',
-  '67574c458542cc4835b614cf'
-   ]`
+  messages.forEach(async (e) => {
+    e.readCount = e.readBy.length;
+    await e.save();
+  })
 
-   console.log(y.replaceAll('\'', "\""))
 
-db.disconnect();
-
-// 00
+// db.disconnect();

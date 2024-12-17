@@ -12,7 +12,8 @@ import postsRoute from "./routes/postsRoute.js";
 import studentsRoute from "./routes/studentRoute.js";
 import postGroupRoute from "./routes/postGroupRoute.js";
 import chatGroupRoute from "./routes/chatGroupRoute.js";
-import communityRoute from "./routes/communityRoute.js"
+import communityRoute from "./routes/communityRoute.js";
+import chatRoute from "./routes/chatRoute.js";
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -20,11 +21,13 @@ const app = express();
 
 // Middleware
 app.use(pkg.json());
+
 app.use(
   pkg.urlencoded({
     extended: true,
   })
 );
+
 app.use(cors());
 app.use(morgan("tiny"));
 
@@ -35,6 +38,24 @@ const io = new Server(httpServer, {
   cors: {
     origin: "*",
   },
+});
+
+io.on("connection", (socket) => {
+  console.log("CONNECTED");
+
+  socket.on("senMessage", ({ chatId, content }) => {
+    console.log({ chatId, content });
+    io.emit("rec", content);
+  });
+  socket.on("sese", (ww) => {
+    console.log(ww);
+    // socket.emit("rec", content);
+  });
+
+  socket.on("disconnect", async (s) => {
+    console.log(s);
+    console.log("DISCONNECTED");
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////
@@ -51,6 +72,7 @@ app.use("/api/student", studentsRoute);
 app.use("/api/postgroup", postGroupRoute);
 app.use("/api/chatgroup", chatGroupRoute);
 app.use("/api/community", communityRoute);
+app.use("/api/chat", chatRoute);
 
 const startServer = async () => {
   let db = await connectDB();
@@ -60,21 +82,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-// let users = await Users.find();
-// console.log(users)
-// let reg = "21-ARID-4591";
-// users.forEach(async (element) => {
-//   if (element.type == 0) {
-//     await Students.insertMany([
-//       {
-//         user: element._id,
-//         reg_no: reg,
-//       },
-//     ]);
-//   } else if (element.type == 1) {
-//     await Teachers.insertMany([{ user: element._id }]);
-//   } else {
-//     await Administrators.insertMany([{ user: element._id }]);
-//   }
-// });

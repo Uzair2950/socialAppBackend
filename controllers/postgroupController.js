@@ -8,6 +8,7 @@ import {
   Chats,
   Users,
 } from "../database/models/models.js";
+import chatGroupController from "./chatGroupController.js";
 
 export default {
   getGroup: async function (gId, requesterId) {
@@ -39,21 +40,26 @@ export default {
     return { groupInfo: group, isCreator, isAdmin, posts };
   },
 
-  newHybribGroup: async function(
+  newHybribGroup: async function (
     creator_id,
     title,
     imgUrl,
     aboutGroup,
     allowPosting,
     allowChatting,
-    is_private,
-
+    is_private
   ) {
-    let postGroup = await this.newGroup(creator_id, title, imgUrl, allowPosting, is_private);
-    await this.addChatGroup(postGroup, allowChatting)
+    let postGroup = await this.newGroup(
+      creator_id,
+      title,
+      imgUrl,
+      aboutGroup,
+      allowPosting,
+      is_private
+    );
+    await this.addChatGroup(postGroup, allowChatting);
     return postGroup;
   },
-
 
   newGroup: async function (
     creator_id,
@@ -92,7 +98,7 @@ export default {
       imgUrl: group.imgUrl,
       admins: group.admins,
       chat: chat._id,
-      allowChatting
+      allowChatting,
     });
     await chatGroup.save();
 
@@ -113,7 +119,6 @@ export default {
       },
     ]);
   },
-
 
   bulkAddMembers: async function (gid, users) {
     let membersArray = users.map((uid) => ({
@@ -185,5 +190,13 @@ export default {
 
   getGroupMembers: async function (gid) {
     return (await GroupMembers.find({ gid }).select("uid")).map((e) => e.uid);
+  },
+
+  // leave / remove
+  removeMembers: async function (gid, uid) {
+    await GroupMembers.deleteOne({ gid, uid });
+    let group = await PostGroups.findById(gid).select("hasGroupChat");
+    if (group.hasGroupChat)
+      await chatGroupController.removeMember(group.hasGroupChat, uid);
   },
 };

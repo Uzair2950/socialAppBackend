@@ -5,6 +5,7 @@ import {
   Administrators,
   Friends,
   Posts,
+  AutoReply,
 } from "../database/models/models.js";
 
 import postController from "./postController.js";
@@ -43,7 +44,9 @@ export default {
   },
 
   getProfile: async function (uid, rid) {
-    let user_data = await Users.findById(uid).select("-activeChats -password");
+    let user_data = await Users.findById(uid).select(
+      "-activeChats -groupChats -password"
+    );
     let isSelf = uid == rid;
     let isFriend = await this.isFriend(uid, rid);
     let isPublic = !user_data.is_private;
@@ -114,5 +117,26 @@ export default {
     }));
 
     return [...friends, ...friends2];
+  },
+
+  toggleAutoReply: async function (uid) {
+    let user = await Users.findById(uid);
+    user.autoReply = !user.autoReply;
+    await user.save();
+  },
+
+  addAutoReply: async function (uid, autoreplies) {
+    let replies = await AutoReply.insertMany(
+      autoreplies.map((e) => ({ user: uid, ...e }))
+    );
+    return replies;
+  },
+
+  removeAutoReply: async function (autoReplyId) {
+    await AutoReply.findByIdAndDelete(autoReplyId);
+  },
+
+  getAutoReplies: async function (uid) {
+    return await AutoReply.find({ user: uid });
   },
 };

@@ -4,9 +4,12 @@ import postController from "../controllers/postController.js";
 import multer from "multer";
 import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
+import { read } from "fs";
+
+const destination = "/static/posts";
 
 const storage = multer.diskStorage({
-  destination: "./static/posts",
+  destination: `.${destination}`,
   filename: function (req, file, cb) {
     const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
     cb(
@@ -27,9 +30,7 @@ router.post(
   "/addPost",
   postsAttachments.array("postsImages"),
   async (req, res) => {
-    let attachements = req.files?.map(
-      (e) => `/${e.path.replaceAll("\\", "/")}`
-    );
+    let attachements = req.files?.map((e) => `${destination}/${e.filename}`);
     let { author, content, privacyLevel, group_id } = req.body;
 
     await postController.addPost(
@@ -43,10 +44,20 @@ router.post(
   }
 );
 
-// TODO:
-// router.put("/editPost/:pId", async (req, res) => {
-//   return res.json({message: "success"});
-// });
+router.put(
+  "/editPost/:pid",
+  postsAttachments.array("postsImages"),
+  async (req, res) => {
+    // attachments inside body will contain the attachments that are already in post.
+    // the removed attachment won't be included in the attachments list (from frontend)
+    let newAttachments = req.files?.map((e) => `${destination}/${e.filename}`);
+    await postController.editPost(req.params.pid, {
+      attachments: [...req.body.attachments, ...newAttachments],
+      content: req.body.content,
+    });
+    return res.json({ message: "success" });
+  }
+);
 
 router.get("/getPosts/:uid", async (req, res) => {
   res.json(await postController.getPosts(req.params.uid, 0));
@@ -78,6 +89,22 @@ router.post(
 router.put("/toggleCommenting/:pId", async (req, res) => {
   await postController.toggleCommenting(req.params.pId);
   return res.json({ message: "success" });
+});
+
+// Like / Unlike Comment
+router.put("/toggleCommentInteraction/:cid/:uid/:state", async (req, res) => {
+  await postController.toggleCommentInteraction(
+    req.params.cid,
+    req.params.uid,
+    req.params.state
+  );
+  return res.json({ message: "success" });
+});
+
+router.get("/getComments/:pid/:uid", async (req, res) => {
+  return res.json(
+    await postController.getComments(req.params.pid, req.params.uid)
+  );
 });
 
 router.put("/changeVisbility/:pId/:vis", async (req, res) => {

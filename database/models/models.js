@@ -5,7 +5,8 @@ const _User = new Schema(
     username: { type: String, required: true, index: true },
     password: { type: String, required: true },
     name: { type: String, required: true },
-    type: { type: Number, enum: [0, 1, 2], default: 0 }, //0 => Student , 1 => Teacher, 2 => DataCell
+    type: { type: Number, enum: [0, 1, 2], default: 0 }, //0 => Student , 1 => Teacher, 2 => Administrator
+    autoReply: { type: Boolean, default: false },
     avatarURL: { type: String, default: "" },
     is_private: { type: Boolean, default: false },
     bio: { type: String, default: "" },
@@ -31,16 +32,6 @@ const _Friends = new Schema(
   },
   { timestamps: true }
 );
-
-// const _Story = new Schema({
-//   author: { type: Types.ObjectId, ref: "user" },
-//   content: { type: String, default: "" },
-//   is_private: { type: Boolean, default: false },
-//   attachements: [{ type: String, default: "" }],
-//   views: [{ type: Types.ObjectId, ref: "user" }],
-//   add_time: { type: Date, default: Date.now },
-//   expired: { type: Boolean, default: false },
-// });
 
 const _Course = new Schema({
   code: { type: String, required: true },
@@ -91,22 +82,28 @@ const _Message = new Schema(
     senderId: { type: Types.ObjectId, ref: "user" },
     content: { type: String, default: "" },
     isReply: { type: Boolean, default: false },
-    readBy: [{ type: Types.ObjectId, ref: "user" }],
+    readBy: [{ type: Types.ObjectId, ref: "user", unique: true }],
+    readCount: { type: Number, default: 1 },
     // ^ Why This? To Make Blue Ticks Easy!
     // just compare readBy Count with total chat participants :)))))
     reply: {
       type: Types.ObjectId,
       ref: "message",
+      default: null,
     },
     attachments: [{ type: String, default: [] }],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 const _Comment = new Schema(
   {
     author: { type: Types.ObjectId, ref: "user" },
     content: { type: String, default: "" },
+    likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
+    likesCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
@@ -117,7 +114,7 @@ const _Post = new Schema(
     group_id: { type: Types.ObjectId, ref: "postgroup", default: undefined },
     is_pinned: { type: Boolean, default: false },
     content: { type: String, default: "" },
-    attachements: [{ type: String, default: "" }],
+    attachments: [{ type: String, default: "" }],
     // Group posts will be public by default.
     // self => <= 2
     // friend => <= 1
@@ -171,6 +168,7 @@ const _Chat = new Schema(
   {
     type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal, 1 => GroupChat
     participants: [{ type: Types.ObjectId, ref: "user", default: [] }],
+    totalParticipants: { type: Number, default: 0 },
     messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
   },
   {
