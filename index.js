@@ -43,9 +43,9 @@ const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log("CONNECTED");
 
-  socket.on("senMessage", ({ chatId, content }) => {
-    console.log({ chatId, content });
-    io.emit("rec", content);
+  socket.on("sendMessage", ({ chatId, messageId }) => {
+    console.log({ chatId, messageId });
+    io.emit(`receiveMessage_${chatId}`, messageId);
   });
   socket.on("sese", (ww) => {
     console.log(ww);

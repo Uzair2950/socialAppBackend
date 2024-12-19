@@ -2,10 +2,9 @@ import { Chats, Users, Messages } from "../database/models/models.js";
 
 import { getNewMessageCount } from "../utils/utils.js";
 
-
 // Realtime Chatting Pseudo Steps
 // 1. Initiate a socket connection when user opens chat screen? (SEE ****)
-// 2. 
+// 2.
 
 export default {
   // Personal Chats
@@ -25,11 +24,6 @@ export default {
   },
 
   getAllChats: async function (uid) {
-    // Actually HERE: ****
-    // When getAllChats route is shit.
-    // Connect to WebSocket Server at the same time.
-    // join room when a specific chat is opened
-    //
     let userChats = await Users.findById(uid)
       .select("activeChats")
       .populate({
@@ -59,7 +53,7 @@ export default {
     );
   },
   // NOTE: Read Logic will be handled on frontned.
-  getChat: async function (chatId, uid, newMessageCount) {
+  getChat: async function (chatId, uid = "", newMessageCount = 0) {
     // Read all previous messages.
     if (newMessageCount > 0)
       await this.readMessages(chatId, uid, newMessageCount);
@@ -84,6 +78,21 @@ export default {
     return chat;
   },
 
+  getMessage: async function (mid) {
+    return await Messages.findById(mid)
+      .select("content attachments readCount createdAt reply senderId")
+      .populate([
+        {
+          path: "reply",
+          select: "content attachments senderId",
+        },
+        {
+          path: "senderId",
+          select: "name avatarURL",
+        },
+      ]);
+  },
+
   sendMessage: async function (
     chatId,
     senderId,
@@ -100,12 +109,14 @@ export default {
       isReply,
       reply: replyId,
     });
-    
+
     await message.save();
 
     await Chats.findByIdAndUpdate(chatId, {
       $push: { messages: message._id },
     });
+
+    return message._id;
   },
 
   readMessages: async function (chatId, uid, messageCount) {

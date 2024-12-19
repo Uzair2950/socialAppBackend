@@ -43,11 +43,15 @@ router.get("/getAllChats/:uid", async (req, res) => {
   return res.json(await chatController.getAllChats(req.params.uid));
 });
 
+router.get("/getMessage/:mid", async (req, res) => {
+  return res.json(await chatController.getMessage(req.params.mid));
+});
+
 router.post(
   "/sendMessage/:cid",
   messageAttchments.array("attachments"),
   async (req, res) => {
-    await chatController.sendMessage(
+    let message_id = await chatController.sendMessage(
       req.params.cid,
       req.body.senderId,
       req.body.content,
@@ -55,7 +59,7 @@ router.post(
       req.body.isReply,
       req.body.replyId
     );
-    return res.json({ message: "success" });
+    return res.json({ message: "success", message_id });
   }
 );
 
