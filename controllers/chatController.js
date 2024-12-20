@@ -43,7 +43,11 @@ export default {
       userChats.activeChats.map(async (e) => ({
         id: e._id,
         chatInfo: e.participants[0],
-        lastMessage: e.messages.slice(-1)[0] ?? {},
+        lastMessage: e.messages.slice(-1)[0] ?? {
+          senderId: "",
+          content: "",
+          createdAt: "",
+        },
         newMessageCount: await getNewMessageCount(
           e.messages.slice(-1)[0],
           uid,
@@ -54,9 +58,12 @@ export default {
   },
   // NOTE: Read Logic will be handled on frontned.
   getChat: async function (chatId, uid = "", newMessageCount = 0) {
+    if (newMessageCount == NaN) newMessageCount = 0;
     // Read all previous messages.
-    if (newMessageCount > 0)
-      await this.readMessages(chatId, uid, newMessageCount);
+    // if (newMessageCount > 0) {
+    //   console.log("READING MESSAGES")
+    //   await this.readMessages(chatId, uid, newMessageCount);
+    // }
 
     let chat = await Chats.findById(chatId)
       .select("messages totalParticipants")
@@ -78,9 +85,10 @@ export default {
     return chat;
   },
 
-  getMessage: async function (mid) {
-    return await Messages.findById(mid)
-      .select("content attachments readCount createdAt reply senderId")
+  getMessage: async function (mid, uid) {
+
+    let message = await Messages.findById(mid)
+      .select("content attachments readCount readBy createdAt reply senderId")
       .populate([
         {
           path: "reply",
@@ -91,6 +99,12 @@ export default {
           select: "name avatarURL",
         },
       ]);
+
+
+      if (!message.readBy.includes(uid))
+        await this.readMessageById(mid, uid)
+
+      return message
   },
 
   sendMessage: async function (
@@ -101,22 +115,36 @@ export default {
     isReply = false,
     replyId = undefined
   ) {
-    let message = new Messages({
-      content,
-      attachments,
-      senderId,
-      readBy: [senderId], //woops
-      isReply,
-      reply: replyId,
+    try {
+      let message = new Messages({
+        content,
+        attachments,
+        senderId,
+        readBy: [senderId], //woops
+        isReply,
+        reply: replyId,
+      });
+  
+      // message.readBy.addToSet(senderId)
+  
+      await message.save();
+  
+      await Chats.findByIdAndUpdate(chatId, {
+        $push: { messages: message._id },
+      });
+  
+      return message._id;
+    } catch(err) {
+      console.log(err)
+      return undefined
+    }
+  },
+
+  readMessageById: async function (mid, uid) {
+    await Messages.findByIdAndUpdate(mid, {
+      $addToSet: { readBy: uid },
+      $inc: { readCount: 1 },
     });
-
-    await message.save();
-
-    await Chats.findByIdAndUpdate(chatId, {
-      $push: { messages: message._id },
-    });
-
-    return message._id;
   },
 
   readMessages: async function (chatId, uid, messageCount) {

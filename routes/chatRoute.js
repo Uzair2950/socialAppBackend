@@ -19,9 +19,8 @@ const storage = diskStorage({
 
 const messageAttchments = multer({ storage });
 
-router.get("/", messageAttchments.array("messages"), (req, res) => {
-  console.log(req.files);
-  let paths = res.send(paths);
+router.get("/", (req, res) => {
+  return res.send({message: "Test"})
 });
 
 router.post("/initiateChat/:sender/:receiver", async (req, res) => {
@@ -29,22 +28,23 @@ router.post("/initiateChat/:sender/:receiver", async (req, res) => {
   return res.json({ message: "success" });
 });
 
-router.get("/getChat/:cid", async (req, res) => {
+router.get("/getChat/:cid/:uid/:messageCount", async (req, res) => {
   return res.json(
     await chatController.getChat(
       req.params.cid,
-      req.body.uid,
-      req.body.messageCount
+      req.params.uid,
+      parseInt(req.params.messageCount)
     )
   );
+
 });
 
 router.get("/getAllChats/:uid", async (req, res) => {
   return res.json(await chatController.getAllChats(req.params.uid));
 });
 
-router.get("/getMessage/:mid", async (req, res) => {
-  return res.json(await chatController.getMessage(req.params.mid));
+router.get("/getMessage/:mid/:uid", async (req, res) => {
+  return res.json(await chatController.getMessage(req.params.mid, req.params.uid));
 });
 
 router.post(

@@ -82,7 +82,7 @@ const _Message = new Schema(
     senderId: { type: Types.ObjectId, ref: "user" },
     content: { type: String, default: "" },
     isReply: { type: Boolean, default: false },
-    readBy: [{ type: Types.ObjectId, ref: "user", unique: true }],
+    readBy: [{ type: Types.ObjectId, ref: "user" }],
     readCount: { type: Number, default: 1 },
     // ^ Why This? To Make Blue Ticks Easy!
     // just compare readBy Count with total chat participants :)))))

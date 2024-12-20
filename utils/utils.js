@@ -32,11 +32,12 @@ const convertTo24Hour = (time) => {
 const getNewMessageCount = async (lastMessage, uid, chatId) => {
   if (!lastMessage || lastMessage.senderId == uid) return 0;
 
-  return (
+  let x =  (
     await Chats.findById(chatId)
       .select("messages")
       .populate("messages", "readBy")
-  ).messages.filter((i) => i.readBy.length != 2).length;
+  )
+  return x.messages.filter((i) => !i.readBy.includes(uid)).length;
 };
 
 export {
