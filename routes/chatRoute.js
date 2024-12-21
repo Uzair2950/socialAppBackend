@@ -36,7 +36,6 @@ router.get("/getChat/:cid/:uid/:messageCount", async (req, res) => {
       parseInt(req.params.messageCount)
     )
   );
-
 });
 
 router.get("/getAllChats/:uid", async (req, res) => {

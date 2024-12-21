@@ -5,7 +5,44 @@ import {
   GroupMembers,
 } from "../database/models/models.js";
 
+import chatController from "./chatController.js";
+
 export default {
+  getGroupChat: async function (gid, uid) {
+    let group = await ChatGroups.findById(gid).select(
+      "name avatarURL aboutGroup allowChatting admins chat"
+    );
+
+    let isAdmin = group.admins.includes(uid);
+
+    let chat = await chatController.getChat(group.chat);
+
+    return {
+      groupInfo: {
+        name: group.name,
+        avatarURL: group.avatarURL,
+        aboutGroup: group.aboutGroup,
+        canChat: group.allowChatting || isAdmin,
+        isAdmin,
+      },
+      chat,
+    };
+  },
+
+  getParticipants: async function (gid) {
+    let group = await ChatGroups.findById(gid).select("chat admins");
+
+    let chatParticipants = await Chats.findById(group.chat)
+      .select("participants")
+      .populate("participants", "name avatarURL");
+
+    return chatParticipants.participants.map((e) => ({
+      name: e.name,
+      avatarURL: e.avatarURL,
+      isAdmin: group.admins.includes(e._id),
+    }));
+  },
+
   newGroupChat: async function (
     creator_id,
     title,
@@ -52,6 +89,16 @@ export default {
     });
   },
 
+  // Admins
+
+  getAdmins: async function (gid) {
+    let group = await ChatGroups.findById(gid)
+      .select("admins")
+      .populate("admins", "name avatarURL");
+
+    return group.admins;
+  },
+
   addAdmins: async function (gid, admins) {
     let group = await ChatGroups.findById(gid);
     group.admins.addToSet(...admins);
@@ -70,9 +117,8 @@ export default {
       $inc: { totalParticipants: -1 },
     });
 
-    let x = await Users.findByIdAndUpdate(uid, {
+    await Users.findByIdAndUpdate(uid, {
       $pull: { groupChats: chatid._id },
     }); // Remove from users
-    console.log(x);
   },
 };

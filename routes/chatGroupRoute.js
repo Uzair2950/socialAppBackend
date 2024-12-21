@@ -5,6 +5,20 @@ const router = Router();
 
 router.get("/", (req, res) => res.send("Wow"));
 
+router.get("/getGroupChat/:gid/:uid", async (req, res) => {
+  return res.json(
+    await chatGroupController.getGroupChat(req.params.gid, req.params.uid)
+  );
+});
+
+router.get("/getAdmins/:gid", async (req, res) => {
+  return res.json(await chatGroupController.getAdmins(req.params.gid));
+});
+
+router.get("/getMembers/:gid", async (req, res) => {
+  return res.json(await chatGroupController.getParticipants(req.params.gid));
+});
+
 //TODO: ADD THE IMAGE
 router.post("/newGroupChat/:creatorId", async (req, res) => {
   await chatGroupController.newGroupChat(

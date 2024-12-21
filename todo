@@ -3,3 +3,5 @@
     ii.  Feed will require the user id to check for likes
 
 2. Chat Implementation
+
+3. Handle Message - isRead logic on backend

@@ -153,10 +153,10 @@ const _PostGroup = new Schema(
 
 const _ChatGroup = new Schema(
   {
-    title: { type: String, required: true },
+    name: { type: String, required: true },
     chat: { type: Types.ObjectId, ref: "chat", required: true },
     allowChatting: { type: Boolean, enum: [false, true], default: true }, //0 => Everyone can send , 1 => Only admins.
-    imgUrl: { type: String, default: "/static/avatars/default_group.png" },
+    avatarURL: { type: String, default: "/static/avatars/default_group.png" },
     aboutGroup: { type: String, default: "" },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
   },
@@ -166,30 +166,12 @@ const _ChatGroup = new Schema(
 // for personal
 const _Chat = new Schema(
   {
-    type: { type: Number, enum: [0, 1], default: 0 }, //0 => Personal, 1 => GroupChat
+    isGroup: { type: Boolean, enum: [false, true], default: false },
     participants: [{ type: Types.ObjectId, ref: "user", default: [] }],
     totalParticipants: { type: Number, default: 0 },
     messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
   },
   {
-    methods: {
-      getTitle(current_user_id) {
-        // Chat Head Title Is Different for every user
-        return this.participants.filter(
-          (y) => y._id.toString() != current_user_id
-        )[0];
-      },
-      getChatHead(current_user_id) {
-        let chatHead = {
-          chatInfo: this.participants.filter(
-            (y) => y._id.toString() != current_user_id
-          )[0],
-          lastMessage: this.messages[0] ?? {},
-        };
-
-        return chatHead;
-      },
-    },
     timestamps: true,
   }
 );

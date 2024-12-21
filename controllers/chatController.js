@@ -23,50 +23,135 @@ export default {
     return chat._id;
   },
 
+  // getAllChats: async function (uid) {
+  //   let userChats = await Users.findById(uid)
+  //     .select("activeChats groupChats")
+  //     .populate([
+  //       {
+  //         path: "activeChats",
+  //         select: "participants messages totalParticipants",
+  //         options: { sort: { updatedAt: -1 } },
+  //         populate: [
+  //           {
+  //             path: "participants",
+  //             select: "name avatarURL",
+  //             match: { _id: { $ne: uid } }, // Gets the "other" user
+  //           },
+  //           {
+  //             path: "messages",
+  //             select: "content senderId createdAt -_id",
+  //             options: { $slice: -1 },
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         path: "groupChats",
+  //         select: "name avatarURL chat",
+  //         populate: {
+  //           path: "chat",
+  //           select: "type",
+  //           populate: {
+  //             path: "messages",
+  //             select: "content senderId createdAt -_id",
+  //             options: { $slice: -1 },
+  //           },
+  //         },
+  //       },
+  //     ]);
+  //   return Promise.all(
+  //     userChats.activeChats.map(async (e) => ({
+  //       id: e._id,
+  //       chatInfo: e.participants[0],
+  //       totalParticipants: e.totalParticipants,
+  //       lastMessage: e.messages.slice(-1)[0] ?? {
+  //         senderId: "",
+  //         content: "",
+  //         createdAt: "",
+  //       },
+  //       newMessageCount: await getNewMessageCount(
+  //         e.messages.slice(-1)[0],
+  //         uid,
+  //         e._id
+  //       ),
+  //     }))
+  //   );
+  // },
+
   getAllChats: async function (uid) {
     let userChats = await Users.findById(uid)
-      .select("activeChats")
+      .select("activeChats groupChats -_id")
       .populate({
-        path: "activeChats",
-        select: "participants messages",
-        options: { sort: { updatedAt: -1 } },
-        populate: [
-          {
-            path: "participants",
-            select: "name avatarURL",
-            match: { _id: { $ne: uid } }, // Gets the "other" user
-          },
-          { path: "messages", select: "content senderId createdAt -_id" },
-        ],
+        path: "groupChats",
+        select: "chat name avatarURL",
       });
-    return Promise.all(
-      userChats.activeChats.map(async (e) => ({
-        id: e._id,
-        chatInfo: e.participants[0],
-        lastMessage: e.messages.slice(-1)[0] ?? {
-          senderId: "",
-          content: "",
-          createdAt: "",
+    let groupChats = userChats.groupChats.map((e) => e.chat);
+    let chats = await Chats.find(
+      { _id: [...groupChats, ...userChats.activeChats] },
+      {
+        isGroup: 1,
+        totalParticipants: 1,
+        participants: {
+          $elemMatch: { $ne: uid },
         },
-        newMessageCount: await getNewMessageCount(
-          e.messages.slice(-1)[0],
-          uid,
-          e._id
-        ),
-      }))
+        messages: { $slice: -1 },
+      },
+      { sort: { updatedAt: -1 } }
+    ).populate([
+      {
+        path: "messages",
+        select: "content senderId createdAt -_id",
+      },
+      {
+        path: "participants",
+        select: "name avatarURL",
+      },
+    ]);
+
+    let transformedChats = await Promise.all(
+      chats.map(async (e) => {
+        let chatInfo = {
+          _id: e.participants[0]._id,
+          name: e.participants[0].name,
+          avatarURL: e.participants[0].avatarURL,
+        };
+        if (e.isGroup) {
+          let chatGroupDetails = userChats.groupChats.filter(
+            (i) => i.chat.toString() == e._id.toString()
+          )[0];
+          chatInfo = {
+            _id: chatGroupDetails._id,
+            name: chatGroupDetails.name,
+            avatarURL: chatGroupDetails.avatarURL,
+          };
+        }
+
+        return {
+          id: e._id,
+          chatInfo,
+          totalParticipants: e.totalParticipants,
+          isGroup: e.isGroup,
+          lastMessage: e.messages[0] ?? {
+            senderId: "",
+            content: "",
+            createdAt: "",
+          },
+          newMessageCount: await getNewMessageCount(e.messages[0], uid, e._id),
+        };
+      })
     );
+
+    return transformedChats;
   },
+
   // NOTE: Read Logic will be handled on frontned.
   getChat: async function (chatId, uid = "", newMessageCount = 0) {
     if (newMessageCount == NaN) newMessageCount = 0;
     // Read all previous messages.
-    // if (newMessageCount > 0) {
-    //   console.log("READING MESSAGES")
-    //   await this.readMessages(chatId, uid, newMessageCount);
-    // }
+    if (newMessageCount > 0 && uid != "")
+      await this.readMessages(chatId, uid, newMessageCount);
 
     let chat = await Chats.findById(chatId)
-      .select("messages totalParticipants")
+      .select("messages totalParticipants isGroup")
       .populate({
         path: "messages",
         select: "content attachments readCount createdAt",
@@ -86,7 +171,6 @@ export default {
   },
 
   getMessage: async function (mid, uid) {
-
     let message = await Messages.findById(mid)
       .select("content attachments readCount readBy createdAt reply senderId")
       .populate([
@@ -100,11 +184,10 @@ export default {
         },
       ]);
 
+    if (uid != 0 && !message.readBy.includes(uid))
+      await this.readMessageById(mid, uid);
 
-      if (!message.readBy.includes(uid))
-        await this.readMessageById(mid, uid)
-
-      return message
+    return message;
   },
 
   sendMessage: async function (
@@ -124,19 +207,19 @@ export default {
         isReply,
         reply: replyId,
       });
-  
+
       // message.readBy.addToSet(senderId)
-  
+
       await message.save();
-  
+
       await Chats.findByIdAndUpdate(chatId, {
         $push: { messages: message._id },
       });
-  
+
       return message._id;
-    } catch(err) {
-      console.log(err)
-      return undefined
+    } catch (err) {
+      console.log(err);
+      return undefined;
     }
   },
 

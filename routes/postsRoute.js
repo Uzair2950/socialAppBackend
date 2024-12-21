@@ -22,8 +22,10 @@ const storage = multer.diskStorage({
 const postsAttachments = multer({ storage });
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({ message: "OK" });
+router.post("/", postsAttachments.array("images"), (req, res) => {
+  console.log(req.files)
+  console.log(req.body)
+  return res.json({ message: "OK" });
 });
 
 router.post(

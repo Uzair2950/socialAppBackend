@@ -46,14 +46,12 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", ({ chatId, messageId }) => {
     console.log({ chatId, messageId });
     io.emit(`receiveMessage_${chatId}`, messageId);
-  });
-  socket.on("sese", (ww) => {
-    console.log(ww);
-    // socket.emit("rec", content);
+    console.log("EMITTING: updateAllChatsView", chatId, messageId)
+    io.emit(`updateAllChatsView`, chatId, messageId);
   });
 
+
   socket.on("disconnect", async (s) => {
-    console.log(s);
     console.log("DISCONNECTED");
   });
 });
@@ -74,11 +72,11 @@ app.use("/api/chatgroup", chatGroupRoute);
 app.use("/api/community", communityRoute);
 app.use("/api/chat", chatRoute);
 
-const startServer = async () => {
-  let db = await connectDB();
+(async () => {
+  await connectDB();
   httpServer.listen(3001, () => {
     console.log("Listening On ws://localhost:3001\nhttp://localhost:3001");
   });
-};
+})();
 
-startServer();
+// startServer();
