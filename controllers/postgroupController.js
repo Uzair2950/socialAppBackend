@@ -30,7 +30,7 @@ export default {
     let isCreator = group.admins[0] == requesterId;
 
     // Sort by pinned to bring pinned on top
-    // Not sure what impact it will have on performance.
+    // Not sure what impact will it have on performance.
     // TODO: ADD PAGINATION FOR INIFINITE SCROLLING
     let posts = await Posts.find({ group_id: gId })
       .populate("author", "name avatarURL")
@@ -67,7 +67,8 @@ export default {
     imgUrl,
     aboutGroup,
     allowPosting,
-    is_private
+    is_private,
+    isOfficial
   ) {
     let group = new PostGroups({
       title,
@@ -76,6 +77,7 @@ export default {
       admins: [creator_id],
       aboutGroup,
       allowPosting,
+      isOfficial,
     });
 
     await group.save();

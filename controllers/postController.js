@@ -8,18 +8,21 @@ export default {
     author,
     privacyLevel,
     content,
-    attachements,
+    attachments,
     group_id
   ) {
     let post = new Posts({
       author,
       group_id,
       content,
-      attachements,
+      attachments,
       privacyLevel,
     });
     await post.save();
+
+    return post._id;
   },
+
   // TODO: Needs to be modified.
   getPosts: async function (uid, num) {
     let posts = await Posts.find({

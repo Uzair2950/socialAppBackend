@@ -23,7 +23,6 @@ const router = express.Router();
 // Middle Ware
 const createGroupSchema = z.object({
   title: z.string(), // Add check on frontend..
-  imgUrl: z.string().default("/static/avatars/default_group.png"),
   is_private: z.boolean().default(false),
   aboutGroup: z.string().default(""),
   allowPosting: z.boolean().default(true),
@@ -53,36 +52,32 @@ router.get("/getGroup/:gId/:rId", async (req, res) => {
   );
 });
 
-router.post(
-  "/createHybridGroup/:creatorId",
-  async (req, res) => {
-
-
-    await postgroupController.newGroup(
-      req.params.creatorId,
-      req.body.title,
-      req.body.imgUrl,
-      req.body.aboutGroup,
-      req.body.allowPosting,
-      req.body.is_private
-    );
-    return res.send({ message: `Group ${req.body.title} Created` });
-  }
-);
+router.post("/createHybridGroup/:creatorId", async (req, res) => {
+  await postgroupController.newGroup(
+    req.params.creatorId,
+    req.body.title,
+    req.body.imgUrl,
+    req.body.aboutGroup,
+    req.body.allowPosting,
+    req.body.is_private
+  );
+  return res.send({ message: `Group ${req.body.title} Created` });
+});
 
 router.post(
   "/createGroup/:creatorId",
-  validateRequest(createGroupSchema),
+  groupAvatars.single("group_avatar"),
   async (req, res) => {
-    await postgroupController.newGroup(
+    let group_id = await postgroupController.newGroup(
       req.params.creatorId,
       req.body.title,
-      req.body.imgUrl,
+      `/${req?.file.path.replaceAll("\\", "/")}`,
       req.body.aboutGroup,
       req.body.allowPosting,
-      req.body.is_private
+      req.body.is_private,
+      req.body.isOfficial
     );
-    return res.send({ message: `Group ${req.body.title} Created` });
+    return res.send({ message: `Group ${req.body.title} Created`, group_id });
   }
 );
 
@@ -132,7 +127,6 @@ router.post("/rejectRequest/:reqId", async (req, res) => {
   await postgroupController.rejectRequest(req.params.reqId);
   return res.json({ message: "success" });
 });
-
 
 // Leave Group
 

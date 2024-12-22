@@ -14,6 +14,7 @@ import postGroupRoute from "./routes/postGroupRoute.js";
 import chatGroupRoute from "./routes/chatGroupRoute.js";
 import communityRoute from "./routes/communityRoute.js";
 import chatRoute from "./routes/chatRoute.js";
+import feedRouter from "./routes/feedRoute.js";
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -46,10 +47,9 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", ({ chatId, messageId }) => {
     console.log({ chatId, messageId });
     io.emit(`receiveMessage_${chatId}`, messageId);
-    console.log("EMITTING: updateAllChatsView", chatId, messageId)
+    console.log("EMITTING: updateAllChatsView", chatId, messageId);
     io.emit(`updateAllChatsView`, chatId, messageId);
   });
-
 
   socket.on("disconnect", async (s) => {
     console.log("DISCONNECTED");
@@ -71,6 +71,7 @@ app.use("/api/postgroup", postGroupRoute);
 app.use("/api/chatgroup", chatGroupRoute);
 app.use("/api/community", communityRoute);
 app.use("/api/chat", chatRoute);
+app.use("/api/feed", feedRouter);
 
 (async () => {
   await connectDB();

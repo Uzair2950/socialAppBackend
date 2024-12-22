@@ -99,7 +99,14 @@ export default {
     ).populate([
       {
         path: "messages",
-        select: "content senderId createdAt -_id",
+        // select: "content senderId createdAt -_id",
+        select: {
+          content: 1,
+          senderId: 1,
+          createdAt: 1,
+          _id: 0,
+          attachments: 1,
+        },
       },
       {
         path: "participants",
@@ -134,6 +141,7 @@ export default {
             senderId: "",
             content: "",
             createdAt: "",
+            attachments: [],
           },
           newMessageCount: await getNewMessageCount(e.messages[0], uid, e._id),
         };

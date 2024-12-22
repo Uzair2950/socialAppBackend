@@ -57,6 +57,7 @@ const _Student = new Schema({
   reg_no: { type: String, required: true },
   user: { type: Types.ObjectId, ref: "user", required: true },
   cgpa: { type: Number, default: 0 },
+  section: { type: Types.ObjectId, ref: "section", required: true },
 });
 
 const _Enrollment = new Schema({

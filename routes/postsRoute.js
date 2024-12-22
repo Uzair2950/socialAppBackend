@@ -23,8 +23,8 @@ const postsAttachments = multer({ storage });
 const router = express.Router();
 
 router.post("/", postsAttachments.array("images"), (req, res) => {
-  console.log(req.files)
-  console.log(req.body)
+  console.log(req.files);
+  console.log(req.body);
   return res.json({ message: "OK" });
 });
 
@@ -33,16 +33,17 @@ router.post(
   postsAttachments.array("postsImages"),
   async (req, res) => {
     let attachements = req.files?.map((e) => `${destination}/${e.filename}`);
+    console.log(attachements)
     let { author, content, privacyLevel, group_id } = req.body;
 
-    await postController.addPost(
+    let post_id = await postController.addPost(
       author,
       privacyLevel,
       content,
       attachements,
       group_id
     );
-    return res.json({ message: "Posted!" });
+    return res.json({ message: "Posted!", post_id });
   }
 );
 
