@@ -15,6 +15,7 @@ import {
   Chats,
   Communities,
   Messages,
+  Sections,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import { getCurrentSession, getStudentSections } from "./utils/utils.js";
@@ -22,6 +23,7 @@ import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
 
 import { getNewMessageCount } from "./utils/utils.js";
+import { parseTimetable } from "./xlparser.js";
 
 let db = await connectDB();
 
@@ -250,72 +252,75 @@ let id2 = "6754a9268db89992d5b8221f";
 //     path: "messages",
 //     options: { $slice: -1 },
 //   });
-let userDetails = await Users.findById("6754a9268db89992d5b8221e")
-  .select("activeChats groupChats -_id")
-  .populate({
-    path: "groupChats",
-    select: "chat name avatarURL",
-  });
+// let userDetails = await Users.findById("6754a9268db89992d5b8221e")
+//   .select("activeChats groupChats -_id")
+//   .populate({
+//     path: "groupChats",
+//     select: "chat name avatarURL",
+//   });
 
-let groupChats = userDetails.groupChats.map((e) => e.chat);
-// console.log(userDetails);
-let chats = await Chats.find(
-  { _id: [...groupChats, ...userDetails.activeChats] },
-  {
-    isGroup: 1,
-    totalParticipants: 1,
-    participants: {
-      $elemMatch: { $ne: "6754a9268db89992d5b8221e" },
-    },
-    messages: { $slice: -1 },
-  },
-  { sort: { updatedAt: -1 } }
-).populate([
-  {
-    path: "messages",
-    select: "content senderId createdAt -_id",
-  },
-  {
-    path: "participants",
-    select: "name avatarURL",
-  },
-]);
+// let groupChats = userDetails.groupChats.map((e) => e.chat);
+// // console.log(userDetails);
+// let chats = await Chats.find(
+//   { _id: [...groupChats, ...userDetails.activeChats] },
+//   {
+//     isGroup: 1,
+//     totalParticipants: 1,
+//     participants: {
+//       $elemMatch: { $ne: "6754a9268db89992d5b8221e" },
+//     },
+//     messages: { $slice: -1 },
+//   },
+//   { sort: { updatedAt: -1 } }
+// ).populate([
+//   {
+//     path: "messages",
+//     select: "content senderId createdAt -_id",
+//   },
+//   {
+//     path: "participants",
+//     select: "name avatarURL",
+//   },
+// ]);
 
-let transformedChats = await Promise.all(
-  chats.map(async (e) => {
-    let chatInfo = {
-      _id: e.participants[0]._id,
-      name: e.participants[0].name,
-      avatarURL: e.participants[0].avatarURL,
-    };
-    if (e.isGroup) {
-      console.log("is group")
-      let chatGroupDetails = userDetails.groupChats.filter((i) => i.chat.toString() == e._id.toString())[0];
-      chatInfo = {
-        _id: chatGroupDetails._id,
-        name: chatGroupDetails.name,
-        avatarURL: chatGroupDetails.avatarURL,
-      };
-    }
+// let transformedChats = await Promise.all(
+//   chats.map(async (e) => {
+//     let chatInfo = {
+//       _id: e.participants[0]._id,
+//       name: e.participants[0].name,
+//       avatarURL: e.participants[0].avatarURL,
+//     };
+//     if (e.isGroup) {
+//       console.log("is group")
+//       let chatGroupDetails = userDetails.groupChats.filter((i) => i.chat.toString() == e._id.toString())[0];
+//       chatInfo = {
+//         _id: chatGroupDetails._id,
+//         name: chatGroupDetails.name,
+//         avatarURL: chatGroupDetails.avatarURL,
+//       };
+//     }
 
-    return {
-      id: e._id,
-      chatInfo,
-      totalParticipants: e.totalParticipants,
-      isGroup: e.isGroup,
-      lastMessage: e.messages[0] ?? {
-        senderId: "",
-        content: "",
-        createdAt: "",
-      },
-      newMessageCount: await getNewMessageCount(
-        e.messages[0],
-        "6754a9268db89992d5b8221e",
-        e._id
-      ),
-    };
-  })
-);
+//     return {
+//       id: e._id,
+//       chatInfo,
+//       totalParticipants: e.totalParticipants,
+//       isGroup: e.isGroup,
+//       lastMessage: e.messages[0] ?? {
+//         senderId: "",
+//         content: "",
+//         createdAt: "",
+//       },
+//       newMessageCount: await getNewMessageCount(
+//         e.messages[0],
+//         "6754a9268db89992d5b8221e",
+//         e._id
+//       ),
+//     };
+//   })
+// );
 
-console.log(transformedChats);
+
+
+
+
 db.disconnect();

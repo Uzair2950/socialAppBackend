@@ -1,4 +1,9 @@
-import { Sessions, Chats, Enrollment } from "../database/models/models.js";
+import {
+  Sessions,
+  Chats,
+  Enrollment,
+  Sections,
+} from "../database/models/models.js";
 
 const getCurrentSession = async () => {
   return await Sessions.findOne({ has_commenced: false }).lean();
@@ -32,12 +37,14 @@ const convertTo24Hour = (time) => {
 const getNewMessageCount = async (lastMessage, uid, chatId) => {
   if (!lastMessage || lastMessage.senderId == uid) return 0;
 
-  let x =  (
-    await Chats.findById(chatId)
-      .select("messages")
-      .populate("messages", "readBy")
-  )
+  let x = await Chats.findById(chatId)
+    .select("messages")
+    .populate("messages", "readBy");
   return x.messages.filter((i) => !i.readBy.includes(uid)).length;
+};
+
+const getSectionIdByName = async (title) => {
+  return (await Sections.findOne({ title }))._id;
 };
 
 export {
@@ -45,4 +52,5 @@ export {
   getStudentSections,
   getCurrentSessionId,
   getNewMessageCount,
+  getSectionIdByName
 };

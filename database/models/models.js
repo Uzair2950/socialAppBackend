@@ -40,7 +40,7 @@ const _Course = new Schema({
 });
 
 const _Section = new Schema({
-  title: { type: String, required: true },
+  title: { type: String, required: true, unique: true },
 });
 
 const _Session = new Schema({
@@ -237,19 +237,80 @@ const _Notification = new Schema(
 const _TimeTable = new Schema({
   section: { type: Types.ObjectId, ref: "section" },
   slots: {
-    monday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
-    tuesday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
-    wednesday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
-    thursday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
-    friday: [{ type: Types.ObjectId, ref: "slots", default: [] }],
+    monday: [
+      {
+        type: {
+          course: String,
+          venue: String,
+          start_time: String,
+          end_time: String,
+          time: String,
+          instructors: String,
+        },
+        default: [],
+      },
+    ],
+    tuesday: [
+      {
+        type: {
+          course: String,
+          venue: String,
+          start_time: String,
+          end_time: String,
+          time: String,
+          instructors: String,
+        },
+        default: [],
+      },
+    ],
+    wednesday: [
+      {
+        type: {
+          course: String,
+          venue: String,
+          start_time: String,
+          end_time: String,
+          time: String,
+          instructors: String,
+        },
+        default: [],
+      },
+    ],
+    thursday: [
+      {
+        type: {
+          course: String,
+          venue: String,
+          start_time: String,
+          end_time: String,
+          time: String,
+          instructors: String,
+        },
+        default: [],
+      },
+    ],
+    friday: [
+      {
+        type: {
+          course: String,
+          venue: String,
+          start_time: String,
+          end_time: String,
+          time: String,
+          instructors: String,
+        },
+        default: [],
+      },
+    ],
   },
 });
 
 const _Slot = new Schema({
-  cousre: { type: Types.ObjectId, ref: "course", required: true },
-  instructors: [
-    { type: Types.ObjectId, ref: "user", required: true, default: [] },
-  ],
+  //  course: { type: Types.ObjectId, ref: "course", required: true },
+  course: { type: String, required: true },
+  instructors: { type: String, required: true },
+  // { type: Types.ObjectId, ref: "user", required: true, default: [] },
+
   venue: { type: String, required: true },
   start_time: { type: String, required: true },
   end_time: { type: String, required: true },
