@@ -33,17 +33,21 @@ router.post(
   postsAttachments.array("postsImages"),
   async (req, res) => {
     let attachements = req.files?.map((e) => `${destination}/${e.filename}`);
-    console.log(attachements)
-    let { author, content, privacyLevel, group_id } = req.body;
+    console.log(attachements);
+    let { author, content, privacyLevel, group_id, type } = req.body;
 
     let post_id = await postController.addPost(
       author,
       privacyLevel,
       content,
       attachements,
-      group_id
+      group_id,
+      type
     );
-    return res.json({ message: "Posted!", post_id });
+    if (post_id) {
+      return res.json({ message: "Posted!", post_id });
+    }
+    return res.status(400).json({ message: "Invalid timetable format!" });
   }
 );
 

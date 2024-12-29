@@ -1,7 +1,5 @@
-import {
-  Posts,
-  Comments,
-} from "../database/models/models.js";
+import { Posts, Comments, TimeTable } from "../database/models/models.js";
+import { parseTimetable } from "../xlparser.js";
 
 export default {
   addPost: async function (
@@ -9,18 +7,37 @@ export default {
     privacyLevel,
     content,
     attachments,
-    group_id
+    group_id,
+    type
   ) {
-    let post = new Posts({
-      author,
-      group_id,
-      content,
-      attachments,
-      privacyLevel,
-    });
-    await post.save();
+    if (type == "timetable") {
+      if (attachments.length > 0 && attachments[0].split(".")[1] == "xlsx") {
 
-    return post._id;
+        let timetable = await parseTimetable(attachments[0]);
+        if (timetable) {
+          // Delete old 
+          console.log(timetable)
+          await TimeTable.deleteMany();
+
+          await TimeTable.insertMany(timetable);
+
+          let post = new Posts({
+            author,
+            group_id,
+            content,
+            attachments,
+            privacyLevel,
+          });
+          await post.save();
+      
+          return post._id;
+        }
+      } else {
+        console.log("Invalid File")
+        return { message: "Invalid Timetable File!" };
+      }
+    }
+    
   },
 
   // TODO: Needs to be modified.
