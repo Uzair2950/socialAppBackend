@@ -21,17 +21,17 @@ const router = express.Router();
 //Routes
 
 // Authorize User {username, password}
-router.get(
+router.post(
   "/authorize",
   validateRequest({
     body: z.object({
-      username: z.string(),
+      email: z.string(),
       password: z.string(),
     }),
   }),
   async (req, res) => {
     let user = await userController.authorizeUser(
-      req.body.username,
+      req.body.email,
       req.body.password
     );
 

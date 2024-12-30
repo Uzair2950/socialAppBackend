@@ -2,7 +2,8 @@ import { model, Schema, Types } from "mongoose";
 
 const _User = new Schema(
   {
-    username: { type: String, required: true, index: true },
+    // username: { type: String, required: true, index: true },
+    email: { type: String, required: true, index: true },
     password: { type: String, required: true },
     name: { type: String, required: true },
     type: { type: Number, enum: [0, 1, 2], default: 0 }, //0 => Student , 1 => Teacher, 2 => Administrator
@@ -112,10 +113,11 @@ const _Comment = new Schema(
 const _Post = new Schema(
   {
     author: { type: Types.ObjectId, ref: "user", required: true },
-    group_id: { type: Types.ObjectId, ref: "postgroup", default: undefined },
+    group_id: [{ type: Types.ObjectId, ref: "postgroup", default: [] }],
     is_pinned: { type: Boolean, default: false },
     content: { type: String, default: "" },
     attachments: [{ type: String, default: "" }],
+    type: { type: Number, default: 0 },
     // Group posts will be public by default.
     // self => <= 2
     // friend => <= 1
@@ -159,7 +161,7 @@ const _ChatGroup = new Schema(
     allowChatting: { type: Boolean, enum: [false, true], default: true }, //0 => Everyone can send , 1 => Only admins.
     avatarURL: { type: String, default: "/static/avatars/default_group.png" },
     aboutGroup: { type: String, default: "" },
-    admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
+    admins: [{ type: Types.ObjectId, ref: "user", default: [] }], 
   },
   { timestamps: true }
 );
@@ -169,7 +171,7 @@ const _Chat = new Schema(
   {
     isGroup: { type: Boolean, enum: [false, true], default: false },
     participants: [{ type: Types.ObjectId, ref: "user", default: [] }],
-    totalParticipants: { type: Number, default: 0 },
+    totalParticipants: { type: Number, default: 1 },
     messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
   },
   {

@@ -22,8 +22,8 @@ export default {
 
     return res ? true : false;
   },
-  authorizeUser: async function (username, password) {
-    let user = await Users.findOne({ username, password }).lean();
+  authorizeUser: async function (email, password) {
+    let user = await Users.findOne({ email, password }).lean();
 
     if (!user) return undefined;
     // TODO: select specific attributes not all..

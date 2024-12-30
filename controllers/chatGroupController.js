@@ -54,9 +54,10 @@ export default {
     let chat = new Chats({
       type: 1,
       participants: [creator_id],
+      isGroup: true,
     });
     let group = new ChatGroups({
-      title,
+      name: title,
       imgUrl,
       aboutGroup,
       allowChatting,

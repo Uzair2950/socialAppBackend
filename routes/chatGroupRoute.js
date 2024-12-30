@@ -21,14 +21,14 @@ router.get("/getMembers/:gid", async (req, res) => {
 
 //TODO: ADD THE IMAGE
 router.post("/newGroupChat/:creatorId", async (req, res) => {
-  await chatGroupController.newGroupChat(
+  let chat_id = await chatGroupController.newGroupChat(
     req.params.creatorId,
-    req.body.title,
+    req.body.name,
     req.body.imgUrl,
     req.body.aboutGroup,
     req.body.allowChatting
   );
-  return res.send({ message: `GroupChat ${req.body.title} Created` });
+  return res.send({ message: `GroupChat ${req.body.title} Created`, id: chat_id });
 });
 
 // TESTING REQUIRED

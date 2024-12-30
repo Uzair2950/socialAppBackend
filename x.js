@@ -321,6 +321,19 @@ let id2 = "6754a9268db89992d5b8221f";
 
 
 
-
+await Users.insertMany([
+  {
+    name: "Uzair ibn e Irfan",
+    email: "2021-ARID-4623@biit.edu.pk",
+    password: "123",
+    avatarURL: "/static/avatars/default_avatar.png"
+  },
+  {
+    name: " Uzair Muhammad",
+    email: "2021-ARID-4624@biit.edu.pk",
+    password: "123",
+    avatarURL: "/static/avatars/default_avatar.png"
+  }
+])
 
 db.disconnect();
