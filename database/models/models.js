@@ -1,29 +1,33 @@
 import { model, Schema, Types } from "mongoose";
 
-const _User = new Schema(
-  {
-    // username: { type: String, required: true, index: true },
-    email: { type: String, required: true, index: true },
-    password: { type: String, required: true },
-    name: { type: String, required: true },
-    type: { type: Number, enum: [0, 1, 2], default: 0 }, //0 => Student , 1 => Teacher, 2 => Administrator
-    autoReply: { type: Boolean, default: false },
-    avatarURL: { type: String, default: "" },
-    is_private: { type: Boolean, default: false },
-    bio: { type: String, default: "" },
-    activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }], // personal chats
-    groupChats: [{ type: Types.ObjectId, ref: "chatgroup", default: [] }],
+const _User = new Schema({
+  // username: { type: String, required: true, index: true },
+  email: { type: String, required: true, index: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  type: {
+    type: String,
+    enum: ["student", "teacher", "administrator"],
+    default: "student",
   },
-  {
-    virtuals: {
-      id: {
-        get() {
-          return this._id;
-        },
-      },
+  autoReply: { type: Boolean, default: false },
+  avatarURL: { type: String, default: "" },
+  is_private: { type: Boolean, default: false },
+  bio: { type: String, default: "" },
+  activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }], // Personal Chats
+  groupChats: [{ type: Types.ObjectId, ref: "chatgroup", default: [] }],
+  uid: {
+    type: Types.ObjectId,
+    ref: function () {
+      return this.type;
     },
-  }
-);
+  },
+});
+
+const _UserSettings = new Schema({
+  uid: { type: Types.ObjectId, ref: "user" },
+  autoReply: { type: Boolean, default: false },
+});
 
 const _Friends = new Schema(
   {
@@ -51,14 +55,13 @@ const _Session = new Schema({
 });
 
 const _Teacher = new Schema({
-  user: { type: Types.ObjectId, ref: "user", required: true },
+  // user: { type: Types.ObjectId, ref: "user", required: true },
+  department: { type: String, enum: ["CS", "AI", "SE"], default: "CS" },
 });
 
 const _Student = new Schema({
   reg_no: { type: String, required: true },
-  user: { type: Types.ObjectId, ref: "user", required: true },
   cgpa: { type: Number, default: 0 },
-  section: { type: Types.ObjectId, ref: "section", required: true },
 });
 
 const _Enrollment = new Schema({
@@ -76,7 +79,12 @@ const _Allocation = new Schema({
 });
 
 const _Administrator = new Schema({
-  user: { type: Types.ObjectId, ref: "user", required: true },
+  // user: { type: Types.ObjectId, ref: "user", required: true },
+  role: {
+    type: String,
+    enum: ["finance", "accounts", "datacell", "admission", "director", "admin"],
+    default: "admin",
+  },
 });
 
 const _Message = new Schema(
@@ -87,13 +95,16 @@ const _Message = new Schema(
     readBy: [{ type: Types.ObjectId, ref: "user" }],
     readCount: { type: Number, default: 1 },
     // ^ Why This? To Make Blue Ticks Easy!
-    // just compare readBy Count with total chat participants :)))))
+    // just compare readCount with total chat participants :)))))
+
     reply: {
       type: Types.ObjectId,
       ref: "message",
       default: null,
     },
     attachments: [{ type: String, default: [] }],
+    // For scheduled messages.
+    status: { type: Number, enum: [0, 1], default: 1 }, // 0 => Scheduled, 1 => Delivered
   },
   {
     timestamps: true,
@@ -161,7 +172,7 @@ const _ChatGroup = new Schema(
     allowChatting: { type: Boolean, enum: [false, true], default: true }, //0 => Everyone can send , 1 => Only admins.
     avatarURL: { type: String, default: "/static/avatars/default_group.png" },
     aboutGroup: { type: String, default: "" },
-    admins: [{ type: Types.ObjectId, ref: "user", default: [] }], 
+    admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
   },
   { timestamps: true }
 );
@@ -328,11 +339,13 @@ const _DateSheet = new Schema({
 
 const _AutoReply = new Schema({
   user: { type: Types.ObjectId, ref: "user" },
+  chat: { type: Types.ObjectId, ref: "chat" },
   message: { type: String, required: true },
   reply: { type: String, required: true },
 });
 
 const Users = model("user", _User);
+const UserSettings = model("usersettings", _UserSettings);
 const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
 const Sections = model("section", _Section);
@@ -361,6 +374,7 @@ const AutoReply = model("autoreply", _AutoReply);
 
 export {
   Users,
+  UserSettings,
   Friends,
   Courses,
   Sections,

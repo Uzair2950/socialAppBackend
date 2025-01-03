@@ -3,6 +3,9 @@ import {
   Chats,
   Enrollment,
   Sections,
+  UserSettings,
+  AutoReply,
+  Messages,
 } from "../database/models/models.js";
 
 const getCurrentSession = async () => {
@@ -47,10 +50,72 @@ const getSectionIdByName = async (title) => {
   return (await Sections.findOne({ title }))._id;
 };
 
+const isGroupChat = async (chatId) => {
+  let chat = await Chats.findOne({ _id: chatId, isGroup: true }).select("_id");
+
+  return chat ? true : false;
+};
+
+const isAutoReplyEnabled = async (uid) => {
+  let user = await UserSettings.findOne({ uid, autoReply: true }).select("_id");
+  return user ? true : false;
+};
+
+const getMessageContent = async (messageId) => {
+  return (
+    await Messages.findById(messageId).select("content").lean()
+  ).content.toLowerCase();
+};
+
+const getOtherParticipant = async (chatId, currentParticipant) => {
+  return (
+    await Chats.findById(chatId).select({
+      participants: {
+        $elemMatch: { $ne: currentParticipant },
+      },
+    })
+  ).participants[0]; // will never be undefined!
+};
+
+const getAutoReply = async (chatId, sender, message) => {
+  let receiver = await getOtherParticipant(chatId, sender);
+
+  // If receiver doesn't have autoReply enabled return undefined;
+  if (!isAutoReplyEnabled(receiver)) return undefined;
+
+  // Get the content of sent message.
+  let messageContent = await getMessageContent(message);
+
+  // Find autoReply of receiver of this chat <chatId>
+  let autoReply = await AutoReply.findOne({
+    chat: chatId,
+    user: receiver,
+    message: messageContent,
+  }).select("message reply");
+
+  // if autoReply is not undefined and message is same as the "sent" messageContent create the autoreply message
+  if (autoReply && autoReply.message.toLowerCase() == messageContent) {
+    let newMessage = new Messages({
+      content: autoReply.message,
+      senderId: sender,
+      readBy: [sender, receiver],
+    });
+
+    await newMessage.save();
+    return newMessage._id;
+  }
+  // No autoreply was found
+  return undefined;
+};
+
 export {
+  getOtherParticipant,
+  getAutoReply,
   getCurrentSession,
   getStudentSections,
+  getMessageContent,
   getCurrentSessionId,
   getNewMessageCount,
-  getSectionIdByName
+  getSectionIdByName,
+  isGroupChat,
 };

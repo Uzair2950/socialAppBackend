@@ -15,6 +15,7 @@ import chatGroupRoute from "./routes/chatGroupRoute.js";
 import communityRoute from "./routes/communityRoute.js";
 import chatRoute from "./routes/chatRoute.js";
 import feedRouter from "./routes/feedRoute.js";
+import { getAutoReply, isGroupChat } from "./utils/utils.js";
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -41,14 +42,45 @@ const io = new Server(httpServer, {
   },
 });
 
+// io.on("connection", (socket) => {
+//   console.log("CONNECTED");
+
+//   socket.on("sendMessage", ({ chatId, messageId }) => {
+//     console.log({ chatId, messageId });
+//     io.emit(`receiveMessage_${chatId}`, messageId);
+
+//     console.log("EMITTING: updateAllChatsView", chatId, messageId);
+//     io.emit(`updateAllChatsView`, chatId, messageId);
+//   });
+
+//   socket.on("disconnect", async (s) => {
+//     console.log("DISCONNECTED");
+//   });
+// });
+
+// After auto-reply
 io.on("connection", (socket) => {
   console.log("CONNECTED");
 
-  socket.on("sendMessage", ({ chatId, messageId }) => {
+  socket.on("sendMessage", async ({ chatId, messageId, senderId }) => {
     console.log({ chatId, messageId });
-    io.emit(`receiveMessage_${chatId}`, messageId);
+
+
+
+    io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
     console.log("EMITTING: updateAllChatsView", chatId, messageId);
     io.emit(`updateAllChatsView`, chatId, messageId);
+
+    // Find the auto reply message
+    if (!isGroupChat(chatId)) {
+      let autoReplyId = await getAutoReply(chatId, senderId, messageId);
+      if (autoReplyId) {
+        io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
+        io.emit(`updateAllChatsView`, chatId, autoReplyId); // Update all chats view
+      }
+    } 
+
+    // TODO: Implement VIP messages filtering
   });
 
   socket.on("disconnect", async (s) => {

@@ -16,13 +16,19 @@ import {
   Communities,
   Messages,
   Sections,
+  Administrators,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
-import { getCurrentSession, getStudentSections } from "./utils/utils.js";
+import {
+  getCurrentSession,
+  getStudentSections,
+  isGroupChat,
+  getOtherParticipant
+} from "./utils/utils.js";
 import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
 
-import { getNewMessageCount } from "./utils/utils.js";
+import { getNewMessageCount, getMessageContent } from "./utils/utils.js";
 import { parseTimetable } from "./xlparser.js";
 
 let db = await connectDB();
@@ -319,21 +325,6 @@ let id2 = "6754a9268db89992d5b8221f";
 //   })
 // );
 
-
-
-await Users.insertMany([
-  {
-    name: "Uzair ibn e Irfan",
-    email: "2021-ARID-4623@biit.edu.pk",
-    password: "123",
-    avatarURL: "/static/avatars/default_avatar.png"
-  },
-  {
-    name: " Uzair Muhammad",
-    email: "2021-ARID-4624@biit.edu.pk",
-    password: "123",
-    avatarURL: "/static/avatars/default_avatar.png"
-  }
-])
+console.log(await getOtherParticipant("675c95af52ec11f80a0b8a0c", myId));
 
 db.disconnect();
