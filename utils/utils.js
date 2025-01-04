@@ -80,21 +80,31 @@ const getOtherParticipant = async (chatId, currentParticipant) => {
 const getAutoReply = async (chatId, sender, message) => {
   let receiver = await getOtherParticipant(chatId, sender);
 
+  console.log("Other Participant: " + receiver);
+
   // If receiver doesn't have autoReply enabled return undefined;
-  if (!isAutoReplyEnabled(receiver)) return undefined;
+  if (!isAutoReplyEnabled(receiver)) {
+    console.log(`Auto Reply Is not enabled!}`);
+    return undefined;
+  }
+
+  console.log("Auto Reply is enabled.");
 
   // Get the content of sent message.
   let messageContent = await getMessageContent(message);
+  console.log(`New Message Contnet; ${messageContent}`);
+  // THOUGHTS: Read the sent message?
 
   // Find autoReply of receiver of this chat <chatId>
   let autoReply = await AutoReply.findOne({
     chat: chatId,
     user: receiver,
-    message: messageContent,
+    // message: messageContent,
   }).select("message reply");
 
   // if autoReply is not undefined and message is same as the "sent" messageContent create the autoreply message
   if (autoReply && autoReply.message.toLowerCase() == messageContent) {
+    console.log("Matched Createing new message");
     let newMessage = new Messages({
       content: autoReply.message,
       senderId: sender,

@@ -73,8 +73,10 @@ io.on("connection", (socket) => {
 
     // Find the auto reply message
     if (!isGroupChat(chatId)) {
+      console.log("Not Group Chat")
       let autoReplyId = await getAutoReply(chatId, senderId, messageId);
       if (autoReplyId) {
+        console.log("Auto Reply Found")
         io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
         io.emit(`updateAllChatsView`, chatId, autoReplyId); // Update all chats view
       }

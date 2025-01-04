@@ -17,13 +17,16 @@ import {
   Messages,
   Sections,
   Administrators,
+  AutoReply,
+  UserSettings,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import {
   getCurrentSession,
   getStudentSections,
   isGroupChat,
-  getOtherParticipant
+  getOtherParticipant,
+  getAutoReply,
 } from "./utils/utils.js";
 import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
@@ -40,6 +43,8 @@ let cc = "675736d0c90ab67482af2155";
 
 let myId = "6754a9268db89992d5b8221e";
 let id2 = "6754a9268db89992d5b8221f";
+
+let chatId = "675c95af52ec11f80a0b8a0c";
 // await Slots.insertMany([
 //   // 7C
 //   // monday
@@ -325,6 +330,10 @@ let id2 = "6754a9268db89992d5b8221f";
 //   })
 // );
 
-console.log(await getOtherParticipant("675c95af52ec11f80a0b8a0c", myId));
+// await AutoReply.insertMany([
+//   { user: myId, chat: chatId, message: "Congratulations", reply: "Thank you!" },
+// ]);
+
+
 
 db.disconnect();
