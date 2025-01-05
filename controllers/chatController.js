@@ -99,7 +99,7 @@ export default {
     ).populate([
       {
         path: "messages",
-        // select: "content senderId createdAt -_id",
+
         select: {
           content: 1,
           senderId: 1,
@@ -232,6 +232,7 @@ export default {
   },
 
   readMessageById: async function (mid, uid) {
+    // TODO: Fix the readCount: 3 bug
     await Messages.findByIdAndUpdate(mid, {
       $addToSet: { readBy: uid },
       $inc: { readCount: 1 },

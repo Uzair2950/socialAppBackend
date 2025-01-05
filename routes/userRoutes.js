@@ -183,4 +183,10 @@ router.delete("/removeAutoReply/:id", async (req, res) => {
   return res.json({ message: "success" });
 });
 
+// VIP
+
+router.get("/getVipChat/:uid", async (req, res) => {
+  return res.json(await userController.getVipChat(req.params.uid));
+});
+
 export default router;

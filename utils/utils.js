@@ -6,7 +6,10 @@ import {
   UserSettings,
   AutoReply,
   Messages,
+  VipCollections,
 } from "../database/models/models.js";
+
+import chatController from "../controllers/chatController.js";
 
 const getCurrentSession = async () => {
   return await Sessions.findOne({ has_commenced: false }).lean();
@@ -52,8 +55,7 @@ const getSectionIdByName = async (title) => {
 
 const isGroupChat = async (chatId) => {
   let chat = await Chats.findOne({ _id: chatId, isGroup: true }).select("_id");
-
-  return chat ? true : false;
+  return chat == null ? false : true;
 };
 
 const isAutoReplyEnabled = async (uid) => {
@@ -80,20 +82,14 @@ const getOtherParticipant = async (chatId, currentParticipant) => {
 const getAutoReply = async (chatId, sender, message) => {
   let receiver = await getOtherParticipant(chatId, sender);
 
-  console.log("Other Participant: " + receiver);
-
   // If receiver doesn't have autoReply enabled return undefined;
-  if (!isAutoReplyEnabled(receiver)) {
-    console.log(`Auto Reply Is not enabled!}`);
-    return undefined;
-  }
+  if (!(await isAutoReplyEnabled(receiver))) return undefined;
 
   console.log("Auto Reply is enabled.");
 
   // Get the content of sent message.
   let messageContent = await getMessageContent(message);
   console.log(`New Message Contnet; ${messageContent}`);
-  // THOUGHTS: Read the sent message?
 
   // Find autoReply of receiver of this chat <chatId>
   let autoReply = await AutoReply.findOne({
@@ -104,18 +100,43 @@ const getAutoReply = async (chatId, sender, message) => {
 
   // if autoReply is not undefined and message is same as the "sent" messageContent create the autoreply message
   if (autoReply && autoReply.message.toLowerCase() == messageContent) {
-    console.log("Matched Createing new message");
-    let newMessage = new Messages({
-      content: autoReply.message,
-      senderId: sender,
-      readBy: [sender, receiver],
-    });
-
-    await newMessage.save();
-    return newMessage._id;
+    let newMessage = await chatController.sendMessage(
+      chatId,
+      receiver,
+      autoReply.reply
+    );
+    return newMessage;
   }
   // No autoreply was found
   return undefined;
+};
+
+const vipMessageHandling = async (senderId, messageId, chatId) => {
+  console.log(`SenderID: ${senderId}`);
+  let vipCollectionsContainingSender = await VipCollections.find({
+    people: { $eq: senderId },
+  }).select("creator");
+
+  console.log(vipCollectionsContainingSender);
+
+  if (vipCollectionsContainingSender.length == 0) return;
+
+  return await Promise.all(
+    vipCollectionsContainingSender.map(async (e) => {
+      let isCreatorInCurrentChat = await Chats.find({
+        _id: chatId,
+        participants: { $eq: e.creator },
+      });
+
+      if (isCreatorInCurrentChat) {
+        await VipCollections.findByIdAndUpdate(e._id, {
+          $push: { messages: messageId },
+        });
+      }
+
+      return e._id;
+    })
+  );
 };
 
 export {
@@ -128,4 +149,5 @@ export {
   getNewMessageCount,
   getSectionIdByName,
   isGroupChat,
+  vipMessageHandling,
 };

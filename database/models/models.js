@@ -24,6 +24,12 @@ const _User = new Schema({
   },
 });
 
+const _VipCollections = new Schema({
+  creator: { type: Types.ObjectId, ref: "user" },
+  people: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
+});
+
 const _UserSettings = new Schema({
   uid: { type: Types.ObjectId, ref: "user" },
   autoReply: { type: Boolean, default: false },
@@ -350,6 +356,7 @@ const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
 const Sections = model("section", _Section);
 const Administrators = model("administrator", _Administrator);
+const VipCollections = model("vipcollection", _VipCollections);
 const Teachers = model("teacher", _Teacher);
 const Students = model("student", _Student);
 const Enrollment = model("enrollment", _Enrollment);
@@ -375,6 +382,7 @@ const AutoReply = model("autoreply", _AutoReply);
 export {
   Users,
   UserSettings,
+  VipCollections,
   Friends,
   Courses,
   Sections,

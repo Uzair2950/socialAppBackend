@@ -6,6 +6,7 @@ import {
   Friends,
   Posts,
   AutoReply,
+  VipCollections,
 } from "../database/models/models.js";
 
 import postController from "./postController.js";
@@ -125,6 +126,22 @@ export default {
     await user.save();
   },
 
+  getVipChat: async function (uid) {
+    let vipChat = await VipCollections.findOne({ creator: uid })
+      .select("messages")
+      .populate({
+        path: "messages",
+        select: "content attachments createdAt senderId",
+        sort: { createdAt: -1 },
+        populate: {
+          path: "senderId",
+          select: "name avatarURL",
+        },
+      });
+
+    return vipChat;
+  },
+
   addAutoReply: async function (uid, autoreplies) {
     let replies = await AutoReply.insertMany(
       autoreplies.map((e) => ({ user: uid, ...e }))
@@ -136,7 +153,59 @@ export default {
     await AutoReply.findByIdAndDelete(autoReplyId);
   },
 
+  editAutoReply: async function (replyId, message, reply) {
+    await AutoReply.findByIdAndUpdate(replyId, { message, reply });
+  },
+
   getAutoReplies: async function (uid) {
-    return await AutoReply.find({ user: uid });
+    // Damn
+    // 1. Fetches the user's auto-replies
+    // 2. Gets & Populates the "other" participant (*)
+    // 3. Transforms the object
+    // 4. Groups all replies by their chatId // (+)
+    // Returns somthing like this:
+    /*[chatId:string]: {
+      details: {name: string, avatarURL: string},
+      messages: [{id: string/objectId, message: string, reply: string}]
+    }*/
+
+    let groupedByChats = (
+      await AutoReply.find({ user: uid })
+        .select("-user")
+        .populate([
+          {
+            path: "chat",
+            select: {
+              _id: 1,
+              participants: {
+                $elemMatch: { $ne: uid }, // * $ne => not equals
+              },
+            },
+            populate: {
+              // *
+              path: "participants",
+              select: "name avatarURL -_id",
+            },
+          },
+        ])
+        .lean()
+    )
+      .map((e) => ({
+        ...e,
+        chat: { id: e.chat._id, details: e.chat.participants[0] },
+      }))
+      .reduce((chats, curr) => {
+        // +
+        chats[curr.chat.id] = chats[curr.chat.id] || {};
+        chats[curr.chat.id].details = curr.chat.details || {};
+        chats[curr.chat.id].replies = chats[curr.chat.id].replies || [];
+        chats[curr.chat.id].replies.push({
+          id: curr._id,
+          message: curr.message,
+          reply: curr.reply,
+        });
+        return chats;
+      }, {});
+    return groupedByChats;
   },
 };

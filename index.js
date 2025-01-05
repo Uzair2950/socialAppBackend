@@ -1,10 +1,12 @@
 import cors from "cors";
 import express from "express";
 import pkg from "body-parser";
+import morgan from "morgan";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import morgan from "morgan";
 import { connectDB } from "./database/db.js";
+
+const { json, urlencoded } = pkg;
 
 // Routes
 import userRoutes from "./routes/userRoutes.js";
@@ -15,17 +17,23 @@ import chatGroupRoute from "./routes/chatGroupRoute.js";
 import communityRoute from "./routes/communityRoute.js";
 import chatRoute from "./routes/chatRoute.js";
 import feedRouter from "./routes/feedRoute.js";
-import { getAutoReply, isGroupChat } from "./utils/utils.js";
+
+//
+import {
+  getAutoReply,
+  isGroupChat,
+  vipMessageHandling,
+} from "./utils/utils.js";
 
 ////////////////////////////////////////////////////////////////////////
 
 const app = express();
 
 // Middleware
-app.use(pkg.json());
+app.use(json());
 
 app.use(
-  pkg.urlencoded({
+  urlencoded({
     extended: true,
   })
 );
@@ -63,29 +71,37 @@ io.on("connection", (socket) => {
   console.log("CONNECTED");
 
   socket.on("sendMessage", async ({ chatId, messageId, senderId }) => {
-    console.log({ chatId, messageId });
-
-
+    console.log({ chatId, messageId, senderId });
 
     io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
-    console.log("EMITTING: updateAllChatsView", chatId, messageId);
     io.emit(`updateAllChatsView`, chatId, messageId);
 
     // Find the auto reply message
-    if (!isGroupChat(chatId)) {
-      console.log("Not Group Chat")
+
+    if (!(await isGroupChat(chatId))) {
       let autoReplyId = await getAutoReply(chatId, senderId, messageId);
       if (autoReplyId) {
-        console.log("Auto Reply Found")
+        console.log("Auto Reply Found");
         io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
         io.emit(`updateAllChatsView`, chatId, autoReplyId); // Update all chats view
       }
-    } 
-
+    }
     // TODO: Implement VIP messages filtering
+    else {
+      console.log("Getting VIP Messages");
+      let vipMessages = await vipMessageHandling(senderId, messageId, chatId);
+      console.log(vipMessages);
+      if (vipMessages) {
+        vipMessages.forEach((e) => {
+          console.log(`Emitting: receiveVipMessage_${e}| ${messageId}`);
+          io.emit(`receiveVipMessage_${e}`, messageId); // Emit the Vip message
+          // io.emit(`updateVipView`, e, messageId); // Update all Vip Chats view
+        });
+      }
+    }
   });
 
-  socket.on("disconnect", async (s) => {
+  socket.on("disconnect", () => {
     console.log("DISCONNECTED");
   });
 });

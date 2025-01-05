@@ -19,6 +19,7 @@ import {
   Administrators,
   AutoReply,
   UserSettings,
+  VipCollections,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import {
@@ -27,6 +28,7 @@ import {
   isGroupChat,
   getOtherParticipant,
   getAutoReply,
+  vipMessageHandling,
 } from "./utils/utils.js";
 import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
@@ -330,10 +332,16 @@ let chatId = "675c95af52ec11f80a0b8a0c";
 //   })
 // );
 
-// await AutoReply.insertMany([
-//   { user: myId, chat: chatId, message: "Congratulations", reply: "Thank you!" },
+// await VipCollections.insertMany([
+//   {
+//     creator: myId,
+//     people: [id2],
+//     collectName: "Collection 1",
+//   },
 // ]);
 
 
+
+console.log(JSON.stringify(vipChat, null, 2));
 
 db.disconnect();
