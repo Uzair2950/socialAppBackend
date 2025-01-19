@@ -4,7 +4,7 @@ import postController from "../controllers/postController.js";
 import multer from "multer";
 import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
-import { read } from "fs";
+
 
 const destination = "/static/posts";
 
@@ -50,7 +50,7 @@ router.post(
     //   return res.json({ message: "Posted!", post_id });
     // }
     // return res.status(400).json({ message: "Invalid timetable format!" });
-    return res.status(200).json({ message: "Well vert buce" });
+    return res.status(200).json({ message: "Well very nice" });
   }
 );
 

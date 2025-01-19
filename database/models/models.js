@@ -350,6 +350,12 @@ const _AutoReply = new Schema({
   reply: { type: String, required: true },
 });
 
+// const _ScheduledMessages = new Schema({
+//   chat: { type: Types.ObjectId, ref: "chat" },
+//   message: { type: Types.ObjectId, ref: "message" },
+//   pushTime: {type: Date, }
+// });
+
 const Users = model("user", _User);
 const UserSettings = model("usersettings", _UserSettings);
 const Friends = model("friend", _Friends);

@@ -2,7 +2,6 @@ import { Router } from "express";
 import chatController from "../controllers/chatController.js";
 import path from "path";
 import multer, { diskStorage } from "multer";
-
 const router = Router();
 
 const destination = "/static/messages";
@@ -16,6 +15,7 @@ const storage = diskStorage({
     );
   },
 });
+
 
 const messageAttchments = multer({ storage });
 

@@ -35,8 +35,9 @@ import chatController from "./controllers/chatController.js";
 
 import { getNewMessageCount, getMessageContent } from "./utils/utils.js";
 import { parseTimetable } from "./xlparser.js";
+import { model, Schema } from "mongoose";
 
-let db = await connectDB();
+// let db = await connectDB();
 
 let tbw = "675736d0c90ab67482af2162";
 let map = "675736d0c90ab67482af215c";
@@ -340,8 +341,21 @@ let chatId = "675c95af52ec11f80a0b8a0c";
 //   },
 // ]);
 
+// let x = new Schema({
+//   date: Date
+// })
+
+// let xModel = model("xm", x)
+
+// let mod = new xModel({
+//   date: Date.now()
+// })
+
+// console.log(mod)
+
+let date = Date.now()
+console.log(date)
 
 
-console.log(JSON.stringify(vipChat, null, 2));
 
-db.disconnect();
+// db.disconnect();

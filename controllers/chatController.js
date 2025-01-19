@@ -1,3 +1,4 @@
+import { Filter } from "bad-words";
 import { Chats, Users, Messages } from "../database/models/models.js";
 
 import { getNewMessageCount } from "../utils/utils.js";
@@ -206,9 +207,11 @@ export default {
     isReply = false,
     replyId = undefined
   ) {
+    let filter = new Filter();
+
     try {
       let message = new Messages({
-        content,
+        content: filter.clean(content),
         attachments,
         senderId,
         readBy: [senderId], //woops
