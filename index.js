@@ -76,26 +76,24 @@ io.on("connection", (socket) => {
     io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
     io.emit(`updateAllChatsView`, chatId, messageId);
 
-    // Find the auto reply message
-
     if (!(await isGroupChat(chatId))) {
+      console.log("Not Group Chat");
       let autoReplyId = await getAutoReply(chatId, senderId, messageId);
+
       if (autoReplyId) {
-        console.log("Auto Reply Found");
+        console.log("Auto Reply Found " + autoReplyId);
         io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
-        io.emit(`updateAllChatsView`, chatId, autoReplyId); // Update all chats view
+        io.emit("updateAllChatsView", chatId, autoReplyId); // Update all chats view
       }
     }
-    // TODO: Implement VIP messages filtering
+    // Vip messages Filter
     else {
-      console.log("Getting VIP Messages");
       let vipMessages = await vipMessageHandling(senderId, messageId, chatId);
       console.log(vipMessages);
       if (vipMessages) {
         vipMessages.forEach((e) => {
           console.log(`Emitting: receiveVipMessage_${e}| ${messageId}`);
           io.emit(`receiveVipMessage_${e}`, messageId); // Emit the Vip message
-          // io.emit(`updateVipView`, e, messageId); // Update all Vip Chats view
         });
       }
     }

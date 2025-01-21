@@ -3,10 +3,11 @@ import {
   Chats,
   Enrollment,
   Sections,
-  UserSettings,
   AutoReply,
   Messages,
   VipCollections,
+  ChatSettings,
+  Users,
 } from "../database/models/models.js";
 
 import chatController from "../controllers/chatController.js";
@@ -59,7 +60,8 @@ const isGroupChat = async (chatId) => {
 };
 
 const isAutoReplyEnabled = async (uid) => {
-  let user = await UserSettings.findOne({ uid, autoReply: true }).select("_id");
+  let user = await Users.findOne({ _id: uid, autoReply: true }).select("_id");
+  console.log(user);
   return user ? true : false;
 };
 
@@ -81,34 +83,37 @@ const getOtherParticipant = async (chatId, currentParticipant) => {
 
 const getAutoReply = async (chatId, sender, message) => {
   let receiver = await getOtherParticipant(chatId, sender);
-
-  // If receiver doesn't have autoReply enabled return undefined;
-  if (!(await isAutoReplyEnabled(receiver))) return undefined;
+  console.log("Other: " + receiver);
+  // If receiver doesn't have autoReply enabled return;
+  if (!(await isAutoReplyEnabled(receiver, chatId))) return;
 
   console.log("Auto Reply is enabled.");
 
   // Get the content of sent message.
-  let messageContent = await getMessageContent(message);
-  console.log(`New Message Contnet; ${messageContent}`);
+  let messageContent = (await getMessageContent(message)).toLowerCase();
+  console.log(`New Message Content; ${messageContent}`);
 
-  // Find autoReply of receiver of this chat <chatId>
-  let autoReply = await AutoReply.findOne({
+  // Find all auto-replies of this chat of the receiver
+  let autoReply = await AutoReply.find({
     chat: chatId,
     user: receiver,
     // message: messageContent,
   }).select("message reply");
 
-  // if autoReply is not undefined and message is same as the "sent" messageContent create the autoreply message
-  if (autoReply && autoReply.message.toLowerCase() == messageContent) {
-    let newMessage = await chatController.sendMessage(
-      chatId,
-      receiver,
-      autoReply.reply
-    );
-    return newMessage;
+  // Find if message contains any "auto-reply" part
+  // + This logic is not good at all.
+  for (let i = 0; i < autoReply.length; i++) {
+    if (messageContent.includes(autoReply[i].message)) {
+      let newMessage = await chatController.sendMessage(
+        chatId,
+        receiver,
+        autoReply[i].reply
+      );
+      return newMessage;
+    }
   }
+
   // No autoreply was found
-  return undefined;
 };
 
 const vipMessageHandling = async (senderId, messageId, chatId) => {

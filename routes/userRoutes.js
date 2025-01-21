@@ -168,20 +168,23 @@ router.post("/toggleAutoReply/:uid", async (req, res) => {
   return res.json({ message: "success" });
 });
 
-router.get("/getAutoReplies/:uid", async (req, res) => {
-  return res.json(await userController.getAutoReplies(req.params.uid));
-});
 
-router.post("/addAutoReply/:uid", async (req, res) => {
-  let autoReply = await userController.addAutoReply(req.params.uid, req.body);
+// Since Auto-Replies are different for each chat, so routes have been moved to chatRoute
 
-  return res.json({ autoReply, message: "success" });
-});
+// router.get("/getAutoReplies/:uid", async (req, res) => {
+//   return res.json(await userController.getAutoReplies(req.params.uid));
+// });
 
-router.delete("/removeAutoReply/:id", async (req, res) => {
-  await userController.removeAutoReply(req.params.id);
-  return res.json({ message: "success" });
-});
+// router.post("/addAutoReply/:uid", async (req, res) => {
+//   let autoReply = await userController.addAutoReply(req.params.uid, req.body);
+
+//   return res.json({ autoReply, message: "success" });
+// });
+
+// router.delete("/removeAutoReply/:id", async (req, res) => {
+//   await userController.removeAutoReply(req.params.id);
+//   return res.json({ message: "success" });
+// });
 
 // VIP
 

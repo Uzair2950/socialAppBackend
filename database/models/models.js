@@ -30,9 +30,11 @@ const _VipCollections = new Schema({
   messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
 });
 
-const _UserSettings = new Schema({
-  uid: { type: Types.ObjectId, ref: "user" },
-  autoReply: { type: Boolean, default: false },
+const _ChatSettings = new Schema({
+  uid: { type: Types.ObjectId, ref: "user" }, // Whose settings
+  chat: { type: Types.ObjectId, ref: "chat" }, // Which Chat
+  autoDownload: { type: Boolean, default: false },
+  autoDownloadDirectory: { type: String, default: "" },
 });
 
 const _Friends = new Schema(
@@ -52,6 +54,7 @@ const _Course = new Schema({
 
 const _Section = new Schema({
   title: { type: String, required: true, unique: true },
+  group: { type: Types.ObjectId, ref: "postgroup" },
 });
 
 const _Session = new Schema({
@@ -61,13 +64,14 @@ const _Session = new Schema({
 });
 
 const _Teacher = new Schema({
-  // user: { type: Types.ObjectId, ref: "user", required: true },
   department: { type: String, enum: ["CS", "AI", "SE"], default: "CS" },
 });
 
 const _Student = new Schema({
   reg_no: { type: String, required: true },
+  department: { type: String, enum: ["CS", "AI", "SE"], default: "CS" },
   cgpa: { type: Number, default: 0 },
+  section: { type: Types.ObjectId, ref: "section" },
 });
 
 const _Enrollment = new Schema({
@@ -167,6 +171,7 @@ const _PostGroup = new Schema(
     is_private: { type: Boolean, default: false },
     totalMembers: { type: Number, default: 1 },
     isOfficial: { type: Boolean, default: false }, // Won't allow people to exit group!
+    isSociety: { type: Boolean, default: false }, // to easily query socities
   },
   { timestamps: true }
 );
@@ -175,7 +180,7 @@ const _ChatGroup = new Schema(
   {
     name: { type: String, required: true },
     chat: { type: Types.ObjectId, ref: "chat", required: true },
-    allowChatting: { type: Boolean, enum: [false, true], default: true }, //0 => Everyone can send , 1 => Only admins.
+    allowChatting: { type: Boolean, default: true }, //0 => Everyone can send , 1 => Only admins.
     avatarURL: { type: String, default: "/static/avatars/default_group.png" },
     aboutGroup: { type: String, default: "" },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
@@ -186,7 +191,7 @@ const _ChatGroup = new Schema(
 // for personal
 const _Chat = new Schema(
   {
-    isGroup: { type: Boolean, enum: [false, true], default: false },
+    isGroup: { type: Boolean, default: false },
     participants: [{ type: Types.ObjectId, ref: "user", default: [] }],
     totalParticipants: { type: Number, default: 1 },
     messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
@@ -254,6 +259,7 @@ const _Notification = new Schema(
 );
 
 const _TimeTable = new Schema({
+  session: { type: Types.ObjectId, ref: "session" },
   section: { type: Types.ObjectId, ref: "section" },
   slots: {
     monday: [
@@ -324,16 +330,15 @@ const _TimeTable = new Schema({
   },
 });
 
-const _Slot = new Schema({
-  //  course: { type: Types.ObjectId, ref: "course", required: true },
-  course: { type: String, required: true },
-  instructors: { type: String, required: true },
-  // { type: Types.ObjectId, ref: "user", required: true, default: [] },
+// const _Slot = new Schema({
+//   //  course: { type: Types.ObjectId, ref: "course", required: true },
+//   course: { type: String, required: true }, //TODO: Add courseId instead of code..
+//   instructors: { type: String, required: true },
 
-  venue: { type: String, required: true },
-  start_time: { type: String, required: true },
-  end_time: { type: String, required: true },
-});
+//   venue: { type: String, required: true },
+//   start_time: { type: String, required: true },
+//   end_time: { type: String, required: true },
+// });
 
 const _DateSheet = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
@@ -350,14 +355,15 @@ const _AutoReply = new Schema({
   reply: { type: String, required: true },
 });
 
-// const _ScheduledMessages = new Schema({
-//   chat: { type: Types.ObjectId, ref: "chat" },
-//   message: { type: Types.ObjectId, ref: "message" },
-//   pushTime: {type: Date, }
-// });
+const _ScheduledMessages = new Schema({
+  // Same Message for multiple chats...
+  chat: [{ type: Types.ObjectId, ref: "chat" }],
+  message: { type: Types.ObjectId, ref: "message" },
+  pushTime: { type: Date },
+});
 
 const Users = model("user", _User);
-const UserSettings = model("usersettings", _UserSettings);
+const ChatSettings = model("chatsettings", _ChatSettings);
 const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
 const Sections = model("section", _Section);
@@ -378,16 +384,16 @@ const GroupRequests = model("grouprequest", _GroupRequests);
 const Communities = model("community", _Community);
 const CommunityMembers = model("communitymembers", _CommunityMembers);
 const Notifications = model("notification", _Notification);
-// const Stories = model("stories", _Story);
+
 const Sessions = model("session", _Session);
-const Slots = model("slots", _Slot);
+// const Slots = model("slots", _Slot);
 const TimeTable = model("timetable", _TimeTable);
 const Datesheet = model("datesheet", _DateSheet);
 const AutoReply = model("autoreply", _AutoReply);
 
 export {
   Users,
-  UserSettings,
+  ChatSettings,
   VipCollections,
   Friends,
   Courses,

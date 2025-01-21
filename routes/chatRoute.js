@@ -2,6 +2,7 @@ import { Router } from "express";
 import chatController from "../controllers/chatController.js";
 import path from "path";
 import multer, { diskStorage } from "multer";
+import userController from "../controllers/userController.js";
 const router = Router();
 
 const destination = "/static/messages";
@@ -16,16 +17,20 @@ const storage = diskStorage({
   },
 });
 
-
 const messageAttchments = multer({ storage });
 
 router.get("/", (req, res) => {
-  return res.send({message: "Test"})
+  return res.send({ message: "Test" });
 });
 
 router.post("/initiateChat/:sender/:receiver", async (req, res) => {
-  await chatController.initiateChat(req.params.sender, req.params.receiver);
-  return res.json({ message: "success" });
+  return res.json({
+    message: "success",
+    id: await chatController.initiateChat(
+      req.params.sender,
+      req.params.receiver
+    ),
+  });
 });
 
 router.get("/getChat/:cid/:uid/:messageCount", async (req, res) => {
@@ -38,12 +43,20 @@ router.get("/getChat/:cid/:uid/:messageCount", async (req, res) => {
   );
 });
 
+router.get("/getChatSettings/:chat/:uid", async (req, res) => {
+  return res.json(
+    await chatController.getChatSettings(req.params.chat, req.params.uid)
+  );
+});
+
 router.get("/getAllChats/:uid", async (req, res) => {
   return res.json(await chatController.getAllChats(req.params.uid));
 });
 
 router.get("/getMessage/:mid/:uid", async (req, res) => {
-  return res.json(await chatController.getMessage(req.params.mid, req.params.uid));
+  return res.json(
+    await chatController.getMessage(req.params.mid, req.params.uid)
+  );
 });
 
 router.post(
@@ -67,4 +80,47 @@ router.delete("/deleteMessage/:mid", async (req, res) => {
   return res.json({ message: "success" });
 });
 
+// Auto-Reply
+// uid -> userId, cid -> ChatId
+router.get("/getAutoReplies/:uid/:cid", async (req, res) => {
+  return res.json(
+    await chatController.getAutoReplies(req.params.uid, req.params.cid)
+  );
+});
+
+router.post("/addAutoReply/:uid/:cid", async (req, res) => {
+  let autoReply = await chatController.addAutoReply(
+    req.params.uid,
+    req.params.cid,
+    req.body
+  );
+
+  return res.json({ autoReply, message: "success" });
+});
+
+router.put("/editAutoReply/:rid", async (req, res) => {
+  let autoReply = await chatController.editAutoReply(
+    req.params.rid,
+    req.body.message,
+    req.body.reply
+  );
+
+  return res.json({ autoReply, message: "success" });
+});
+
+router.delete("/removeAutoReply/:id", async (req, res) => {
+  await chatController.removeAutoReply(req.params.id);
+  return res.json({ message: "success" });
+});
+
+// Auto-Download
+router.put("/toggleAutoDownload/:uid/:cid", async (req, res) => {
+  await chatController.toggleAutoDownload(req.params.uid, req.params.cid);
+  return res.json({ message: "success" });
+});
+
+router.put("/updateDownloadDirectory/:sid", async (req, res) => {
+  await chatController.updateDownloadDirectory(req.params.sid, req.body.dir);
+  return res.json({ message: "success" });
+});
 export default router;
