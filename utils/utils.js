@@ -8,6 +8,7 @@ import {
   VipCollections,
   ChatSettings,
   Users,
+  Courses,
 } from "../database/models/models.js";
 
 import chatController from "../controllers/chatController.js";
@@ -25,6 +26,15 @@ const getStudentSections = async (sid) => {
     student: sid,
     session: (await getCurrentSession())._id,
   }).distinct("section");
+};
+
+const getCourseIdByCode = async (courseCode) => {
+  let code = courseCode.split("-").join(""); // Remove Hyphen
+  // console.log("Checking Code: " + code)
+  // Assuming courseCode is always found
+  let courseId = await Courses.findOne({ code }).select("_id").lean();
+
+  return courseId._id;
 };
 
 const convertTo24Hour = (time) => {
@@ -155,4 +165,5 @@ export {
   getSectionIdByName,
   isGroupChat,
   vipMessageHandling,
+  getCourseIdByCode
 };

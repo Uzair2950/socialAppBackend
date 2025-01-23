@@ -38,19 +38,19 @@ router.post(
 
     console.log(req.body)
 
-    // let post_id = await postController.addPost(
-    //   author,
-    //   parseInt(privacyLevel),
-    //   content,
-    //   attachements,
-    //   group_id,
-    //   parseInt(type)
-    // );
-    // if (post_id) {
-    //   return res.json({ message: "Posted!", post_id });
-    // }
-    // return res.status(400).json({ message: "Invalid timetable format!" });
-    return res.status(200).json({ message: "Well very nice" });
+    let post_id = await postController.addPost(
+      author,
+      parseInt(privacyLevel),
+      content,
+      attachements,
+      group_id,
+      parseInt(type)
+    );
+    if (post_id) {
+      return res.json({ message: "Posted!", post_id });
+    }
+    return res.status(400).json({ message: "Invalid timetable format!" });
+
   }
 );
 

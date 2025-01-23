@@ -14,6 +14,7 @@ import { getNewMessageCount } from "../utils/utils.js";
 // 2.
 
 export default {
+
   // Personal Chats
   initiateChat: async function (sender, receiver) {
     let chat = new Chats({
@@ -65,6 +66,8 @@ export default {
   editAutoReply: async function (replyId, message, reply) {
     await AutoReply.findByIdAndUpdate(replyId, { message, reply });
   },
+
+
 
   // getAutoReplies: async function (uid) {
   //   // Damn

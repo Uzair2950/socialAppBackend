@@ -1,6 +1,9 @@
 import { Notifications } from "../database/models/models.js";
 
 export default {
+  getUnreadNotificationCount: async function (uid) {
+    return (await Notifications.find({ user: uid, isRead: false })).length;
+  },
   getNotifications: async function (uid) {
     return await Notifications.find({ user: uid });
   },

@@ -1,4 +1,5 @@
 import { Posts, Comments, TimeTable } from "../database/models/models.js";
+import { getCurrentSession } from "../utils/utils.js";
 import { parseTimetable } from "../xlparser.js";
 
 import { Filter } from "bad-words";
@@ -12,7 +13,6 @@ export default {
     group_id,
     type
   ) {
-
     let filter = new Filter();
     let post = new Posts({
       author,
@@ -21,13 +21,14 @@ export default {
       attachments,
       privacyLevel,
     });
-    if (type == "timetable") {
+    if (type == 0) {
+      // Timetable
       if (attachments.length > 0 && attachments[0].split(".")[1] == "xlsx") {
         let timetable = await parseTimetable(attachments[0]);
         if (timetable) {
           // Delete old
-          console.log(timetable);
-          await TimeTable.deleteMany();
+          let session = (await getCurrentSession())._id;
+          await TimeTable.deleteMany({ session });
 
           await TimeTable.insertMany(timetable);
         }
@@ -36,9 +37,8 @@ export default {
         return { message: "Invalid Timetable File!" };
       }
       // TODO: Add Datesheet
-    } else if (type == "datesheet") {
-
-    } 
+    } else if (type == 1) {
+    }
 
     await post.save();
 

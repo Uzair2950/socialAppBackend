@@ -6,6 +6,7 @@ import {
   Friends,
   VipCollections,
 } from "../database/models/models.js";
+import notificationController from "./notificationController.js";
 
 import postController from "./postController.js";
 
@@ -21,21 +22,34 @@ export default {
 
     return res ? true : false;
   },
-  authorizeUser: async function (email, password) {
-    let user = await Users.findOne({ email, password }).lean();
 
-    if (!user) return undefined;
-    // TODO: select specific attributes not all..
-    if (user.type == 0) {
-      let student = await Students.findOne({ user: user._id }).lean();
-      return { ...user, ...student };
-    } else if (user.type == 1) {
-      let teacher = await Teachers.findOne({ user: user._id }).lean();
-      return { ...user, ...teacher };
-    } else {
-      let admin = await Administrators.findOne({ user: user._id }).lean();
-      return { ...user, ...admin };
-    }
+  // TODO: Fix this
+  authorizeUser: async function (email, password) {
+    let user = await Users.findOne({ email, password }).select("_id").lean();
+
+    // Invalid Username and password
+    if (!user) return;
+
+    // get alerts
+    let notiCount = await notificationController.getUnreadNotificationCount(
+      user._id
+    );
+
+    // TODO: Add Message Count!
+    return { id: user._id, notiCount };
+
+    // if (!user) return undefined;
+    // // TODO: select specific attributes not all..
+    // if (user.type == 0) {
+    //   let student = await Students.findOne({ user: user._id }).lean();
+    //   return { ...user, ...student };
+    // } else if (user.type == 1) {
+    //   let teacher = await Teachers.findOne({ user: user._id }).lean();
+    //   return { ...user, ...teacher };
+    // } else {
+    //   let admin = await Administrators.findOne({ user: user._id }).lean();
+    //   return { ...user, ...admin };
+    // }
   },
 
   updateUser: async function (uid, data) {
@@ -139,6 +153,4 @@ export default {
 
     return vipChat;
   },
-
-
 };

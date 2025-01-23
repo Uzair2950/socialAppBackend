@@ -17,17 +17,13 @@ export default {
 
     let sections = await getStudentSections(uid);
 
-    let timeTable = await TimeTable.find({ section: { $in: sections } }).select(
-      "slots"
-    );
-    // .populate({
-    //   path: "slots.monday slots.thursday slots.wednesday slots.thursday slots.friday",
-    //   options: { sort: { start_time: 1 } },
-    //   populate: [
-    //     { path: "cousre", model: "course", select: "title" },
-    //     { path: "instructors", model: "user", select: "name" },
-    //   ],
-    // });
+    let timeTable = await TimeTable.find({ section: { $in: sections } })
+      .select("slots")
+      .populate({
+        path: "slots.monday slots.thursday slots.wednesday slots.thursday slots.friday",
+        options: { sort: { start_time: 1 } },
+        populate: [{ path: "course", model: "course", select: "title -_id" }],
+      });
 
     timeTable.forEach((table) => {
       Object.keys(table.slots).forEach((day) => {

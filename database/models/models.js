@@ -47,9 +47,8 @@ const _Friends = new Schema(
 );
 
 const _Course = new Schema({
-  code: { type: String, required: true },
+  code: { type: String, required: true }, // without -, for easy handling
   title: { type: String, required: true },
-  creditHours: { type: Number, required: true },
 });
 
 const _Section = new Schema({
@@ -113,8 +112,6 @@ const _Message = new Schema(
       default: null,
     },
     attachments: [{ type: String, default: [] }],
-    // For scheduled messages.
-    status: { type: Number, enum: [0, 1], default: 1 }, // 0 => Scheduled, 1 => Delivered
   },
   {
     timestamps: true,
@@ -265,7 +262,7 @@ const _TimeTable = new Schema({
     monday: [
       {
         type: {
-          course: String,
+          course: { type: Types.ObjectId, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
@@ -278,7 +275,7 @@ const _TimeTable = new Schema({
     tuesday: [
       {
         type: {
-          course: String,
+          course: { type: Types.ObjectId, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
@@ -291,7 +288,7 @@ const _TimeTable = new Schema({
     wednesday: [
       {
         type: {
-          course: String,
+          course: { type: Types.ObjectId, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
@@ -304,7 +301,7 @@ const _TimeTable = new Schema({
     thursday: [
       {
         type: {
-          course: String,
+          course: { type: Types.ObjectId, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
@@ -317,7 +314,7 @@ const _TimeTable = new Schema({
     friday: [
       {
         type: {
-          course: String,
+          course: { type: Types.ObjectId, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
@@ -410,7 +407,7 @@ export {
   Communities,
   CommunityMembers,
   Notifications,
-  Slots,
+  // Slots,
   Administrators,
   Sessions,
   TimeTable,

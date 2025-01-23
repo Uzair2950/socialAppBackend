@@ -1,5 +1,14 @@
-import { Filter } from "bad-words";
+import { parseDateSheet, parseTimetable } from "./xlparser.js";
+import { connectDB } from "./database/db.js";
+import { getCourseIdByCode } from "./utils/utils.js";
+import { Courses, Enrollment } from "./database/models/models.js";
 
-const filter = new Filter();
+let d = await connectDB();
 
-console.log(filter.clean("penis"));
+await parseDateSheet('datesheet.xls')
+
+
+
+// console.log(JSON.stringify(uniqueCourses));
+
+await d.disconnect();
