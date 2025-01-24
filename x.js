@@ -17,7 +17,6 @@ import {
   Sections,
   Administrators,
   AutoReply,
-
   VipCollections,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
@@ -37,8 +36,6 @@ import { parseTimetable } from "./xlparser.js";
 import { model, Schema } from "mongoose";
 
 let db = await connectDB();
-
-
 
 let myId = "6754a9268db89992d5b8221e";
 let id2 = "6754a9268db89992d5b8221f";
@@ -466,32 +463,43 @@ let currSession = (await getCurrentSession())._id;
 
 // console.log(mod)
 
-await Enrollment.insertMany([
-  {
-    student: myId,
-    session: currSession,
-    section: "671fca9828d6e955a5ecdbb0",
-    course: "679297d437b7de5dc9a4b1a0" // tbw
-  },
-  {
-    student: myId,
-    session: currSession,
-    section: "671fca9828d6e955a5ecdbb0",
-    course: "679298573c3423980afda7a6" // cc
-  },
-  {
-    student: myId,
-    session: currSession,
-    section: "671fca9828d6e955a5ecdbb0",
-    course: "679298c33c3423980afda7a7" // TOQ
-  },
-  {
-    student: myId,
-    session: currSession,
-    section: "671fca9828d6e955a5ecdbb4",
-    course: "679297d437b7de5dc9a4b15e" // map
-  }
-])
+// await Enrollment.insertMany([
+//   {
+//     student: myId,
+//     session: currSession,
+//     section: "671fca9828d6e955a5ecdbb0",
+//     course: "679297d437b7de5dc9a4b1a0" // tbw
+//   },
+//   {
+//     student: myId,
+//     session: currSession,
+//     section: "671fca9828d6e955a5ecdbb0",
+//     course: "679298573c3423980afda7a6" // cc
+//   },
+//   {
+//     student: myId,
+//     session: currSession,
+//     section: "671fca9828d6e955a5ecdbb0",
+//     course: "679298c33c3423980afda7a7" // TOQ
+//   },
+//   {
+//     student: myId,
+//     session: currSession,
+//     section: "671fca9828d6e955a5ecdbb4",
+//     course: "679297d437b7de5dc9a4b15e" // map
+//   }
+// ])
 
+console.log(
+  JSON.stringify(
+    await TimeTable.find({ section: { $in: ["671fca9828d6e955a5ecdbb0", "671fca9828d6e955a5ecdbb4"] } })
+      .select("slots")
+      // .populate({
+      //   path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
+      //   options: { sort: { start_time: 1 } },
+      //   populate: [{ path: "course", model: "course", select: "title -_id" }],
+      // })
+  , null, 2)
+);
 
 db.disconnect();

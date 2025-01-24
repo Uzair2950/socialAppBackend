@@ -30,7 +30,7 @@ const getStudentSections = async (sid) => {
 
 const getCourseIdByCode = async (courseCode) => {
   let code = courseCode.split("-").join(""); // Remove Hyphen
-  // console.log("Checking Code: " + code)
+  console.log("Checking Code: " + code)
   // Assuming courseCode is always found
   let courseId = await Courses.findOne({ code }).select("_id").lean();
 

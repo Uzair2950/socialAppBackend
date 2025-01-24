@@ -339,9 +339,10 @@ const _TimeTable = new Schema({
 
 const _DateSheet = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
-  type: { type: String, enum: ["mids", "finals"], default: "mids" },
+  type: { type: String, enum: ["Mid", "Final"], default: "Mid" },
   course_id: { type: Types.ObjectId, ref: "course" },
-  date_time: Date,
+  day: String,
+  time: String,
   commenced: { type: Boolean, default: false },
 });
 

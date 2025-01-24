@@ -25,6 +25,7 @@ export default {
         populate: [{ path: "course", model: "course", select: "title -_id" }],
       });
 
+
     timeTable.forEach((table) => {
       Object.keys(table.slots).forEach((day) => {
         mergedSlots[day] = mergedSlots[day].concat(table.slots[day]);

@@ -37,19 +37,6 @@ export default {
 
     // TODO: Add Message Count!
     return { id: user._id, notiCount };
-
-    // if (!user) return undefined;
-    // // TODO: select specific attributes not all..
-    // if (user.type == 0) {
-    //   let student = await Students.findOne({ user: user._id }).lean();
-    //   return { ...user, ...student };
-    // } else if (user.type == 1) {
-    //   let teacher = await Teachers.findOne({ user: user._id }).lean();
-    //   return { ...user, ...teacher };
-    // } else {
-    //   let admin = await Administrators.findOne({ user: user._id }).lean();
-    //   return { ...user, ...admin };
-    // }
   },
 
   updateUser: async function (uid, data) {

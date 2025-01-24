@@ -15,18 +15,87 @@ const daysMaps = {
   F: "friday",
 };
 
+const fullDayMap = {
+  Mon: "Monday",
+  Tue: "Tuesday",
+  Wed: "Wednesday",
+  Thu: "Thursday",
+  Fri: "Friday",
+  Sat: "Saturday",
+};
+
 const parseDateSheet = async (filePath) => {
   try {
     let file = readFile(filePath); // TODO: Add the dot.
+    let session = (await getCurrentSession())._id;
     let sheetNames = file.SheetNames;
+    const codeRegex = /\b[A-Z]{2,3}-?\d{3}\b/;
+    let dateSheet = [];
     for (let i = 0; i < /*sheetNames.length*/ 1; i++) {
       let currSheet = sheetNames[i];
 
       let x = utils.sheet_to_json(file.Sheets[currSheet], { header: "A" });
 
-      console.log(x);
+      let examType = x[1]["A"].trim().split(" ")[0];
+      let time = x[2]["A"].trim();
+      console.log(time);
+      console.log(examType);
+
+      // Datehseet starts from index 5
+
+      for (let j = 5; j < x.length; j++) {
+        /*
+        {
+            A: 'Sat',
+            B: '06-07-2024',
+            C: 'MTH-001                            Pre-Calculus-1                                                                                                                                                                                                                                                                                                                     (Only for Pre-Medical)',
+            D: 'MTH-001                            Pre-Calculus-1                                                                                                                                                                                                                                                                                                                     (Only for Pre-Medical)',
+            H: 'CSC-205            Software Engineering',
+            I: 'CSC-205            Software Engineering',
+            K: 'CAI-262\nMachine Learning',
+            L: 'CSE-324\nSoftware Requirement Engineering',
+            M: 'CS-453           Software Engineering',
+            N: 'CS-453           Software Engineering',
+            P: 'CS-515\nComputing Vision',
+            S: 'ENG-315\nTechnical & Business Writing',
+            T: 'CS-452           Software Engineering-I',
+            V: ' ELE401\nBasic Electronics',
+            X: 'CS-789                (Network Manage Security'
+          }
+        */
+        let data = x[j];
+        let day = data["A"];
+        let date = data["B"];
+
+        let keys = Object.keys(data).filter((i) => i != "A" && i != "B");
+        console.log(data)
+        await Promise.all(
+          keys.map(async (key) => {
+            const codeMatch = data[key].match(codeRegex);
+            if (codeMatch) {
+              let code = codeMatch[0].trim();
+              // console.log("Current Course Code: " + code)
+              let courseId = await getCourseIdByCode(code);
+              
+              dateSheet.push({
+                session,
+                type: examType.toLowerCase(),
+                course_id: courseId,
+                day: day,
+                date: date,
+              });
+            }
+          })
+        );
+
+      }
+
+      // console.log(x);
     }
-  } catch {}
+    console.log(dateSheet)
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const parseTimetable = async (filePath) => {
@@ -45,7 +114,6 @@ const parseTimetable = async (filePath) => {
       if (!obj["A"]) continue;
 
       if (obj["A"].includes("Time Table:")) {
-        a;
         let sectionName = obj["A"].split(":")[1];
         let sectionId = await getSectionIdByName(sectionName);
         let slots = {

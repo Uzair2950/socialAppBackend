@@ -75,7 +75,8 @@ router.post(
       req.body.aboutGroup,
       req.body.allowPosting,
       req.body.is_private,
-      req.body.isOfficial
+      req.body.isOfficial,
+      req.body.isSociety
     );
     return res.send({ message: `Group ${req.body.title} Created`, group_id });
   }

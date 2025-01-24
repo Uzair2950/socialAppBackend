@@ -65,10 +65,11 @@ export default {
     creator_id,
     title,
     imgUrl,
-    aboutGroup,
     allowPosting,
+    aboutGroup,
     is_private,
-    isOfficial
+    isOfficial = false,
+    isSociety = false
   ) {
     let group = new PostGroups({
       title,
@@ -78,6 +79,7 @@ export default {
       aboutGroup,
       allowPosting,
       isOfficial,
+      isSociety
     });
 
     await group.save();
