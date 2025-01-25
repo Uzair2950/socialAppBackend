@@ -24,22 +24,34 @@ router.post("/addGroup/:cid", async (req, res) => {
   return res.json({ message: "success" });
 });
 
+// ✅
 router.post("/addMember/:cid/:uid", async (req, res) => {
   await communityController.addMember(req.params.cid, req.params.uid);
   return res.json({ message: "success" });
 });
 
+// ✅
 router.get("/getCommunity/:cid/:rid", async (req, res) => {
   return res.json(
     await communityController.getCommunity(req.params.cid, req.params.rid)
   );
 });
 
+
+// ✅
 router.post("/addAdmins/:cid", async (req, res) => {
   await communityController.addAdmins(req.params.cid, req.body.admins);
   return res.json({ message: "Admins Added!" });
 });
 
+// ✅
+router.post("/removeAdmins/:cid", async (req, res) => {
+  await communityController.removeAdmins(req.params.cid, req.body.admins);
+  return res.json({ message: "Admins Removed!" });
+});
+
+
+// ✅
 router.put("/leaveCommunity/:cid/:uid", async (req, res) => {
   await communityController.leaveCommunity(req.params.cid, req.params.uid);
   return res.json({ message: "success" });

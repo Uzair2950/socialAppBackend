@@ -1,4 +1,9 @@
-import { Datesheet, Enrollment, TimeTable } from "../database/models/models.js";
+import {
+  Datesheet,
+  Enrollment,
+  TimeTable,
+  Users,
+} from "../database/models/models.js";
 import {
   getCurrentSession,
   getStudentSections,
@@ -25,7 +30,6 @@ export default {
         populate: [{ path: "course", model: "course", select: "title -_id" }],
       });
 
-
     timeTable.forEach((table) => {
       Object.keys(table.slots).forEach((day) => {
         mergedSlots[day] = mergedSlots[day].concat(table.slots[day]);
@@ -44,17 +48,42 @@ export default {
       .distinct("course");
   },
 
-  getDateSheet: async function (sid) {
-    let coursesIds = await this.getEnrolledCourses(sid);
-    let dateSheet = await Datesheet.find({
-      session: await getCurrentSessionId(),
-      commenced: false,
-      course_id: { $in: coursesIds },
-    })
-      .select("type date_time course_id")
-      .populate("course_id", "title")
-      .sort({ date_time: 1 });
+  // getDateSheet: async function (sid) {
+  //   let coursesIds = await this.getEnrolledCourses(sid);
+  //   let dateSheet = await Datesheet.find({
+  //     session: await getCurrentSessionId(),
+  //     commenced: false,
+  //     course_id: { $in: coursesIds },
+  //   })
+  //     .select("type date_time course_id")
+  //     .populate("course_id", "title")
+  //     .sort({ date_time: 1 });
 
-    return dateSheet;
+  //   return dateSheet;
+  // },
+
+  getClassGroupId: async function (uid) {
+    /*
+      {
+        _id: new ObjectId('6754a9268db89992d5b8221e'),
+        type: 'student',
+        uid: {
+          _id: new ObjectId('6754aa7cb893811aa8ed366d'),
+          section: {
+            _id: new ObjectId('671fca9828d6e955a5ecdbb0'),
+            group: new ObjectId('67940a1800543d3d52eeffbc')
+          }
+        }
+      }
+    */
+    let student = await Users.findById(uid)
+      .select("uid type")
+      .populate({
+        path: "uid",
+        select: "section",
+        populate: { path: "section", select: "group" },
+      });
+
+    return student.uid.section.group;
   },
 };

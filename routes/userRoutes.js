@@ -5,6 +5,7 @@ import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
 import multer from "multer";
 import { AutoReply } from "../database/models/models.js";
+import feedController from "../controllers/feedController.js";
 
 const storage = multer.diskStorage({
   destination: "./static/avatars",
@@ -105,91 +106,117 @@ router.put(
   }
 );
 
-// Update Avatar
-// Frontend handling => if avatarURL is empty, use the default avatarURL.
-// ✅
-router.put(
-  "/updateAvatar/:id",
-  avatarsUpload.single("avatar"),
-  async (req, res) => {
-    await userController.updateUser(req.params.id, {
-      avatarURL: `/static/avatars/${req.params.id}${path.extname(
-        req.file.originalname
-      )}`,
-    });
-
-    return res.json({
-      message: `Avatar Updated Successfully!`,
-    });
-  }
-);
 
 /*
           RELATIONSHIP HANDLER
 
 */
-
+// ✅
 router.get("/getFriends/:uid", async (req, res) => {
   return res.json(await userController.getFriends(req.params.uid));
 });
 
+// ✅
 router.get("/getPendingRequests/:uid", async (req, res) => {
   return res.json(await userController.getPendingRequests(req.params.uid));
 });
 
+// ✅
 router.post("/addFriend/:uid/:fid", async (req, res) => {
   await userController.addFriend(req.params.uid, req.params.fid);
   return res.json({ message: "Request Sent!" });
 });
 
+// ✅
 router.post("/acceptRequest/:request_id", async (req, res) => {
   await userController.acceptRequest(req.params.request_id);
   return res.json({ message: "Request Accepted" });
+});
+
+// ✅
+router.post("/rejectRequest/:request_id", async (req, res) => {
+  await userController.rejectRequest(req.params.request_id);
+  return res.json({ message: "Request Rejected" });
 });
 
 /*
       ==================================== GET USERPROFILE
 */
 
+// ✅
 router.get("/getProfile/:id/:requester_id", async (req, res) => {
   return res.json(
     await userController.getProfile(req.params.id, req.params.requester_id)
   );
 });
 
+// ✅
+
+// MARK: --- NEW ROUTE
+router.get("/getGroups/:uid", async (req, res) => {
+  return res.json(await userController.getGroups(req.params.uid));
+});
+
+
 /*
 
   == AUTO-REPLY
 
 */
-
+// ✅
 router.post("/toggleAutoReply/:uid", async (req, res) => {
   await userController.toggleAutoReply(req.params.uid);
   return res.json({ message: "success" });
 });
 
 
-// Since Auto-Replies are different for each chat, so routes have been moved to chatRoute
+  // == VIP COLLECTION
+// ✅
 
-// router.get("/getAutoReplies/:uid", async (req, res) => {
-//   return res.json(await userController.getAutoReplies(req.params.uid));
-// });
-
-// router.post("/addAutoReply/:uid", async (req, res) => {
-//   let autoReply = await userController.addAutoReply(req.params.uid, req.body);
-
-//   return res.json({ autoReply, message: "success" });
-// });
-
-// router.delete("/removeAutoReply/:id", async (req, res) => {
-//   await userController.removeAutoReply(req.params.id);
-//   return res.json({ message: "success" });
-// });
-
-// VIP
-
+// MARK: --- NEW ROUTE
 router.get("/getVipChat/:uid", async (req, res) => {
   return res.json(await userController.getVipChat(req.params.uid));
 });
+
+
+// MARK: --- NEW ROUTE
+router.get("/getVipCollection/:uid", async (req, res) => {
+  return res.json(await userController.getVipCollection(req.params.uid));
+});
+
+// MARK: --- NEW ROUTE
+router.post("/createVipCollection/:uid", async (req, res) => {
+  return res.json({
+    id: await userController.createVipCollection(
+      req.params.uid,
+      req.body.people
+    ),
+  });
+});
+
+// ✅
+// MARK: --- NEW ROUTE
+router.delete("/deleteVipCollection/:collection_id", async (req, res) => {
+  await userController.deleteVipCollection(req.params.collection_id);
+  return res.json({
+    success: true,
+  });
+});
+
+// ✅
+// MARK: --- NEW ROUTE
+router.put("/addPeopleInCollection/:collection_id", async (req, res) => {
+  await userController.addPeopleInVipCollection(req.params.collection_id, req.body.people)
+  return res.json({ message: "success" });
+});
+
+// ✅
+// MARK: --- NEW ROUTE
+router.put("/removePeopleFromCollection/:collection_id", async (req, res) => {
+  await userController.removeFromVipCollection(req.params.collection_id, req.body.people)
+  return res.json({ message: "success" });
+});
+
+
 
 export default router;

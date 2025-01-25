@@ -9,6 +9,7 @@ import {
   ChatSettings,
   Users,
   Courses,
+  Friends,
 } from "../database/models/models.js";
 
 import chatController from "../controllers/chatController.js";
@@ -30,7 +31,7 @@ const getStudentSections = async (sid) => {
 
 const getCourseIdByCode = async (courseCode) => {
   let code = courseCode.split("-").join(""); // Remove Hyphen
-  console.log("Checking Code: " + code)
+  console.log("Checking Code: " + code);
   // Assuming courseCode is always found
   let courseId = await Courses.findOne({ code }).select("_id").lean();
 
@@ -154,6 +155,15 @@ const vipMessageHandling = async (senderId, messageId, chatId) => {
   );
 };
 
+const getFriendsIds = async (uid) => {
+  let friends = await Friends.find({
+    status: "accepted",
+    $or: [{ uid }, { friend_id: uid }],
+  }).select("uid friend_id");
+
+  return friends.map((e) => (e.uid == uid ? e.friend_id : e.uid));
+};
+
 export {
   getOtherParticipant,
   getAutoReply,
@@ -165,5 +175,6 @@ export {
   getSectionIdByName,
   isGroupChat,
   vipMessageHandling,
-  getCourseIdByCode
+  getCourseIdByCode,
+  getFriendsIds,
 };

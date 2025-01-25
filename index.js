@@ -17,6 +17,7 @@ import chatGroupRoute from "./routes/chatGroupRoute.js";
 import communityRoute from "./routes/communityRoute.js";
 import chatRoute from "./routes/chatRoute.js";
 import feedRouter from "./routes/feedRoute.js";
+import notificationRouter from "./routes/notificationRoute.js";
 
 //
 import {
@@ -120,6 +121,7 @@ app.use("/api/chatgroup", chatGroupRoute);
 app.use("/api/community", communityRoute);
 app.use("/api/chat", chatRoute);
 app.use("/api/feed", feedRouter);
+app.use("/api/notifications", notificationRouter);
 
 (async () => {
   await connectDB();

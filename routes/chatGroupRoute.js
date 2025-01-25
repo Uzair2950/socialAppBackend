@@ -1,53 +1,89 @@
 import { Router } from "express";
 import chatGroupController from "../controllers/chatGroupController.js";
+import path from "path";
+import multer, { diskStorage } from "multer";
 
 const router = Router();
 
+const destination = "/static/avatars";
+const storage = diskStorage({
+  destination: `.${destination}`,
+  filename: function (req, file, cb) {
+    const uniqueSuffix = `${Date.now()}_${Math.round(Math.random() * 1e9)}`;
+    cb(
+      null,
+      `${file.fieldname}_${uniqueSuffix}${path.extname(file.originalname)}`
+    );
+  },
+});
+
+const attachments = multer({ storage });
+
 router.get("/", (req, res) => res.send("Wow"));
 
+
+/// ✅
 router.get("/getGroupChat/:gid/:uid", async (req, res) => {
   return res.json(
     await chatGroupController.getGroupChat(req.params.gid, req.params.uid)
   );
 });
 
+/// ✅
 router.get("/getAdmins/:gid", async (req, res) => {
   return res.json(await chatGroupController.getAdmins(req.params.gid));
 });
 
+/// ✅
 router.get("/getMembers/:gid", async (req, res) => {
   return res.json(await chatGroupController.getParticipants(req.params.gid));
 });
 
-//TODO: ADD THE IMAGE
-router.post("/newGroupChat/:creatorId", async (req, res) => {
+
+/// ✅
+router.post("/newGroupChat/:creatorId", attachments.single("group_avatar"), async (req, res) => {
+  console.log(req.file)
   let chat_id = await chatGroupController.newGroupChat(
     req.params.creatorId,
     req.body.name,
-    req.body.imgUrl,
+    req.file ? `/${req.file?.path.replaceAll("\\", "/")}`: undefined,
     req.body.aboutGroup,
     req.body.allowChatting
   );
-  return res.send({ message: `GroupChat ${req.body.title} Created`, id: chat_id });
+  return res.send({ message: `GroupChat ${req.body.name} Created`, id: chat_id });
 });
 
-// TESTING REQUIRED
+
+/// ✅
+
 router.put("/updateGroup/:gId", async (req, res) => {
   await chatGroupController.updateGroupSettings(req.params.gId, req.body);
   return res.json({ message: "Updated" });
 });
 
+
+/// ✅
 router.post("/addGroupAdmins/:gid", async (req, res) => {
   await chatGroupController.addAdmins(req.params.gid, req.body.admins);
   return res.json({ message: "Admins Added!" });
 });
 
+/// ✅
+
+// MARK: --- NEW ROUTE
+router.post("/removeAdmin/:gid/:uid", async (req, res) => {
+  await chatGroupController.removeAdmin(req.params.gid, req.params.uid);
+  return res.json({ message: "Admin Removed!" });
+});
+
+/// ✅
 router.post("/joinGroup/:gid/:uid", async (req, res) => {
   await chatGroupController.addToGroupChat(req.params.gid, req.params.uid);
   return res.json({ message: "Group Joined!" });
 });
 
 // Kick / Leave
+/// ✅
 router.put("/removeMember/:gid/:uid", async (req, res) => {
   await chatGroupController.removeMember(req.params.gid, req.params.uid);
   return res.json({ message: "success" });

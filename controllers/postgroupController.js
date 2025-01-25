@@ -14,35 +14,46 @@ export default {
   getGroup: async function (gId, requesterId) {
     let group = await PostGroups.findById(gId);
     if (!group) return {};
-    let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
 
-    if (!isMember && group.is_private) {
-      return {
-        title: group.title,
-        imgUrl: group.imgUrl,
-        totalMembers: group.totalMembers,
-        is_private: group.is_private,
-        isMember: false,
-      };
-    }
+    /*
+
+        Offical groups handling
+
+    */
 
     let isAdmin = group.admins.includes(requesterId);
+
+    if (group.isOfficial) {
+      if (!isAdmin) return { accessible: false };
+    } else {
+      let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
+
+      if (!isMember && group.is_private) {
+        return {
+          name: group.name,
+          imgUrl: group.imgUrl,
+          totalMembers: group.totalMembers,
+          is_private: group.is_private,
+          isMember: false,
+          accessible: true,
+        };
+      }
+    }
+
     let isCreator = group.admins[0] == requesterId;
 
-    // Sort by pinned to bring pinned on top
-    // Not sure what impact will it have on performance.
     // TODO: ADD PAGINATION FOR INIFINITE SCROLLING
     let posts = await Posts.find({ group_id: gId })
       .populate("author", "name avatarURL")
       .select("-group_id -privacyLevel -updatedAt")
-      .sort({ is_pinned: -1 }); // TODO: Sort by createdAt As well!
+      .sort({ is_pinned: -1, createdAt: -1 });
 
-    return { groupInfo: group, isCreator, isAdmin, posts };
+    return { accessible: true, groupInfo: group, isCreator, isAdmin, posts };
   },
 
   newHybribGroup: async function (
     creator_id,
-    title,
+    name,
     imgUrl,
     aboutGroup,
     allowPosting,
@@ -51,7 +62,7 @@ export default {
   ) {
     let postGroup = await this.newGroup(
       creator_id,
-      title,
+      name,
       imgUrl,
       aboutGroup,
       allowPosting,
@@ -63,7 +74,7 @@ export default {
 
   newGroup: async function (
     creator_id,
-    title,
+    name,
     imgUrl,
     allowPosting,
     aboutGroup,
@@ -72,14 +83,14 @@ export default {
     isSociety = false
   ) {
     let group = new PostGroups({
-      title,
+      name,
       imgUrl,
       is_private,
       admins: [creator_id],
       aboutGroup,
       allowPosting,
       isOfficial,
-      isSociety
+      isSociety,
     });
 
     await group.save();
@@ -98,7 +109,7 @@ export default {
 
     await chat.save();
     let chatGroup = new ChatGroups({
-      title: group.title,
+      name: group.name,
       imgUrl: group.imgUrl,
       admins: group.admins,
       chat: chat._id,
@@ -144,16 +155,31 @@ export default {
   },
 
   joinGroup: async function (gid, uid) {
-    console.log("Joining Group", gid, uid);
-    let group = await PostGroups.findById(gid).select("is_private");
+    let group = await PostGroups.findById(gid).select("is_private name admins");
     if (group.is_private) {
       let request = new GroupRequests({
         user: uid,
         gid,
       });
       await request.save();
+
+
+      // Notify group admins about the request.
+      let groupsAdmins = group.admins;
+      let notifications = [];
+
+      groupsAdmins.forEach((e) => {
+        notifications.push({
+          user: e,
+          content: `New Join Request in Group: ${group.name}`,
+          image1: group.imgUrl,
+        });
+      });
+
+      await Notifications.insertMany(notifications);
+
+      //////////////////////////////////////////////////
       return { message: "Requested.." };
-      // TODO: Add notification for group admins/Owner.
     } else {
       await this.addToGroup(gid, uid);
       return { message: "Group Joined!" };
@@ -170,12 +196,12 @@ export default {
     let request = await GroupRequests.findByIdAndDelete(reqId).select(
       "user gid"
     );
-    let group = await PostGroups.findById(request.gid).select("title imgUrl");
+    let group = await PostGroups.findById(request.gid).select("name imgUrl");
     await this.addToGroup(request.gid, request.user);
     let notification = new Notifications({
       type: "welcome",
       user: request.user,
-      content: `Your Request to join ${group.title} has been approved.`,
+      content: `Your Request to join ${group.name} has been approved.`,
       image1: group.imgUrl,
     });
     await notification.save();

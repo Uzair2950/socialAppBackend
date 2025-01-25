@@ -55,13 +55,13 @@ router.get("/getGroup/:gId/:rId", async (req, res) => {
 router.post("/createHybridGroup/:creatorId", async (req, res) => {
   await postgroupController.newGroup(
     req.params.creatorId,
-    req.body.title,
+    req.body.name,
     req.body.imgUrl,
     req.body.aboutGroup,
     req.body.allowPosting,
     req.body.is_private
   );
-  return res.send({ message: `Group ${req.body.title} Created` });
+  return res.send({ message: `Group ${req.body.name} Created` });
 });
 
 router.post(
@@ -70,35 +70,39 @@ router.post(
   async (req, res) => {
     let group_id = await postgroupController.newGroup(
       req.params.creatorId,
-      req.body.title,
-      `/${req?.file.path.replaceAll("\\", "/")}`,
+      req.body.name,
+      req.file ? `/${req.file?.path.replaceAll("\\", "/")}`: undefined,
       req.body.aboutGroup,
       req.body.allowPosting,
       req.body.is_private,
       req.body.isOfficial,
       req.body.isSociety
     );
-    return res.send({ message: `Group ${req.body.title} Created`, group_id });
+    return res.send({ message: `Group ${req.body.name} Created`, group_id });
   }
 );
 
 // Add GroupChat to existing Posting Group
+// ✅
 router.post("/addGroupChat/:gid", async (req, res) => {
   await postgroupController.addChatGroup(req.params.gid);
   return res.json({ message: "Group Chat Added" });
 });
 
 // TESTING REQUIRED
+// ✅
 router.put("/updateGroup/:gId", async (req, res) => {
   await postgroupController.updateGroupSettings(req.params.gId, req.body);
   return res.json({ message: "Updated" });
 });
 
+// ✅
 router.post("/addGroupAdmins/:gid", async (req, res) => {
   await postgroupController.addAdmins(req.params.gid, req.body.admins);
   return res.json({ message: "Admins Added!" });
 });
 
+// ✅
 router.post("/joinGroup/:gid/:uid", async (req, res) => {
   return res.json(
     await postgroupController.joinGroup(req.params.gid, req.params.uid)
@@ -107,6 +111,7 @@ router.post("/joinGroup/:gid/:uid", async (req, res) => {
 
 // Bulk add Users to group
 // Body => Array of ids
+// ✅
 router.post("/addMembers/:gid", async (req, res) => {
   await postgroupController.bulkAddMembers(req.params.gid, req.body.members);
   return res.json({ message: req.body + "Added" });
@@ -115,15 +120,18 @@ router.post("/addMembers/:gid", async (req, res) => {
 ///////////////////
 
 // Group Requests Handler
+// ✅
 router.get("/getPendingRequests/:gId", async (req, res) => {
   return res.json(await postgroupController.getPendingRequests(req.params.gId));
 });
 
+// ✅
 router.post("/approveRequest/:reqId", async (req, res) => {
   await postgroupController.approveRequest(req.params.reqId);
   return res.json({ message: "success" });
 });
 
+// ✅
 router.post("/rejectRequest/:reqId", async (req, res) => {
   await postgroupController.rejectRequest(req.params.reqId);
   return res.json({ message: "success" });

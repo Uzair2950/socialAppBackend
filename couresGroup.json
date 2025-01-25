@@ -1,0 +1,518 @@
+
+[
+  {
+    "_id": "TRANSLATION OF QURAN",
+    "totalCourses": 4,
+    "codes": ["TOQ301", "TOQ401", "TOQ501", "TQA301"]
+  },
+  {
+    "_id": "MULTIVARIABLE CALCULUS",
+    "totalCourses": 3,
+    "codes": ["MTH102", "MTH315", "MTH335"]
+  },
+  {
+    "_id": "NATURAL LANGUAGE PROCESSING",
+    "totalCourses": 2,
+    "codes": ["CAI364", "CS516"]
+  },
+  {
+    "_id": "DISCRETE STRUCTURES",
+    "totalCourses": 2,
+    "codes": ["CS335", "CSC110"]
+  },
+  {
+    "_id": "INFORMATION SECURITY",
+    "totalCourses": 2,
+    "codes": ["CS497", "CSC202"]
+  },
+  {
+    "_id": "COMPUTER NETWORKS",
+    "totalCourses": 2,
+    "codes": ["CS577", "CSC204"]
+  },
+  {
+    "_id": "DIGITAL LOGIC DESIGN",
+    "totalCourses": 2,
+    "codes": ["CS430", "CSC111"]
+  },
+  {
+    "_id": "TECHNICAL AND BUSINESS WRITING",
+    "totalCourses": 2,
+    "codes": ["ENG315", "ENG401"]
+  },
+  {
+    "_id": "ANALYSIS OF ALGORITHMS",
+    "totalCourses": 2,
+    "codes": ["CS542", "CSC401"]
+  },
+  {
+    "_id": "PROGRAMMING FUNDAMENTALS",
+    "totalCourses": 2,
+    "codes": ["CS323", "CSC101"]
+  },
+  {
+    "_id": "WEB TECHNOLOGIES",
+    "totalCourses": 2,
+    "codes": ["CS566", "CSC251"]
+  },
+  {
+    "_id": "NUMERICAL ANALYSIS",
+    "totalCourses": 2,
+    "codes": ["CS572", "CSC352"]
+  },
+  {
+    "_id": "PARALLEL & DISTRIBUTED COMPUTING",
+    "totalCourses": 2,
+    "codes": ["CS687", "CSC314"]
+  },
+  {
+    "_id": "COMPUTER ORGANIZATION AND ASSEMBLY LANGUAGE",
+    "totalCourses": 2,
+    "codes": ["CS530", "CSC211"]
+  },
+  {
+    "_id": "MACHINE LEARNING",
+    "totalCourses": 2,
+    "codes": ["CAI262", "CS404"]
+  },
+  {
+    "_id": "DEEP LEARNING",
+    "totalCourses": 2,
+    "codes": ["CS408", "CAI466"]
+  },
+  {
+    "_id": "PROGRAMMING IN AI",
+    "totalCourses": 2,
+    "codes": ["CS402", "CS403"]
+  },
+  {
+    "_id": "COMPUTER ARCHITECTURE",
+    "totalCourses": 2,
+    "codes": ["CS532", "CSC311"]
+  },
+  {
+    "_id": "SOFTWARE ENGINEERING",
+    "totalCourses": 2,
+    "codes": ["CS453", "CSC205"]
+  },
+  {
+    "_id": "ISLAMIC STUDIES",
+    "totalCourses": 2,
+    "codes": ["IS201", "IS302"]
+  },
+  {
+    "_id": "OBJECT ORIENTED PROGRAMMING",
+    "totalCourses": 2,
+    "codes": ["CS423", "CSC102"]
+  },
+  {
+    "_id": "ARTIFICIAL INTELLIGENCE",
+    "totalCourses": 2,
+    "codes": ["CS632", "CSC203"]
+  },
+  {
+    "_id": "LINEAR ALGEBRA",
+    "totalCourses": 2,
+    "codes": ["MTH103", "MTH435"]
+  },
+  {
+    "_id": "COMPILER CONSTRUCTION",
+    "totalCourses": 2,
+    "codes": ["CS636", "CSC312"]
+  },
+  {
+    "_id": "CALCULUS AND ANALYTIC GEOMETRY",
+    "totalCourses": 2,
+    "codes": ["MTH101", "MTH310"]
+  },
+  {
+    "_id": "INFORMATION TECHNOLOGY PROJECT MANAGEMENT",
+    "totalCourses": 2,
+    "codes": ["CS553", "CS556"]
+  },
+  {
+    "_id": "DATABASE SYSTEMS",
+    "totalCourses": 2,
+    "codes": ["CS400", "CSC103"]
+  },
+  {
+    "_id": "COMPUTER COMMUNICATION & NETWORKS",
+    "totalCourses": 1,
+    "codes": ["CS576"]
+  },
+  {
+    "_id": "INTRODUCTION TO INFORMATION & COMMUNICATION TECHNOLOGIES",
+    "totalCourses": 1,
+    "codes": ["CS300"]
+  },
+  {
+    "_id": "ADVANCED PROGRAMMING",
+    "totalCourses": 1,
+    "codes": ["CSC252"]
+  },
+  {
+    "_id": "ENGLISH COMPOSITION & COMPREHENSION",
+    "totalCourses": 1,
+    "codes": ["ENG101"]
+  },
+  {
+    "_id": "ENGLISH COMPREHENSION",
+    "totalCourses": 1,
+    "codes": ["ENG305"]
+  },
+  {
+    "_id": "INTRODUCTION TO MARKETING",
+    "totalCourses": 1,
+    "codes": ["MGT351"]
+  },
+  {
+    "_id": "ADVANCE DATABASE MANAGEMENT SYSTEMS",
+    "totalCourses": 1,
+    "codes": ["CSC303"]
+  },
+  {
+    "_id": "INTRODUCTION TO MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["MGT411"]
+  },
+  {
+    "_id": "PRE-CALCULUS II",
+    "totalCourses": 1,
+    "codes": ["MTH002"]
+  },
+  {
+    "_id": "DIFFERENTIAL EQUATIONS",
+    "totalCourses": 1,
+    "codes": ["MTH415"]
+  },
+  {
+    "_id": "PROGRAMMING FOR AI",
+    "totalCourses": 1,
+    "codes": ["CAI261"]
+  },
+  {
+    "_id": "PROBABILITY & STATISTICS",
+    "totalCourses": 1,
+    "codes": ["STT101"]
+  },
+  {
+    "_id": "INTRODUCTION TO ORGANIZATIONAL BEHAVIOR",
+    "totalCourses": 1,
+    "codes": ["MGT512"]
+  },
+  {
+    "_id": "TRANSLATION OF QURAN-I",
+    "totalCourses": 1,
+    "codes": ["TOQ101"]
+  },
+  {
+    "_id": "TRANSLATION OF QURAN II",
+    "totalCourses": 1,
+    "codes": ["TOQ102"]
+  },
+  {
+    "_id": "ARTIFICIAL NEURAL NETWORKS & DEEP LEARNING",
+    "totalCourses": 1,
+    "codes": ["CAI361"]
+  },
+  {
+    "_id": "SYSTEM AND NETWORK ADMINISTRATION",
+    "totalCourses": 1,
+    "codes": ["CS584"]
+  },
+  {
+    "_id": "PRE-CALCULUS I",
+    "totalCourses": 1,
+    "codes": ["MTH001"]
+  },
+  {
+    "_id": "OPERATIONS RESEARCH",
+    "totalCourses": 1,
+    "codes": ["CS573"]
+  },
+  {
+    "_id": "SOFTWARE REQUIREMENTS ENGINEERING",
+    "totalCourses": 1,
+    "codes": ["SE454"]
+  },
+  {
+    "_id": "PAKISTAN STUDIES",
+    "totalCourses": 1,
+    "codes": ["SSH302"]
+  },
+  {
+    "_id": "THEORY OF AUTOMATA AND FORMAL LANGUAGES",
+    "totalCourses": 1,
+    "codes": ["CS536"]
+  },
+  {
+    "_id": "VIRTUAL SYSTEMS & SERVICES",
+    "totalCourses": 1,
+    "codes": ["CS655"]
+  },
+  {
+    "_id": "WEB ENGINEERING",
+    "totalCourses": 1,
+    "codes": ["CS666"]
+  },
+  {
+    "_id": "BASIC AGRICULTURE",
+    "totalCourses": 1,
+    "codes": ["AGRO301"]
+  },
+  {
+    "_id": "COMMUNICATION AND PRESENTATION SKILLS",
+    "totalCourses": 1,
+    "codes": ["ENG325"]
+  },
+  {
+    "_id": "FINANCIAL ACCOUNTING",
+    "totalCourses": 1,
+    "codes": ["MGT322"]
+  },
+  {
+    "_id": "SOFTWARE ENGINEERING I",
+    "totalCourses": 1,
+    "codes": ["CS452"]
+  },
+  {
+    "_id": "OPERATING SYSTEM",
+    "totalCourses": 1,
+    "codes": ["CS583"]
+  },
+  {
+    "_id": "PROFESSIONAL PRACTICES",
+    "totalCourses": 1,
+    "codes": ["SSH307"]
+  },
+  {
+    "_id": "OPERATING SYSTEM CONCEPTS",
+    "totalCourses": 1,
+    "codes": ["CS582"]
+  },
+  {
+    "_id": "NETWORK MANAGEMENT AND SECURITY",
+    "totalCourses": 1,
+    "codes": ["CS684"]
+  },
+  {
+    "_id": "APPLICATION OF INFORMATION & COMMUNICATION TECHNOLOGIES",
+    "totalCourses": 1,
+    "codes": ["CSC100"]
+  },
+  {
+    "_id": "FUNCTIONAL ENGLISH",
+    "totalCourses": 1,
+    "codes": ["ENG102"]
+  },
+  {
+    "_id": "MOBILE APPLICATION DEVELOPMENT",
+    "totalCourses": 1,
+    "codes": ["CS693"]
+  },
+  {
+    "_id": "EXPOSITORY WRITING",
+    "totalCourses": 1,
+    "codes": ["ENG201"]
+  },
+  {
+    "_id": "WEB DESIGN AND DEVELOPMENT",
+    "totalCourses": 1,
+    "codes": ["CS565"]
+  },
+  {
+    "_id": "SYSTEM PROGRAMMING",
+    "totalCourses": 1,
+    "codes": ["CS682"]
+  },
+  {
+    "_id": "HCI & COMPUTER GRAPHICS",
+    "totalCourses": 1,
+    "codes": ["CSC313"]
+  },
+  {
+    "_id": "THEORY OF AUTOMATA",
+    "totalCourses": 1,
+    "codes": ["CSC302"]
+  },
+  {
+    "_id": "PRE CALCULUS-II",
+    "totalCourses": 1,
+    "codes": ["MTH202"]
+  },
+  {
+    "_id": "DATA STRUCTURES",
+    "totalCourses": 1,
+    "codes": ["CSC201"]
+  },
+  {
+    "_id": "COMPUTER GRAPHICS",
+    "totalCourses": 1,
+    "codes": ["CS575"]
+  },
+  {
+    "_id": "TRANSLATION OF QURAN-II",
+    "totalCourses": 1,
+    "codes": ["TOQ402"]
+  },
+  {
+    "_id": "APPLIED PHYSICS",
+    "totalCourses": 1,
+    "codes": ["PHY101"]
+  },
+  {
+    "_id": "SOFTWARE PROJECT MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["CS652"]
+  },
+  {
+    "_id": "PRE-CALCULUS-I",
+    "totalCourses": 1,
+    "codes": ["MTH201"]
+  },
+  {
+    "_id": "E-COMMERCE",
+    "totalCourses": 1,
+    "codes": ["CS665"]
+  },
+  {
+    "_id": "OPERATING SYSTEMS",
+    "totalCourses": 1,
+    "codes": ["CSC301"]
+  },
+  {
+    "_id": "DISTRIBUTED DATABASE SYSTEMS",
+    "totalCourses": 1,
+    "codes": ["CS600"]
+  },
+  {
+    "_id": "COMPUTER VISION",
+    "totalCourses": 1,
+    "codes": ["CAI363"]
+  },
+  {
+    "_id": "DATABASE ADMINISTRATION AND MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["CS601"]
+  },
+  {
+    "_id": "BASIC ELECTRONICS",
+    "totalCourses": 1,
+    "codes": ["ELE401"]
+  },
+  {
+    "_id": "FINAL YEAR PROJECT-II",
+    "totalCourses": 1,
+    "codes": ["CS699"]
+  },
+  {
+    "_id": "INTRODUCTION TO FINANCIAL MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["MGT525"]
+  },
+  {
+    "_id": "DATA STRUCTURES AND ALGORITHMS",
+    "totalCourses": 1,
+    "codes": ["CS443"]
+  },
+  {
+    "_id": "TRANSLATION OF QURAN-III",
+    "totalCourses": 1,
+    "codes": ["TOQ201"]
+  },
+  {
+    "_id": "SOFTWARE ENGINEERING II",
+    "totalCourses": 1,
+    "codes": ["CS552"]
+  },
+  {
+    "_id": "ENTERPRISE SYSTEMS",
+    "totalCourses": 1,
+    "codes": ["CS567"]
+  },
+  {
+    "_id": "SOFTWARE REQUIREMENT ENGINEERING",
+    "totalCourses": 1,
+    "codes": ["CSE324"]
+  },
+  {
+    "_id": "ARTIFICIAL NEURAL NETWORKS",
+    "totalCourses": 1,
+    "codes": ["CS405"]
+  },
+  {
+    "_id": "TECHNOLOGY MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["CS686"]
+  },
+  {
+    "_id": "INTRODUCTION TO HUMAN RESOURCE MANAGEMENT",
+    "totalCourses": 1,
+    "codes": ["MGT515"]
+  },
+  {
+    "_id": "HUMAN COMPUTER INTERACTION",
+    "totalCourses": 1,
+    "codes": ["CS685"]
+  },
+  {
+    "_id": "STATISTICS AND PROBABILITY",
+    "totalCourses": 1,
+    "codes": ["STT500"]
+  },
+  {
+    "_id": "KNOWLEDGE REPRESENTATION AND REASONING",
+    "totalCourses": 1,
+    "codes": ["CS406"]
+  },
+  {
+    "_id": "CYBER SECURITY",
+    "totalCourses": 1,
+    "codes": ["CS597"]
+  },
+  {
+    "_id": "INTRODUCTION TO COMPUTING",
+    "totalCourses": 1,
+    "codes": ["CS301"]
+  },
+  {
+    "_id": "PROFESSIONAL ETHICS",
+    "totalCourses": 1,
+    "codes": ["SSH303"]
+  },
+  {
+    "_id": "MULTIMEDIA TECHNOLOGIES",
+    "totalCourses": 1,
+    "codes": ["CS525"]
+  },
+  {
+    "_id": "COMPUTING VISION",
+    "totalCourses": 1,
+    "codes": ["CS515"]
+  },
+  {
+    "_id": "VISUAL PROGRAMMING",
+    "totalCourses": 1,
+    "codes": ["CS692"]
+  },
+  {
+    "_id": "INFORMATION TECHNOLOGY INFRASTRUCTURE",
+    "totalCourses": 1,
+    "codes": ["CS555"]
+  },
+  {
+    "_id": "MODERN PROGRAMMING LANGUAGES",
+    "totalCourses": 1,
+    "codes": ["CS432"]
+  },
+  {
+    "_id": "SOFTWARE DESIGN & ARCHITECTURE",
+    "totalCourses": 1,
+    "codes": ["CSE320"]
+  },
+  {
+    "_id": "FINAL YEAR PROJECT-I",
+    "totalCourses": 1,
+    "codes": ["CS698"]
+  }
+]

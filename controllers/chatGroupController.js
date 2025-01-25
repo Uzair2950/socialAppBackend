@@ -45,20 +45,21 @@ export default {
 
   newGroupChat: async function (
     creator_id,
-    title,
+    name,
     imgUrl,
     aboutGroup,
     allowChatting,
     isAnnoucement = false
   ) {
+    console.log(imgUrl);
     let chat = new Chats({
       type: 1,
       participants: [creator_id],
       isGroup: true,
     });
     let group = new ChatGroups({
-      name: title,
-      imgUrl,
+      name,
+      avatarURL: imgUrl,
       aboutGroup,
       allowChatting,
       admins: [creator_id],
@@ -104,6 +105,10 @@ export default {
     let group = await ChatGroups.findById(gid);
     group.admins.addToSet(...admins);
     await group.save();
+  },
+
+  removeAdmin: async function (gid, admin) {
+    await ChatGroups.findByIdAndUpdate(gid, { $pull: { admins: admin } });
   },
 
   updateGroupSettings: async function (gid, settings) {

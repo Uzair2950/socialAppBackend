@@ -1,4 +1,3 @@
-import { title } from "process";
 import { Communities, CommunityMembers } from "../database/models/models.js";
 import chatGroupController from "./chatGroupController.js";
 
@@ -27,9 +26,15 @@ export default {
   },
 
   addAdmins: async function (cid, admins) {
-    let community = await Communities.findById(cid);
-    community.admins.addToSet(...admins);
-    await community.save();
+    await Communities.findByIdAndUpdate(cid, {
+      $addToSet: { communityAdmins: admins },
+    });
+  },
+
+  removeAdmins: async function (cid, admins) {
+    await Communities.findByIdAndUpdate(cid, {
+      $pullAll: { communityAdmins: admins },
+    });
   },
 
   addGroupToCommunity: async function (cid, group_type, group_id) {
@@ -63,16 +68,18 @@ export default {
     let isCreator = community.communityAdmins[0] == requesterId;
 
     await community.populate([
-      { path: "groups.gid", select: "title imgUrl" },
-      { path: "annoucementGroup", select: "title imgUrl" },
+      { path: "groups.gid", select: "name imgUrl" },
+      { path: "annoucementGroup", select: "name imgUrl" },
     ]);
 
     return { community, isAdmin, isCreator };
   },
 
   leaveCommunity: async function (cid, uid) {
+    // Remove as admin if found
+    await Communities.findByIdAndUpdate(cid, {
+      $pull: { communityAdmins: uid },
+    });
     await CommunityMembers.deleteOne({ cid, uid });
   },
-
-
 };

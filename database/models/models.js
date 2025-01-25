@@ -159,7 +159,7 @@ const _GroupRequests = new Schema(
 // Members in _GroupMembers
 const _PostGroup = new Schema(
   {
-    title: { type: String, required: true },
+    name: { type: String, required: true },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
     imgUrl: { type: String, default: "/static/avatars/default_group.png" },
     hasGroupChat: { type: Types.ObjectId, default: null },

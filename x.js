@@ -18,6 +18,7 @@ import {
   Administrators,
   AutoReply,
   VipCollections,
+  Friends,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import {
@@ -27,6 +28,7 @@ import {
   getOtherParticipant,
   getAutoReply,
   vipMessageHandling,
+  getFriendsIds,
 } from "./utils/utils.js";
 import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
@@ -490,16 +492,25 @@ let currSession = (await getCurrentSession())._id;
 //   }
 // ])
 
-console.log(
-  JSON.stringify(
-    await TimeTable.find({ section: { $in: ["671fca9828d6e955a5ecdbb0", "671fca9828d6e955a5ecdbb4"] } })
-      .select("slots")
-      // .populate({
-      //   path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
-      //   options: { sort: { start_time: 1 } },
-      //   populate: [{ path: "course", model: "course", select: "title -_id" }],
-      // })
-  , null, 2)
-);
+let ids = await getFriendsIds(myId);
 
+let getUserGroups = await GroupMembers.find({ uid: myId }).select("gid -_id");
+
+let groupIds = getUserGroups.map((e) => e.gid);
+console.log(groupIds);
+let posts = await Posts.find({
+  $or: [{ author: ids, group_id: [] }, { group_id: { $in: groupIds } }],
+})
+  .select("author content updatedAt allowCommenting likes comments attachments")
+  .populate([
+    {
+      path: "author",
+      select: "name avatarURL",
+    },
+  ])
+  .sort({
+    updatedAt: -1,
+  });
+
+console.log(posts);
 db.disconnect();

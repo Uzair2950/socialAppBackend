@@ -11,7 +11,8 @@ export default {
     content,
     attachments,
     group_id,
-    type
+    type,
+    allowCommenting
   ) {
     let filter = new Filter();
     let post = new Posts({
@@ -20,8 +21,10 @@ export default {
       content: filter.clean(content), // MARK: Language Filter
       attachments,
       privacyLevel,
+      allowCommenting,
     });
-    if (type == 0) {
+    //  type = 0 (default)
+    if (type == 1) {
       // Timetable
       if (attachments.length > 0 && attachments[0].split(".")[1] == "xlsx") {
         let timetable = await parseTimetable(attachments[0]);
@@ -37,7 +40,7 @@ export default {
         return { message: "Invalid Timetable File!" };
       }
       // TODO: Add Datesheet
-    } else if (type == 1) {
+    } else if (type == 2) {
     }
 
     await post.save();
@@ -45,20 +48,20 @@ export default {
     return post._id;
   },
 
-  // TODO: Needs to be modified.
+
   getPosts: async function (uid, num) {
     let posts = await Posts.find({
       author: uid,
       privacyLevel: { $lte: num },
-      group_id: null,
-    }).populate("author", "name avatarURL");
-    // TODO: Sort by createdAt As well!
+      group_id: [],
+    })
+      .populate("author", "name avatarURL")
+      .sort({ is_pinned: -1, updatedAt: -1 });
     return posts;
   },
 
   pinPost: async function (postId) {
     let post = await Posts.findById(postId);
-
     // Case 1: The Post Being pinned is a "User Post" - Posted on a user's timeline
     let filter = { author: post.author, is_pinned: true };
 
@@ -81,6 +84,11 @@ export default {
   likePost: async function (pid, uid) {
     await Posts.findByIdAndUpdate(pid, { $push: { likes: uid } });
   },
+
+  unlikePost: async function (pid, uid) {
+    await Posts.findByIdAndUpdate(pid, { $pull: { likes: uid } });
+  },
+
 
   addComment: async function (pid, author, content) {
     let comment = new Comments({ author, content });

@@ -9,13 +9,9 @@ import {
 
 import { getNewMessageCount } from "../utils/utils.js";
 
-// Realtime Chatting Pseudo Steps
-// 1. Initiate a socket connection when user opens chat screen? (SEE ****)
-// 2.
-
 export default {
-
   // Personal Chats
+
   initiateChat: async function (sender, receiver) {
     let chat = new Chats({
       participants: [sender, receiver],
@@ -23,6 +19,7 @@ export default {
     });
 
     await chat.save();
+
     // Add chats to activeChats of both users
     await Users.updateMany(
       { _id: { $in: [sender, receiver] } },
@@ -66,8 +63,6 @@ export default {
   editAutoReply: async function (replyId, message, reply) {
     await AutoReply.findByIdAndUpdate(replyId, { message, reply });
   },
-
-
 
   // getAutoReplies: async function (uid) {
   //   // Damn
@@ -177,8 +172,8 @@ export default {
 
   // Auto - Download
 
-  toggleAutoDownload: async function (uid, chatid) {
-    let settings = await ChatSettings.findOne({ uid, chat: chatid });
+  toggleAutoDownload: async function (sid) {
+    let settings = await ChatSettings.findById(sid);
     settings.autoDownload = !settings.autoDownload;
     await settings.save();
     return settings.autoDownload;
@@ -365,7 +360,8 @@ export default {
     );
   },
 
-  deleteMessage: async function (messageId) {
-    await Messages.findByIdAndDelete(messageId);
+  deleteMessage: async function (messageId, cid) {
+    await Messages.findByIdAndDelete(messageId); // Delete the message
+    await Chats.findByIdAndUpdate(cid, { $pull: { messages: messageId } });
   },
 };

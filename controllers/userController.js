@@ -5,6 +5,7 @@ import {
   Administrators,
   Friends,
   VipCollections,
+  GroupMembers,
 } from "../database/models/models.js";
 import notificationController from "./notificationController.js";
 
@@ -23,7 +24,6 @@ export default {
     return res ? true : false;
   },
 
-  // TODO: Fix this
   authorizeUser: async function (email, password) {
     let user = await Users.findOne({ email, password }).select("_id").lean();
 
@@ -88,6 +88,7 @@ export default {
 
   getFriends: async function (uid, splice = false, limit = 0) {
     // 1. Get Friends that were added by this user.
+
     let friends = await Friends.find({ status: "accepted", uid })
       .limit(limit)
       .populate("friend_id", "name avatarURL")
@@ -125,8 +126,51 @@ export default {
     await user.save();
   },
 
-  getVipChat: async function (uid) {
-    let vipChat = await VipCollections.findOne({ creator: uid })
+  getGroups: async function (uid) {
+    let groups = await GroupMembers.find({ uid })
+      .select("gid")
+      .populate("gid", "name imgUrl");
+
+    return groups.map((e) => e.gid);
+  },
+
+  // VIP Collection Handling
+  ////////////////////////////////////////
+
+  getVipCollection: async function (creator) {
+    return await VipCollections.findOne({ creator })
+      .select("-messages")
+      .populate("people", "name avatarURL")
+      .lean();
+  },
+
+  createVipCollection: async function (creator, people) {
+    let vipCollection = new VipCollections({
+      creator,
+      people,
+    });
+    await vipCollection.save();
+    return vipCollection._id;
+  },
+
+  deleteVipCollection: async function (collection_id) {
+    await VipCollections.findByIdAndDelete(collection_id);
+  },
+
+  addPeopleInVipCollection: async function (collection_id, people) {
+    await VipCollections.findByIdAndUpdate(collection_id, {
+      $addToSet: { people: people },
+    });
+  },
+
+  removeFromVipCollection: async function (collection_id, people) {
+    await VipCollections.findByIdAndUpdate(collection_id, {
+      $pullAll: { people: people },
+    });
+  },
+
+  getVipChat: async function (creator) {
+    let vipChat = await VipCollections.findOne({ creator })
       .select("messages")
       .populate({
         path: "messages",
@@ -136,7 +180,8 @@ export default {
           path: "senderId",
           select: "name avatarURL",
         },
-      });
+      })
+      .lean();
 
     return vipChat;
   },
