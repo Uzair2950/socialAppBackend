@@ -354,7 +354,7 @@ const _AutoReply = new Schema({
 });
 
 const _ScheduledMessages = new Schema({
-  // Same Message for multiple chats...
+  // Same Message for multiple chats... can be a group or personal chat doesn't matter
   chat: [{ type: Types.ObjectId, ref: "chat" }],
   message: { type: Types.ObjectId, ref: "message" },
   pushTime: { type: Date },

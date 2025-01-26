@@ -120,7 +120,7 @@ app.use("/api/notifications", notificationRouter);
   httpServer.listen(3001, () => {
     console.log("Listening On ws://localhost:3001\nhttp://localhost:3001");
   });
-  startMessageScheduler();
+  // startMessageScheduler();
 })();
 
 

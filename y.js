@@ -27,11 +27,13 @@ let d = await connectDB();
 
 
 const date = new Date();
-console.log(
-  await ScheduledMessages.find({
-    pushTime: { $lte: date },
-  })
-);
+
+console.log(date.setMinutes(date.getMinutes() + 5))
+// console.log(
+//   await ScheduledMessages.find({
+//     pushTime: { $lte: date },
+//   })
+// );
 
 
 await d.disconnect();

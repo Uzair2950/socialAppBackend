@@ -5,9 +5,13 @@ import {
   Messages,
   ChatSettings,
   AutoReply,
+  ScheduledMessages,
+  ChatGroups,
 } from "../database/models/models.js";
 
 import { getNewMessageCount } from "../utils/utils.js";
+
+let filter = new Filter(); // Language Filter
 
 export default {
   // Personal Chats
@@ -314,8 +318,6 @@ export default {
     isReply = false,
     replyId = undefined
   ) {
-    let filter = new Filter();
-
     try {
       let message = new Messages({
         content: filter.clean(content),
@@ -363,5 +365,37 @@ export default {
   deleteMessage: async function (messageId, cid) {
     await Messages.findByIdAndDelete(messageId); // Delete the message
     await Chats.findByIdAndUpdate(cid, { $pull: { messages: messageId } });
+  },
+
+  // Scheduler;
+  scheduleMessages: async function (
+    personalChats,
+    groupChats,
+    messageContent,
+    messageAttchments,
+    senderId,
+    pushTime
+  ) {
+    let groupChatsIds = await ChatGroups.find({ _id: groupChats }).select(
+      "chat"
+    );
+    // Find Chats of groupChats
+    let chats = [...groupChatsIds.map((e) => e.chat), ...personalChats];
+    let message = new Messages({
+      content: filter.clean(messageContent),
+      attachments: messageAttchments,
+      senderId,
+    });
+
+    await message.save();
+
+    let sMessage = new ScheduledMessages({
+      chat: chats,
+      sender: senderId,
+      message: message._id,
+      pushTime,
+    });
+    await sMessage.save();
+    return sMessage._id;
   },
 };

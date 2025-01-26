@@ -5,7 +5,6 @@ import multer from "multer";
 import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
 
-
 const destination = "/static/posts";
 
 const storage = multer.diskStorage({
@@ -28,7 +27,6 @@ router.post("/", postsAttachments.array("images"), (req, res) => {
   return res.json({ message: "OK" });
 });
 
-
 // ✅
 router.post(
   "/addPost",
@@ -36,8 +34,8 @@ router.post(
   async (req, res) => {
     let attachements = req.files?.map((e) => `${destination}/${e.filename}`);
 
-    let { author, content, privacyLevel, group_id, type, allowCommenting } = req.body;
-
+    let { author, content, privacyLevel, group_id, type, allowCommenting } =
+      req.body;
 
     let post_id = await postController.addPost(
       author,
@@ -46,13 +44,12 @@ router.post(
       attachements,
       group_id,
       parseInt(type),
-      allowCommenting,
+      allowCommenting
     );
     if (post_id) {
       return res.json({ message: "Posted!", post_id });
     }
     return res.status(400).json({ message: "Invalid timetable format!" });
-
   }
 );
 
@@ -71,13 +68,10 @@ router.post(
 //   }
 // );
 
-
-
 // ✅
 router.get("/getPosts/:uid", async (req, res) => {
   res.json(await postController.getPosts(req.params.uid, 0));
 });
-
 
 // ✅
 router.post("/likePost/:pid/:uid", async (req, res) => {

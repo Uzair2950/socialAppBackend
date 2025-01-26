@@ -52,13 +52,16 @@ router.get("/getGroup/:gId/:rId", async (req, res) => {
   );
 });
 
-router.post("/createHybridGroup/:creatorId", async (req, res) => {
-  await postgroupController.newGroup(
+router.post("/createHybridGroup/:creatorId",  groupAvatars.single("group_avatar"), async (req, res) => {
+
+  console.log(req.body)
+  await postgroupController.newHybribGroup(
     req.params.creatorId,
     req.body.name,
-    req.body.imgUrl,
+    req.file ? `/${req.file?.path.replaceAll("\\", "/")}`: undefined,
     req.body.aboutGroup,
     req.body.allowPosting,
+    req.body.allowChatting,
     req.body.is_private
   );
   return res.send({ message: `Group ${req.body.name} Created` });

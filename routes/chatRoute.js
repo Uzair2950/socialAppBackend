@@ -2,6 +2,8 @@ import { Router } from "express";
 import chatController from "../controllers/chatController.js";
 import path from "path";
 import multer, { diskStorage } from "multer";
+import { Filter } from "bad-words";
+import { ChatGroups, Messages } from "../database/models/models.js";
 
 const router = Router();
 
@@ -137,6 +139,30 @@ router.put("/toggleAutoDownload/:sid", async (req, res) => {
 router.put("/updateDownloadDirectory/:sid", async (req, res) => {
   await chatController.updateDownloadDirectory(req.params.sid, req.body.dir);
   return res.json({ message: "success" });
+});
+
+// Message Scheduling
+
+router.post("/scheduleMessage", async (req, res) => {
+  // groupChats: [], personalChats: []
+  let {
+    personalChats,
+    groupChats,
+    messageContent,
+    messageAttchments,
+    senderId,
+    pushTime,
+  } = req.body;
+  let id = await chatController.scheduleMessages(
+    personalChats,
+    groupChats,
+    messageContent,
+    messageAttchments,
+    senderId,
+    pushTime
+  );
+
+  return res.json({ message: "success", id });
 });
 
 export default router;

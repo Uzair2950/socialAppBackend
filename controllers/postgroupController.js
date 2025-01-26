@@ -87,10 +87,10 @@ export default {
       imgUrl,
       is_private,
       admins: [creator_id],
-      aboutGroup,
+      aboutGroup, 
       allowPosting,
       isOfficial,
-      isSociety,
+      isSociety, 
     });
 
     await group.save();
