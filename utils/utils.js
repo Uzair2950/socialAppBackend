@@ -72,7 +72,6 @@ const isGroupChat = async (chatId) => {
 
 const isAutoReplyEnabled = async (uid) => {
   let user = await Users.findOne({ _id: uid, autoReply: true }).select("_id");
-  console.log(user);
   return user ? true : false;
 };
 

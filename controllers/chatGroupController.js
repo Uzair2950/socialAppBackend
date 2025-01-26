@@ -80,6 +80,8 @@ export default {
   addToGroupChat: async function (gid, uid) {
     let chatGroup = await ChatGroups.findById(gid).select("chat -_id");
 
+    if (!chatGroup) return;
+
     await Users.findByIdAndUpdate(uid, {
       // Add in user's active group chats.
       $push: { groupChats: gid },

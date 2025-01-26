@@ -14,11 +14,13 @@
     "bad-words": "^4.0.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "cron": "^3.5.0",
     "express": "^4.21.1",
     "mongoose": "^8.7.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "xlsx": "^0.18.5",
     "zod": "^3.23.8",
     "zod-express-middleware": "^1.4.0"

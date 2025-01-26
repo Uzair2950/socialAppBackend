@@ -9,17 +9,29 @@ import {
   Friends,
   VipCollections,
   Communities,
+  ScheduledMessages,
 } from "./database/models/models.js";
 import studentController from "./controllers/studentController.js";
 
 //
-let d = await connectDB();
 
-console.log(JSON.stringify(
-  await Communities.findById("675b3f4ff5c5033db709a29a").populate([
-    { path: "annoucementGroup", select: "name chat avatarURL" },
-    { path: "groups.gid", select: "name title" },
-  ]), null, 2)
+let d = await connectDB();
+// let dx = new Date();
+// await ScheduledMessages.insertMany([
+//   {
+//     chat: ["675b1c2481388a38bb8ca8cb"],
+//     message: "6765a73024029a0c76c9a8ac",
+//     pushTime: dx.setMinutes(dx.getMinutes() + 3),
+//   },
+// ]);
+
+
+const date = new Date();
+console.log(
+  await ScheduledMessages.find({
+    pushTime: { $lte: date },
+  })
 );
+
 
 await d.disconnect();

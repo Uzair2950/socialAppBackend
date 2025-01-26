@@ -358,6 +358,7 @@ const _ScheduledMessages = new Schema({
   chat: [{ type: Types.ObjectId, ref: "chat" }],
   message: { type: Types.ObjectId, ref: "message" },
   pushTime: { type: Date },
+  sender: { type: Types.ObjectId, ref: "user" },
 });
 
 const Users = model("user", _User);
@@ -388,6 +389,7 @@ const Sessions = model("session", _Session);
 const TimeTable = model("timetable", _TimeTable);
 const Datesheet = model("datesheet", _DateSheet);
 const AutoReply = model("autoreply", _AutoReply);
+const ScheduledMessages = model("scheduledmessage", _ScheduledMessages);
 
 export {
   Users,
@@ -417,4 +419,5 @@ export {
   Enrollment,
   Allocation,
   GroupRequests,
+  ScheduledMessages,
 };
