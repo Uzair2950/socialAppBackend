@@ -229,9 +229,9 @@ export default {
     let transformedChats = await Promise.all(
       chats.map(async (e) => {
         let chatInfo = {
-          _id: e.participants[0]._id,
-          name: e.participants[0].name,
-          avatarURL: e.participants[0].avatarURL,
+          _id: e.participants[0]?._id ?? "",
+          name: e.participants[0]?.name ?? "",
+          avatarURL: e.participants[0]?.avatarURL ?? "",
         };
         if (e.isGroup) {
           let chatGroupDetails = userChats.groupChats.filter(
@@ -344,7 +344,6 @@ export default {
   },
 
   readMessageById: async function (mid, uid) {
-    // TODO: Fix the readCount: 3 bug
     await Messages.findByIdAndUpdate(mid, {
       $addToSet: { readBy: uid },
       $inc: { readCount: 1 },
@@ -357,7 +356,7 @@ export default {
       -1 * messageCount
     );
     await Messages.updateMany(
-      { _id: { $in: messages } },
+      { _id: { $in: messages } }, // { _id:  messages }  should work too?
       { $addToSet: { readBy: uid }, $inc: { readCount: 1 } }
     );
   },
@@ -369,8 +368,8 @@ export default {
 
   // Scheduler;
   scheduleMessages: async function (
-    personalChats,
-    groupChats,
+    personalChats = [],
+    groupChats = [],
     messageContent,
     messageAttchments,
     senderId,
@@ -397,5 +396,10 @@ export default {
     });
     await sMessage.save();
     return sMessage._id;
+  },
+
+
+  deleteScheduledMessage: async function (mid) {
+    await ScheduledMessages.findByIdAndDelete(mid);
   },
 };

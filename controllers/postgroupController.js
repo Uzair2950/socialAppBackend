@@ -105,6 +105,7 @@ export default {
     let chat = new Chats({
       type: 1,
       participants: groupMembers,
+      isGroup: true
     });
 
     await chat.save();

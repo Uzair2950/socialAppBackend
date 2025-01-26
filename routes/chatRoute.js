@@ -142,27 +142,34 @@ router.put("/updateDownloadDirectory/:sid", async (req, res) => {
 });
 
 // Message Scheduling
+router.post(
+  "/scheduleMessage",
+  messageAttchments.array("messageAttchments"),
+  async (req, res) => {
+    console.log(req.body)
+    // groupChats: [], personalChats: []
+    let { personalChats, groupChats, messageContent, senderId, pushTime } =
+      req.body;
 
-router.post("/scheduleMessage", async (req, res) => {
-  // groupChats: [], personalChats: []
-  let {
-    personalChats,
-    groupChats,
-    messageContent,
-    messageAttchments,
-    senderId,
-    pushTime,
-  } = req.body;
-  let id = await chatController.scheduleMessages(
-    personalChats,
-    groupChats,
-    messageContent,
-    messageAttchments,
-    senderId,
-    pushTime
-  );
 
-  return res.json({ message: "success", id });
+    let id = await chatController.scheduleMessages(
+      personalChats,
+      groupChats,
+      messageContent,
+      req.files?.map((e) => `${destination}/${e.filename}`),
+      senderId,
+      pushTime
+    );
+
+    return res.json({ message: "success", id });
+  }
+);
+
+
+
+router.delete("/deleteScheduledMessage/:mid", async (req, res) => {
+  await chatController.deleteScheduledMessage(req.params.mid);
+  return res.json({ message: "success" });
 });
 
 export default router;

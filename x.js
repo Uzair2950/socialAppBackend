@@ -492,25 +492,77 @@ let currSession = (await getCurrentSession())._id;
 //   }
 // ])
 
-let ids = await getFriendsIds(myId);
-
-let getUserGroups = await GroupMembers.find({ uid: myId }).select("gid -_id");
-
-let groupIds = getUserGroups.map((e) => e.gid);
-console.log(groupIds);
-let posts = await Posts.find({
-  $or: [{ author: ids, group_id: [] }, { group_id: { $in: groupIds } }],
-})
-  .select("author content updatedAt allowCommenting likes comments attachments")
-  .populate([
-    {
-      path: "author",
-      select: "name avatarURL",
-    },
-  ])
-  .sort({
-    updatedAt: -1,
+let userChats = await Users.findById(myId)
+  .select("activeChats groupChats -_id")
+  .populate({
+    path: "groupChats",
+    select: "chat name avatarURL",
   });
+let groupChats = userChats.groupChats.map((e) => e.chat);
+let chats = await Chats.find(
+  { _id: [...groupChats, ...userChats.activeChats] },
+  {
+    isGroup: 1,
+    totalParticipants: 1,
+    participants: {
+      $elemMatch: { $ne: myId },
+    },
+    messages: { $slice: -1 },
+  },
+  { sort: { updatedAt: -1 } }
+).populate([
+  {
+    path: "messages",
 
-console.log(posts);
+    select: {
+      content: 1,
+      senderId: 1,
+      createdAt: 1,
+      _id: 0,
+      attachments: 1,
+    },
+  },
+  {
+    path: "participants",
+    select: "name avatarURL",
+  },
+]);
+
+
+let transformedChats = await Promise.all(
+  chats.map(async (e) => {
+    console.log("CHECKING " + e._id)
+    let chatInfo = {
+      _id: e.participants[0]?._id ?? "",
+      name: e.participants[0]?.name ?? "",
+      avatarURL: e.participants[0]?.avatarURL ?? "",
+    };
+    if (e.isGroup) {
+      let chatGroupDetails = userChats.groupChats.filter(
+        (i) => i.chat.toString() == e._id.toString()
+      )[0];
+      chatInfo = {
+        _id: chatGroupDetails._id,
+        name: chatGroupDetails.name,
+        avatarURL: chatGroupDetails.avatarURL,
+      };
+    }
+
+    return {
+      id: e._id,
+      chatInfo,
+      totalParticipants: e.totalParticipants,
+      isGroup: e.isGroup,
+      lastMessage: e.messages[0] ?? {
+        senderId: "",
+        content: "",
+        createdAt: "",
+        attachments: [],
+      },
+      // newMessageCount: await getNewMessageCount(e.messages[0], uid, e._id),
+    };
+  })
+);
+
+console.log(transformedChats);
 db.disconnect();

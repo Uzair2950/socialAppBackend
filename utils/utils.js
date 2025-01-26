@@ -112,8 +112,19 @@ const getAutoReply = async (chatId, sender, message) => {
 
   // Find if message contains any "auto-reply" part
   // + This logic is not good at all.
+  // for (let i = 0; i < autoReply.length; i++) {
+  //   if (messageContent.includes(autoReply[i].message)) {
+  //     let newMessage = await chatController.sendMessage(
+  //       chatId,
+  //       receiver,
+  //       autoReply[i].reply
+  //     );
+  //     return newMessage;
+  //   }
+  // }
+  // Find if message matches an "auto-reply"
   for (let i = 0; i < autoReply.length; i++) {
-    if (messageContent.includes(autoReply[i].message)) {
+    if (autoReply[i].message.toLowerCase() == messageContent) {
       let newMessage = await chatController.sendMessage(
         chatId,
         receiver,

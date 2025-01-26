@@ -6,20 +6,19 @@ let client = io("ws://localhost:3001");
 client.connect();
 
 const startMessageScheduler = () => {
-  console.log("STARTED");
+  console.log("CRON JOB STARTED * * * * *");
   CronJob.from({
     cronTime: "* * * * *", // Every Minute
     // min hour day(month) month day(week)
     onTick: async () => {
       const date = new Date();
       let scheduledMessages = await ScheduledMessages.find({
-        pushTime: { $lt: date },
+        pushTime: { $lte: date },
       });
-      //   console.log(scheduledMessages);
-      //   console.log("TICKED");
-      // let scheduledIds = scheduledMessages.map((e) => e._id);
 
-      // await ScheduledMessages.deleteMany({ _id: scheduledIds });
+      let scheduledIds = scheduledMessages.map((e) => e._id);
+
+      await ScheduledMessages.deleteMany({ _id: scheduledIds });
 
       await Promise.all(
         scheduledMessages.map(async (scheduledMessage) => {
@@ -30,14 +29,12 @@ const startMessageScheduler = () => {
               await Chats.findByIdAndUpdate(c, {
                 $push: { messages: messageId },
               });
-              // console.log("sendMessage", { chatId: c, messageId, senderId });
+              console.log("EMITTING MESSAGE", { chatId: c, messageId, senderId });
               client.emit("sendMessage", { chatId: c, messageId, senderId });
             })
           );
         })
       );
-
-      // io.emit("cronEvent", { message: "Wow" });
     },
   }).start();
 };

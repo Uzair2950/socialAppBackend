@@ -28,7 +28,14 @@ let d = await connectDB();
 
 const date = new Date();
 
-console.log(date.setMinutes(date.getMinutes() + 5))
+console.log(date.setMinutes(date.getMinutes() + 3))
+
+// console.log(await Users.findById("6754a9268db89992d5b8221e")
+// .select("activeChats groupChats -_id")
+// .populate({
+//   path: "activeChats",
+//   select: "participants messages",
+// }));
 // console.log(
 //   await ScheduledMessages.find({
 //     pushTime: { $lte: date },

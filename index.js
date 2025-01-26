@@ -63,33 +63,33 @@ io.on("connection", (socket) => {
     console.log("test" + text);
   }) 
   socket.on("sendMessage", async ({ chatId, messageId, senderId }) => {
-    console.log({ chatId, messageId, senderId });
+    console.log("SENDING MESSAGE .ON ", { chatId, messageId, senderId });
 
+    
+    
+    io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
+    io.emit(`updateAllChatsView`, chatId, messageId);
 
-    //
-    // io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
-    // io.emit(`updateAllChatsView`, chatId, messageId);
+    if (!(await isGroupChat(chatId))) {
+      //"Not Group Chat"
+      let autoReplyId = await getAutoReply(chatId, senderId, messageId);
 
-    // if (!(await isGroupChat(chatId))) {
-    //   //"Not Group Chat"
-    //   let autoReplyId = await getAutoReply(chatId, senderId, messageId);
-
-    //   if (autoReplyId) {
-    //     console.log("Auto Reply Found " + autoReplyId);
-    //     io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
-    //     io.emit("updateAllChatsView", chatId, autoReplyId); // Update all chats view
-    //   }
-    // }
-    // // Vip messages Filter
-    // else {
-    //   let vipMessages = await vipMessageHandling(senderId, messageId, chatId);
-    //   if (vipMessages) {
-    //     vipMessages.forEach((e) => {
-    //       console.log(`Emitting: receiveVipMessage_${e} | ${messageId}`);
-    //       io.emit(`receiveVipMessage_${e}`, messageId); // Emit the Vip message
-    //     });
-    //   }
-    // }
+      if (autoReplyId) {
+        console.log("Auto Reply Found " + autoReplyId);
+        io.emit(`receiveMessage_${chatId}`, autoReplyId); // Emit the autoReply message
+        io.emit("updateAllChatsView", chatId, autoReplyId); // Update all chats view
+      }
+    }
+    // Vip messages Filter
+    else {
+      let vipMessages = await vipMessageHandling(senderId, messageId, chatId);
+      if (vipMessages) {
+        vipMessages.forEach((e) => {
+          console.log(`Emitting: receiveVipMessage_${e} | ${messageId}`);
+          io.emit(`receiveVipMessage_${e}`, messageId); // Emit the Vip message
+        });
+      }
+    }
   });
 
   socket.on("disconnect", () => {
@@ -120,7 +120,7 @@ app.use("/api/notifications", notificationRouter);
   httpServer.listen(3001, () => {
     console.log("Listening On ws://localhost:3001\nhttp://localhost:3001");
   });
-  // startMessageScheduler();
+  startMessageScheduler();
 })();
 
 
