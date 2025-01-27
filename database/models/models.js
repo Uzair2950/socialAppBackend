@@ -11,7 +11,7 @@ const _User = new Schema({
     default: "student",
   },
   autoReply: { type: Boolean, default: false },
-  avatarURL: { type: String, default: "" },
+  avatarURL: { type: String, default: "/static/avatars/default_avatar.png" },
   is_private: { type: Boolean, default: false },
   bio: { type: String, default: "" },
   activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }], // Personal Chats

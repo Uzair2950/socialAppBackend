@@ -5,7 +5,7 @@ import userController from "./userController.js";
 
 export default {
   getOfficialWallPosts: async function () {
-    let posts = await Posts.find({ group_id: "676897d39d525ffb4eb6f5f8" })
+    let posts = await Posts.find({ group_id: "6797ebcc37200dbcdec36ba9" })
       .select(
         "author is_pinned content updatedAt allowCommenting likes comments attachments"
       )

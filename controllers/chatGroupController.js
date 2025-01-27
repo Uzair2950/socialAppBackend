@@ -37,6 +37,7 @@ export default {
       .populate("participants", "name avatarURL");
 
     return chatParticipants.participants.map((e) => ({
+      id: e._id,
       name: e.name,
       avatarURL: e.avatarURL,
       isAdmin: group.admins.includes(e._id),

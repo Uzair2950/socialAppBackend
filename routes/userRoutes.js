@@ -22,7 +22,7 @@ const router = express.Router();
 //Routes
 
 // Authorize User {username, password}
-router.post(
+router.put(
   "/authorize",
   validateRequest({
     body: z.object({

@@ -25,22 +25,22 @@ let d = await connectDB();
 //   },
 // ]);
 
-
 const date = new Date();
 
-console.log(date.setMinutes(date.getMinutes() + 3))
+let student = new Students({
+  reg_no: "2020-ARID-4233",
+  cgpa: 0,
+});
 
-// console.log(await Users.findById("6754a9268db89992d5b8221e")
-// .select("activeChats groupChats -_id")
-// .populate({
-//   path: "activeChats",
-//   select: "participants messages",
-// }));
-// console.log(
-//   await ScheduledMessages.find({
-//     pushTime: { $lte: date },
-//   })
-// );
-
+await student.save();
+await Users.insertMany([
+  {
+    email: "2020-ARID-4233@biit.edu.pk",
+    name: "Usama Ijaz",
+    type: "student",
+    password: "123",
+    uid: student._id,
+  },
+]);
 
 await d.disconnect();

@@ -104,7 +104,6 @@ export default {
     await post.save();
   },
 
-  //TODO: Needs Testing
   getComments: async function (pid, uid) {
     let comments = await Posts.findById(pid)
       .select("comments")

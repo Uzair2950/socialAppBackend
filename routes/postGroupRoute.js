@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   },
 });
 
-//TODO: Add avatar support
+
 const groupAvatars = multer({ storage });
 const router = express.Router();
 

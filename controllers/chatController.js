@@ -17,6 +17,10 @@ export default {
   // Personal Chats
 
   initiateChat: async function (sender, receiver) {
+    let receiverDetails = await Users.findById(receiver).select(
+      "name avatarURL"
+    );
+    if (!receiverDetails) return;
     let chat = new Chats({
       participants: [sender, receiver],
       totalParticipants: 2,
@@ -41,8 +45,24 @@ export default {
         chat: chat._id,
       },
     ]);
-
     return chat._id;
+    // return {
+    //   id: chat._id,
+    //   chatInfo: {
+    //     _id: receiver,
+    //     name: receiverDetails.name,
+    //     avatarURL: receiverDetails.avatarURL,
+    //   },
+    //   totalParticipants: 2,
+    //   isGroup: false,
+    //   lastMessage: {
+    //     senderId: "",
+    //     content: "",
+    //     createdAt: "",
+    //     attachments: [],
+    //   },
+    //   newMessageCount: 0,
+    // }
   },
 
   getChatSettings: async function (chat, uid) {
@@ -397,7 +417,6 @@ export default {
     await sMessage.save();
     return sMessage._id;
   },
-
 
   deleteScheduledMessage: async function (mid) {
     await ScheduledMessages.findByIdAndDelete(mid);

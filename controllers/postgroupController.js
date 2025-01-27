@@ -156,6 +156,7 @@ export default {
   },
 
   joinGroup: async function (gid, uid) {
+  
     let group = await PostGroups.findById(gid).select("is_private name admins");
     if (group.is_private) {
       let request = new GroupRequests({
