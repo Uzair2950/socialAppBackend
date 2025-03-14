@@ -4,6 +4,18 @@ export default {
   getUnreadNotificationCount: async function (uid) {
     return (await Notifications.find({ user: uid, isRead: false })).length;
   },
+  getUnreadNotifications: async function (uid) {
+    let notifications = await Notifications.find({
+      user: uid,
+      // isRead: false,
+    }).populate('actor', '-_id name').select("content image1 image2");
+    let ids = notifications.map((e) => e._id);
+    // update all notifiactions to them as Read
+
+    // await Notifications.updateMany({ _id: ids }, { isRead: true });
+
+    return notifications;
+  },
   getNotifications: async function (uid) {
     return await Notifications.find({ user: uid });
   },
@@ -14,6 +26,7 @@ export default {
 
   addNotification: async function (
     user,
+    actor,
     content,
     type,
     image1 = "",
@@ -21,6 +34,7 @@ export default {
   ) {
     let n = new Notifications({
       user,
+      actor,
       content,
       type,
       image1,
@@ -28,5 +42,7 @@ export default {
     });
 
     await n.save();
+
+    return n._id;
   },
 };

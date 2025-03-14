@@ -18,7 +18,7 @@ const startMessageScheduler = () => {
 
       let scheduledIds = scheduledMessages.map((e) => e._id);
 
-      await ScheduledMessages.deleteMany({ _id: scheduledIds });
+      await ScheduledMessages.deleteMany({ _id: scheduledIds }); // Delete
 
       await Promise.all(
         scheduledMessages.map(async (scheduledMessage) => {
@@ -29,6 +29,7 @@ const startMessageScheduler = () => {
               await Chats.findByIdAndUpdate(c, {
                 $push: { messages: messageId },
               });
+              // TODO: Create a new message for each scheduled message with same content obv
               console.log("EMITTING MESSAGE", { chatId: c, messageId, senderId });
               client.emit("sendMessage", { chatId: c, messageId, senderId });
             })

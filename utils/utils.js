@@ -1,3 +1,6 @@
+
+import { Types } from "mongoose";
+
 import {
   Sessions,
   Chats,
@@ -6,11 +9,13 @@ import {
   AutoReply,
   Messages,
   VipCollections,
-  ChatSettings,
   Users,
   Courses,
   Friends,
+  PostInteraction,
+  CourseMap
 } from "../database/models/models.js";
+
 
 import chatController from "../controllers/chatController.js";
 
@@ -137,6 +142,83 @@ const getAutoReply = async (chatId, sender, message) => {
   // No autoreply was found
 };
 
+const aggregatePosts = async (uid, group_id) => {
+  let posts = await PostInteraction.aggregate([
+    {
+      $match: { group_id: new Types.ObjectId(group_id) },
+    },
+    {
+      $lookup: {
+        from: "postgroups",
+        localField: "group_id",
+        foreignField: "_id",
+        as: "groupData",
+        pipeline: [
+          {
+            $project: {
+              admins: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "posts",
+        localField: "post",
+        foreignField: "_id",
+        as: "postData",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "author",
+              foreignField: "_id",
+              as: "authorData",
+            },
+          },
+          { $unwind: "$authorData" },
+          {
+            $project: {
+              _id: 1,
+              content: 1,
+              attachments: 1,
+              type: 1,
+              createdAt: 1,
+              is_pinned: 1,
+              "authorData._id": 1,
+              "authorData.name": 1,
+              "authorData.avatarURL": 1,
+            },
+          },
+        ],
+      },
+    },
+    { $unwind: "$postData" },
+    { $unwind: "$groupData" },
+    {
+      $project: {
+        _id: 1,
+        group_id: 1,
+        allowCommenting: 1,
+        hasLiked: { $in: [new Types.ObjectId(uid), "$likes"] },
+        is_pinned: 1,
+        commentCount: { $size: "$comments" },
+        likesCount: { $size: "$likes" },
+        isAuthor: {
+          $eq: ["$postData.authorData._id", new Types.ObjectId(uid)],
+        },
+        isGroupAdmin: {
+          $in: [new Types.ObjectId(uid), "$groupData.admins"],
+        },
+        postData: 1,
+      },
+    },
+    { $sort: { is_pinned: -1, "postData.createdAt": -1 } },
+  ]);
+  return posts;
+};
+
 const vipMessageHandling = async (senderId, messageId, chatId) => {
   console.log(`SenderID: ${senderId}`);
   let vipCollectionsContainingSender = await VipCollections.find({
@@ -174,6 +256,10 @@ const getFriendsIds = async (uid) => {
   return friends.map((e) => (e.uid == uid ? e.friend_id : e.uid));
 };
 
+const getCoursesMapping = async (code) => {
+  return (await CourseMap.findOne({ courses: code }).select("-_id courses")).courses;
+}
+
 export {
   getOtherParticipant,
   getAutoReply,
@@ -187,4 +273,6 @@ export {
   vipMessageHandling,
   getCourseIdByCode,
   getFriendsIds,
+  aggregatePosts,
+  getCoursesMapping
 };

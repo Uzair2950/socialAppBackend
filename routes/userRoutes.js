@@ -31,6 +31,7 @@ router.put(
     }),
   }),
   async (req, res) => {
+    console.log(req.body);
     let user = await userController.authorizeUser(
       req.body.email,
       req.body.password
@@ -43,14 +44,18 @@ router.put(
   }
 );
 
+router.get("/getUserData/:uid", async (req, res) => {
+  let u = await userController.getUserData(req.params.uid);
+  console.log(u);
+  return res.json(u);
+});
+
 router.get("/", (req, res) => {
   return res.send("Wow");
 });
 
 /*
-
       ==================================== USER PROFILE UPDATE
-
 */
 
 // ✅
@@ -106,7 +111,6 @@ router.put(
   }
 );
 
-
 /*
           RELATIONSHIP HANDLER
 
@@ -157,7 +161,6 @@ router.get("/getGroups/:uid", async (req, res) => {
   return res.json(await userController.getGroups(req.params.uid));
 });
 
-
 /*
 
   == AUTO-REPLY
@@ -169,7 +172,6 @@ router.post("/toggleAutoReply/:uid", async (req, res) => {
   return res.json({ message: "success" });
 });
 
-
 // == VIP COLLECTION
 // ✅
 
@@ -177,7 +179,6 @@ router.post("/toggleAutoReply/:uid", async (req, res) => {
 router.get("/getVipChat/:uid", async (req, res) => {
   return res.json(await userController.getVipChat(req.params.uid));
 });
-
 
 // MARK: --- NEW ROUTE
 router.get("/getVipCollection/:uid", async (req, res) => {
@@ -206,17 +207,25 @@ router.delete("/deleteVipCollection/:collection_id", async (req, res) => {
 // ✅
 // MARK: --- NEW ROUTE
 router.put("/addPeopleInCollection/:collection_id", async (req, res) => {
-  await userController.addPeopleInVipCollection(req.params.collection_id, req.body.people)
+  await userController.addPeopleInVipCollection(
+    req.params.collection_id,
+    req.body.people
+  );
   return res.json({ message: "success" });
 });
 
 // ✅
 // MARK: --- NEW ROUTE
 router.put("/removePeopleFromCollection/:collection_id", async (req, res) => {
-  await userController.removeFromVipCollection(req.params.collection_id, req.body.people)
+  await userController.removeFromVipCollection(
+    req.params.collection_id,
+    req.body.people
+  );
   return res.json({ message: "success" });
 });
 
-
+router.get("/getAdminGroups/:uid", async (req, res) => {
+  return res.json(await userController.getAdminGroups(req.params.uid))
+});
 
 export default router;

@@ -11,6 +11,7 @@ import {
 import chatGroupController from "./chatGroupController.js";
 
 export default {
+
   getGroup: async function (gId, requesterId) {
     let group = await PostGroups.findById(gId);
     if (!group) return {};
@@ -46,7 +47,7 @@ export default {
     let posts = await Posts.find({ group_id: gId })
       .populate("author", "name avatarURL")
       .select("-group_id -privacyLevel -updatedAt")
-      .sort({ is_pinned: -1, createdAt: -1 });
+      .sort({ /* is_pinned: -1, */ createdAt: -1 }); // TODO: Fix Pin Logic
 
     return { accessible: true, groupInfo: group, isCreator, isAdmin, posts };
   },
@@ -87,10 +88,10 @@ export default {
       imgUrl,
       is_private,
       admins: [creator_id],
-      aboutGroup, 
+      aboutGroup,
       allowPosting,
       isOfficial,
-      isSociety, 
+      isSociety,
     });
 
     await group.save();
@@ -105,7 +106,7 @@ export default {
     let chat = new Chats({
       type: 1,
       participants: groupMembers,
-      isGroup: true
+      isGroup: true,
     });
 
     await chat.save();
@@ -156,7 +157,6 @@ export default {
   },
 
   joinGroup: async function (gid, uid) {
-  
     let group = await PostGroups.findById(gid).select("is_private name admins");
     if (group.is_private) {
       let request = new GroupRequests({
@@ -164,7 +164,6 @@ export default {
         gid,
       });
       await request.save();
-
 
       // Notify group admins about the request.
       let groupsAdmins = group.admins;

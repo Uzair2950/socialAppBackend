@@ -1,30 +1,62 @@
-import { Friends, GroupMembers, Posts } from "../database/models/models.js";
-import { getFriendsIds } from "../utils/utils.js";
-import studentController from "./studentController.js";
-import userController from "./userController.js";
+import { Types } from "mongoose";
+import {
+  PostInteraction,
+  GroupMembers,
+  Posts,
+  Enrollment,
+  Allocation,
+} from "../database/models/models.js";
+import { getFriendsIds, aggregatePosts } from "../utils/utils.js";
 
 export default {
-  getOfficialWallPosts: async function () {
-    let posts = await Posts.find({ group_id: "6797ebcc37200dbcdec36ba9" })
-      .select(
-        "author is_pinned content updatedAt allowCommenting likes comments attachments"
-      )
-      .populate("author", "name avatarURL")
-      .sort({ updatedAt: -1, is_pinned: -1 });
-
-    return posts;
+  getOfficialWallPosts: async function (uid) {
+    return await aggregatePosts(uid, "6797ebcc37200dbcdec36ba9");
   },
 
-  getClassWallPosts: async function (uid) {
-    let group_id = await studentController.getClassGroupId(uid);
-    let posts = await Posts.find({ group_id: group_id })
-      .select(
-        "author is_pinned content updatedAt allowCommenting likes comments attachments"
-      )
-      .populate("author", "name avatarURL")
-      .sort({ updatedAt: -1, is_pinned: -1 });
+  getClassWallPosts: async function (group_id, uid) {
+    return await aggregatePosts(uid, group_id);
+  },
+  /*
+    @type => type of user, (teacher / student)
+    @uid => userid
+  */
+  getClassWallsData: async function (uid, type) {
+    let collection = Enrollment;
+    if (type != "student") collection = Allocation;
 
-    return posts;
+    let sections = await collection.aggregate([
+      { $match: { student: new Types.ObjectId(uid) } },
+      {
+        $lookup: {
+          from: "sections",
+          foreignField: "_id",
+          localField: "section",
+          as: "sectionData",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                title: 1,
+                group: 1,
+              },
+            },
+          ],
+        },
+      },
+      { $unwind: "$sectionData" },
+      {
+        $replaceRoot: { newRoot: "$sectionData" },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title: { $first: "$title" },
+          group: { $first: "$group" }
+        }
+      }
+    ]);
+
+    return sections;
   },
 
   getSocialFeed: async function (uid) {
@@ -35,7 +67,7 @@ export default {
     let groupIds = getUserGroups.map((e) => e.gid);
 
     // Find posts that are by friends or in joined groups:
-    // group_id: [] if post was in a group that u weren't a part of? but was posted by ur friend
+    // group_id: [] if post was in a group that u aren't a part of? but was posted by ur friend
     return await Posts.find({
       $or: [
         { author: friendsIds, group_id: [] },

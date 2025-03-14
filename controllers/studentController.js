@@ -62,28 +62,7 @@ export default {
   //   return dateSheet;
   // },
 
-  getClassGroupId: async function (uid) {
-    /*
-      {
-        _id: new ObjectId('6754a9268db89992d5b8221e'),
-        type: 'student',
-        uid: {
-          _id: new ObjectId('6754aa7cb893811aa8ed366d'),
-          section: {
-            _id: new ObjectId('671fca9828d6e955a5ecdbb0'),
-            group: new ObjectId('67940a1800543d3d52eeffbc')
-          }
-        }
-      }
-    */
-    let student = await Users.findById(uid)
-      .select("uid type")
-      .populate({
-        path: "uid",
-        select: "section",
-        populate: { path: "section", select: "group" },
-      });
 
-    return student.uid.section.group;
-  },
+
+
 };

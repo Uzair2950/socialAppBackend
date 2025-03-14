@@ -101,10 +101,12 @@ const parseDateSheet = async (filePath) => {
 const parseTimetable = async (filePath) => {
   try {
     let currentSession = (await getCurrentSession())._id;
-    let file = readFile("." + filePath);
+    let file = readFile(/*"." + */filePath);
     let sheet = file.Sheets[file.SheetNames[0]];
 
     let x = utils.sheet_to_json(sheet, { header: "A" });
+
+    console.log(x)
 
     const timetable = [];
     let courseCodes = [];
@@ -141,7 +143,7 @@ const parseTimetable = async (filePath) => {
                 let data = x[j][key].split("_").map((e) => e.trim());
                 let time = timeSlot.split("-").map((e) => e.trim());
 
-                let courseId = await getCourseIdByCode(data[0].trim());
+                let courseId = /*await getCourseIdByCode(data[0].trim())*/data[0].trim();
                 slots[daysMaps[key]].push({
                   course: courseId,
                   venue: data[3],

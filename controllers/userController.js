@@ -6,6 +6,7 @@ import {
   Friends,
   VipCollections,
   GroupMembers,
+  PostGroups,
 } from "../database/models/models.js";
 import notificationController from "./notificationController.js";
 
@@ -30,13 +31,16 @@ export default {
     // Invalid Username and password
     if (!user) return;
 
-    // get alerts
-    let notiCount = await notificationController.getUnreadNotificationCount(
-      user._id
-    );
+    // // get alerts
+    // let notiCount = await notificationController.getUnreadNotificationCount(
+    //   user._id
+    // );
 
     // TODO: Add Message Count!
-    return { id: user._id, notiCount };
+    return await this.getUserData(user._id);
+  },
+  getUserData: async function (uid) {
+    return await Users.findById(uid).select("name type avatarURL").lean();
   },
 
   updateUser: async function (uid, data) {
@@ -184,5 +188,10 @@ export default {
       .lean();
 
     return vipChat;
+  },
+
+  getAdminGroups: async function (uid) {
+    let groups_ids = await PostGroups.find({ admins: uid }).select("_id name isOfficial");
+    return groups_ids;
   },
 };

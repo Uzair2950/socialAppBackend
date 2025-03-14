@@ -147,17 +147,12 @@
   {
     "_id": "ADVANCED PROGRAMMING",
     "totalCourses": 1,
-    "codes": ["CSC252"]
+    "codes": ["CSC252", "CS692"]
   },
   {
     "_id": "ENGLISH COMPOSITION & COMPREHENSION",
     "totalCourses": 1,
-    "codes": ["ENG101"]
-  },
-  {
-    "_id": "ENGLISH COMPREHENSION",
-    "totalCourses": 1,
-    "codes": ["ENG305"]
+    "codes": ["ENG101", "ENG305", "ENG102"]
   },
   {
     "_id": "INTRODUCTION TO MARKETING",
@@ -207,7 +202,7 @@
   {
     "_id": "TRANSLATION OF QURAN II",
     "totalCourses": 1,
-    "codes": ["TOQ102"]
+    "codes": ["TOQ102", "TOQ402"]
   },
   {
     "_id": "ARTIFICIAL NEURAL NETWORKS & DEEP LEARNING",
@@ -300,11 +295,6 @@
     "codes": ["CSC100"]
   },
   {
-    "_id": "FUNCTIONAL ENGLISH",
-    "totalCourses": 1,
-    "codes": ["ENG102"]
-  },
-  {
     "_id": "MOBILE APPLICATION DEVELOPMENT",
     "totalCourses": 1,
     "codes": ["CS693"]
@@ -348,11 +338,6 @@
     "_id": "COMPUTER GRAPHICS",
     "totalCourses": 1,
     "codes": ["CS575"]
-  },
-  {
-    "_id": "TRANSLATION OF QURAN-II",
-    "totalCourses": 1,
-    "codes": ["TOQ402"]
   },
   {
     "_id": "APPLIED PHYSICS",
@@ -488,11 +473,6 @@
     "_id": "COMPUTING VISION",
     "totalCourses": 1,
     "codes": ["CS515"]
-  },
-  {
-    "_id": "VISUAL PROGRAMMING",
-    "totalCourses": 1,
-    "codes": ["CS692"]
   },
   {
     "_id": "INFORMATION TECHNOLOGY INFRASTRUCTURE",

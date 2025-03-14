@@ -56,17 +56,18 @@ const io = new Server(httpServer, {
 });
 
 // After auto-reply
+// Listen 
 io.on("connection", (socket) => {
   console.log("CONNECTED");
 
-  socket.on("test", text => {
-    console.log("test" + text);
-  }) 
+  // socket.on("test", text => {
+  //   console.log("test" + text);
+  // }) 
+  
   socket.on("sendMessage", async ({ chatId, messageId, senderId }) => {
     console.log("SENDING MESSAGE .ON ", { chatId, messageId, senderId });
 
-    
-    
+  
     io.emit(`receiveMessage_${chatId}`, messageId); // Emit the current message
     io.emit(`updateAllChatsView`, chatId, messageId);
 

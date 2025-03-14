@@ -47,9 +47,10 @@ const _Friends = new Schema(
 );
 
 const _Course = new Schema({
-  code: { type: String, required: true }, // without -, for easy handling
-  title: { type: String, required: true },
+  _id: { type: String, required: true },
+  title: String,
 });
+
 
 const _Section = new Schema({
   title: { type: String, required: true, unique: true },
@@ -75,14 +76,14 @@ const _Student = new Schema({
 
 const _Enrollment = new Schema({
   student: { type: Types.ObjectId, ref: "user" },
-  course: { type: Types.ObjectId, ref: "course" },
+  course: { type: String, ref: "course" },
   section: { type: Types.ObjectId, ref: "section" },
   session: { type: Types.ObjectId, ref: "session" },
 });
 
 const _Allocation = new Schema({
   teacher: { type: Types.ObjectId, ref: "user" },
-  course: { type: Types.ObjectId, ref: "course" },
+  course: { type: String, ref: "course" },
   section: [{ type: Types.ObjectId, ref: "section" }],
   session: { type: Types.ObjectId, ref: "session" },
 });
@@ -131,8 +132,6 @@ const _Comment = new Schema(
 const _Post = new Schema(
   {
     author: { type: Types.ObjectId, ref: "user", required: true },
-    group_id: [{ type: Types.ObjectId, ref: "postgroup", default: [] }],
-    is_pinned: { type: Boolean, default: false },
     content: { type: String, default: "" },
     attachments: [{ type: String, default: "" }],
     type: { type: Number, default: 0 },
@@ -140,13 +139,21 @@ const _Post = new Schema(
     // self => <= 2
     // friend => <= 1
     // public => <= 0
-    allowCommenting: { type: Boolean, default: true },
     privacyLevel: { type: Number, enum: [0, 1, 2], default: 0 }, // 0 => Public, 1 => Friends Only 2 => Private
-    likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
-    comments: [{ type: Types.ObjectId, ref: "comment", default: [] }],
   },
   { timestamps: true }
 );
+
+const _PostInteraction = new Schema({
+  post: { type: Types.ObjectId, ref: "post", required: true },
+  poster: { type: Types.ObjectId, ref: "user", required: true },
+  group_id: { type: Types.ObjectId, ref: "postgroup", default: null },
+  is_pinned: { type: Boolean, default: false },
+  allowCommenting: { type: Boolean, default: true },
+  likes: [{ type: Types.ObjectId, ref: "user", default: [] }],
+  comments: [{ type: Types.ObjectId, ref: "comment", default: [] }],
+  expireAfter: { type: Date, default: null },
+});
 
 const _GroupRequests = new Schema(
   {
@@ -241,10 +248,20 @@ const _Community = new Schema({
 const _Notification = new Schema(
   {
     user: { type: Types.ObjectId, ref: "user" },
+    actor: { type: Types.ObjectId, ref: "user" },
     content: { type: String, required: true },
     type: {
       type: String,
-      enum: ["message", "post", "friendRequest", "welcome", "general"],
+      enum: [
+        "message",
+        "post",
+        "friendRequest",
+        "welcome_community",
+        "welcome_group",
+        "general",
+        "like",
+        "comment",
+      ],
       required: true,
       default: "general",
     },
@@ -255,77 +272,79 @@ const _Notification = new Schema(
   { timestamps: true }
 );
 
+
 const _TimeTable = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
   section: { type: Types.ObjectId, ref: "section" },
   slots: {
-    monday: [
-      {
-        type: {
-          course: { type: Types.ObjectId, ref: "course", required: true },
+    monday: {
+      type: [
+        {
+          courseMap: { type: [String], default: [] },
+          course: { type: String, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
-          time: String,
           instructors: String,
         },
-        default: [],
-      },
-    ],
-    tuesday: [
-      {
-        type: {
-          course: { type: Types.ObjectId, ref: "course", required: true },
+      ],
+      default: [],
+    },
+    tuesday: {
+      type: [
+        {
+          courseMap: { type: [String], default: [] },
+          course: { type: String, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
-          time: String,
           instructors: String,
         },
-        default: [],
-      },
-    ],
-    wednesday: [
-      {
-        type: {
-          course: { type: Types.ObjectId, ref: "course", required: true },
+      ],
+      default: [],
+    },
+    wednesday: {
+      type: [
+        {
+          courseMap: { type: [String], default: [] },
+          course: { type: String, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
-          time: String,
           instructors: String,
         },
-        default: [],
-      },
-    ],
-    thursday: [
-      {
-        type: {
-          course: { type: Types.ObjectId, ref: "course", required: true },
+      ],
+      default: [],
+    },
+    thursday: {
+      type: [
+        {
+          courseMap: { type: [String], default: [] },
+          course: { type: String, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
-          time: String,
           instructors: String,
         },
-        default: [],
-      },
-    ],
-    friday: [
-      {
-        type: {
-          course: { type: Types.ObjectId, ref: "course", required: true },
+      ],
+      default: [],
+    },
+    friday: {
+      type: [
+        {
+          courseMap: { type: [String], default: [] },
+          course: { type: String, ref: "course", required: true },
           venue: String,
           start_time: String,
           end_time: String,
-          time: String,
           instructors: String,
         },
-        default: [],
-      },
-    ],
+      ],
+      default: [],
+    },
   },
 });
+
 
 // const _Slot = new Schema({
 //   //  course: { type: Types.ObjectId, ref: "course", required: true },
@@ -340,7 +359,7 @@ const _TimeTable = new Schema({
 const _DateSheet = new Schema({
   session: { type: Types.ObjectId, ref: "session" },
   type: { type: String, enum: ["Mid", "Final"], default: "Mid" },
-  course_id: { type: Types.ObjectId, ref: "course" },
+  course_id: { type: String, ref: "course" },
   day: String,
   time: String,
   commenced: { type: Boolean, default: false },
@@ -365,6 +384,7 @@ const Users = model("user", _User);
 const ChatSettings = model("chatsettings", _ChatSettings);
 const Friends = model("friend", _Friends);
 const Courses = model("course", _Course);
+
 const Sections = model("section", _Section);
 const Administrators = model("administrator", _Administrator);
 const VipCollections = model("vipcollection", _VipCollections);
@@ -375,6 +395,7 @@ const Allocation = model("allocation", _Allocation);
 const Messages = model("message", _Message);
 const Comments = model("comment", _Comment);
 const Posts = model("post", _Post);
+const PostInteraction = model("postinteraction", _PostInteraction);
 const PostGroups = model("postgroup", _PostGroup);
 const ChatGroups = model("chatgroup", _ChatGroup);
 const Chats = model("chat", _Chat); // for personal
@@ -390,6 +411,9 @@ const TimeTable = model("timetable", _TimeTable);
 const Datesheet = model("datesheet", _DateSheet);
 const AutoReply = model("autoreply", _AutoReply);
 const ScheduledMessages = model("scheduledmessage", _ScheduledMessages);
+const CourseMap = model("coursemap", new Schema({
+  courses: [{ type: String, ref: "course", required: true }]
+}))
 
 export {
   Users,
@@ -397,12 +421,14 @@ export {
   VipCollections,
   Friends,
   Courses,
+  CourseMap,
   Sections,
   Teachers,
   Students,
   Messages,
   Comments,
   Posts,
+  PostInteraction,
   PostGroups,
   Chats,
   ChatGroups,
