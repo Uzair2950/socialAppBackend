@@ -7,6 +7,7 @@ import {
   VipCollections,
   GroupMembers,
   PostGroups,
+  ChatSettings,
 } from "../database/models/models.js";
 import notificationController from "./notificationController.js";
 
@@ -124,8 +125,18 @@ export default {
     return [...friends, ...friends2];
   },
 
-  toggleAutoReply: async function (uid) {
-    let user = await Users.findById(uid);
+  getPeopleNotInVip: async function (uid) {
+    let friends = await this.getFriends(uid);
+    let vipCollectionIds = (await this.getVipCollection(uid))?.people.map(e => e._id.toString());
+    console.log(vipCollectionIds)
+    let notInVip = friends.filter(e => !vipCollectionIds.includes(e._id.toString()))
+
+    return notInVip;
+
+  },
+
+  toggleAutoReply: async function (uid, chatId) {
+    let user = await ChatSettings.findOne({ uid, chat: chatId });
     user.autoReply = !user.autoReply;
     await user.save();
   },
@@ -191,7 +202,8 @@ export default {
   },
 
   getAdminGroups: async function (uid) {
-    let groups_ids = await PostGroups.find({ admins: uid }).select("_id name isOfficial");
+    console.log(uid)
+    let groups_ids = await PostGroups.find({ admins: uid }).select("_id name imgUrl isOfficial");
     return groups_ids;
   },
 };

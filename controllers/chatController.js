@@ -9,7 +9,7 @@ import {
   ChatGroups,
 } from "../database/models/models.js";
 
-import { getNewMessageCount } from "../utils/utils.js";
+import { getNewMessageCount, isAutoReplyEnabled } from "../utils/utils.js";
 
 let filter = new Filter(); // Language Filter
 
@@ -70,7 +70,10 @@ export default {
   },
 
   getAutoReplies: async function (user, chat) {
-    return await AutoReply.find({ user, chat }).select("_id message reply");
+    let isEnabled = await isAutoReplyEnabled(user, chat);
+
+    let chats = await AutoReply.find({ user, chat }).select("_id message reply");
+    return { isEnabled, autoReplies: chats }
   },
 
   addAutoReply: async function (uid, chat, autoreplies) {
@@ -283,6 +286,60 @@ export default {
     return transformedChats;
   },
 
+  getAllChats_short: async function (uid) {
+    let userChats = await Users.findById(uid)
+      .select("activeChats groupChats -_id")
+      .populate({
+        path: "groupChats",
+        select: "chat name avatarURL",
+      });
+    let groupChats = userChats.groupChats.map((e) => e.chat);
+
+
+
+    let chats = await Chats.find(
+      { _id: [...groupChats, ...userChats.activeChats] },
+      {
+        isGroup: 1,
+        participants: {
+          $elemMatch: { $ne: uid },
+        },
+      },
+    ).populate([
+      {
+        path: "participants",
+        select: "name avatarURL",
+      },
+    ]);
+
+
+    let transformedChats = await Promise.all(
+      chats.map(async (e) => {
+        let obj = {
+          _id: e._id,
+          name: e.participants[0]?.name ?? "",
+          avatarURL: e.participants[0]?.avatarURL ?? "",
+          isGroup: false,
+        };
+        if (e.isGroup) {
+          let chatGroupDetails = userChats.groupChats.filter(
+            (i) => i.chat.toString() == e._id.toString()
+          )[0];
+
+          obj.name = chatGroupDetails.name
+          obj.avatarURL = chatGroupDetails.avatarURL
+          obj.isGroup = true
+
+        }
+
+        return obj;
+      })
+    );
+
+    return transformedChats;
+
+  },
+
   // NOTE: Read Logic will be handled on frontned.
   getChat: async function (chatId, uid = "", newMessageCount = 0) {
     if (newMessageCount == NaN) newMessageCount = 0;
@@ -309,6 +366,7 @@ export default {
 
     return chat;
   },
+
 
   getMessage: async function (mid, uid) {
     let message = await Messages.findById(mid)
@@ -388,18 +446,12 @@ export default {
 
   // Scheduler;
   scheduleMessages: async function (
-    personalChats = [],
-    groupChats = [],
+    chats,
     messageContent,
-    messageAttchments,
+    messageAttchments = [],
     senderId,
     pushTime
   ) {
-    let groupChatsIds = await ChatGroups.find({ _id: groupChats }).select(
-      "chat"
-    );
-    // Find Chats of groupChats
-    let chats = [...groupChatsIds.map((e) => e.chat), ...personalChats];
     let message = new Messages({
       content: filter.clean(messageContent),
       attachments: messageAttchments,
@@ -421,4 +473,19 @@ export default {
   deleteScheduledMessage: async function (mid) {
     await ScheduledMessages.findByIdAndDelete(mid);
   },
+
+  /////
+
+  modifyAutoReplies: async function (obj) {
+    let { uid, chatId, autoReply, edits, newreplies } = obj;
+    console.log(uid, chatId, autoReply, edits, newreplies)
+    await ChatSettings.updateOne({ uid, chat: chatId }, { autoReply }) // Toggle
+
+    if (edits.length > 0)
+      await Promise.all(edits.map(async e => {
+        console.log(await AutoReply.findByIdAndUpdate(e.id, { message: e.message, reply: e.reply }))
+      }))
+    if (newreplies.length > 0)
+      console.log(await AutoReply.insertMany(newreplies))
+  }
 };

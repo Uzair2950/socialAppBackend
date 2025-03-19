@@ -156,7 +156,7 @@ router.get("/getProfile/:id/:requester_id", async (req, res) => {
 
 // ✅
 
-// MARK: --- NEW ROUTE
+
 router.get("/getGroups/:uid", async (req, res) => {
   return res.json(await userController.getGroups(req.params.uid));
 });
@@ -167,25 +167,31 @@ router.get("/getGroups/:uid", async (req, res) => {
 
 */
 // ✅
-router.post("/toggleAutoReply/:uid", async (req, res) => {
-  await userController.toggleAutoReply(req.params.uid);
+router.post("/toggleAutoReply/:uid/:chatId", async (req, res) => {
+  await userController.toggleAutoReply(req.params.uid, req.params.chatId);
   return res.json({ message: "success" });
 });
+
+
 
 // == VIP COLLECTION
 // ✅
 
-// MARK: --- NEW ROUTE
+
 router.get("/getVipChat/:uid", async (req, res) => {
   return res.json(await userController.getVipChat(req.params.uid));
 });
 
-// MARK: --- NEW ROUTE
+router.get("/getPeopleNotInCollection/:uid", async (req, res) => {
+  return res.json(await userController.getPeopleNotInVip(req.params.uid))
+})
+
+
 router.get("/getVipCollection/:uid", async (req, res) => {
   return res.json(await userController.getVipCollection(req.params.uid));
 });
 
-// MARK: --- NEW ROUTE
+
 router.post("/createVipCollection/:uid", async (req, res) => {
   return res.json({
     id: await userController.createVipCollection(
@@ -196,7 +202,7 @@ router.post("/createVipCollection/:uid", async (req, res) => {
 });
 
 // ✅
-// MARK: --- NEW ROUTE
+
 router.delete("/deleteVipCollection/:collection_id", async (req, res) => {
   await userController.deleteVipCollection(req.params.collection_id);
   return res.json({
@@ -205,17 +211,18 @@ router.delete("/deleteVipCollection/:collection_id", async (req, res) => {
 });
 
 // ✅
-// MARK: --- NEW ROUTE
+
 router.put("/addPeopleInCollection/:collection_id", async (req, res) => {
   await userController.addPeopleInVipCollection(
     req.params.collection_id,
     req.body.people
   );
+  console.log(req.body)
   return res.json({ message: "success" });
 });
 
 // ✅
-// MARK: --- NEW ROUTE
+
 router.put("/removePeopleFromCollection/:collection_id", async (req, res) => {
   await userController.removeFromVipCollection(
     req.params.collection_id,

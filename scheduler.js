@@ -16,6 +16,13 @@ const startMessageScheduler = () => {
         pushTime: { $lte: date },
       });
 
+      if (scheduledMessages.length > 0) {
+        console.log("==================================================")
+        console.log("SCHEDULER AT WORK")
+        console.log("==================================================")
+        console.log(scheduledMessages);
+      }
+
       let scheduledIds = scheduledMessages.map((e) => e._id);
 
       await ScheduledMessages.deleteMany({ _id: scheduledIds }); // Delete

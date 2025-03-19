@@ -47,6 +47,10 @@ router.get("/getChat/:cid/:uid/:messageCount", async (req, res) => {
   );
 });
 
+router.get("/getChats_short/:uid", async (req, res) => {
+  return res.json(await chatController.getAllChats_short(req.params.uid))
+})
+
 // ✅
 router.get("/getChatSettings/:chat/:uid", async (req, res) => {
   return res.json(
@@ -83,7 +87,7 @@ router.post(
   }
 );
 
-// MARK: --- NEW ROUTE (UPDATED)
+
 // cid -> chatId
 // ✅
 router.delete("/deleteMessage/:mid/:cid", async (req, res) => {
@@ -123,8 +127,13 @@ router.put("/editAutoReply/:rid", async (req, res) => {
 });
 
 // ✅
-router.delete("/removeAutoReply/:id", async (req, res) => {
+router.put("/removeAutoReply/:id", async (req, res) => {
   await chatController.removeAutoReply(req.params.id);
+  return res.json({ message: "success" });
+});
+
+router.put("/modifyAutoReplies/", async (req, res) => {
+  await chatController.modifyAutoReplies(req.body);
   return res.json({ message: "success" });
 });
 
@@ -146,15 +155,13 @@ router.post(
   "/scheduleMessage",
   messageAttchments.array("messageAttchments"),
   async (req, res) => {
-    console.log(req.body)
-    // groupChats: [], personalChats: []
-    let { personalChats, groupChats, messageContent, senderId, pushTime } =
-      req.body;
 
+    let { chats, messageContent, senderId, pushTime } =
+      req.body;
+    console.log(req.body)
 
     let id = await chatController.scheduleMessages(
-      personalChats,
-      groupChats,
+      chats,
       messageContent,
       req.files?.map((e) => `${destination}/${e.filename}`),
       senderId,

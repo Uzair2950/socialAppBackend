@@ -8,33 +8,52 @@ import {
   getCurrentSession,
   getStudentSections,
   getCurrentSessionId,
+  intersection,
+  sortTimetable
 } from "../utils/utils.js";
 
 export default {
   getTimeTable: async function (uid) {
     const mergedSlots = {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
+      Monday: { slots: [] },
+      Tuesday: { slots: [] },
+      Wednesday: { slots: [] },
+      Thursday: { slots: [] },
+      Friday: { slots: [] },
     };
 
     let sections = await getStudentSections(uid);
+    let sectionKeys = {}
+    sections.map(e => (sectionKeys = { ...sectionKeys, [e._id]: e.courses }))
 
-    let timeTable = await TimeTable.find({ section: { $in: sections } })
-      .select("slots")
-      .populate({
-        path: "slots.monday slots.thursday slots.wednesday slots.thursday slots.friday",
-        options: { sort: { start_time: 1 } },
-        populate: [{ path: "course", model: "course", select: "title -_id" }],
-      });
+    let timetable = await TimeTable.find({
+      section: Object.keys(sectionKeys)
+    }).populate({
+      path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
+      populate: [{ path: "course", model: "course", select: "title" }],
+    }).lean()
 
-    timeTable.forEach((table) => {
+    let timetablex = timetable.map(e => {
+      return {
+        ...e, slots: {
+          Monday: e.slots.monday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+          Tuesday: e.slots.tuesday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+          Wednesday: e.slots.wednesday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+          Thursday: e.slots.thursday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+          Friday: e.slots.friday.filter(s => intersection(s.courseMap, sectionKeys[e.section]))
+        }
+      }
+    })
+
+    timetablex.forEach((table) => {
       Object.keys(table.slots).forEach((day) => {
-        mergedSlots[day] = mergedSlots[day].concat(table.slots[day]);
+        mergedSlots[day].slots = mergedSlots[day].slots.concat(table.slots[day]);
       });
     });
+
+    Object.keys(mergedSlots).map(key => {
+      mergedSlots[key].slots = sortTimetable(mergedSlots[key].slots);
+    })
 
     return mergedSlots;
   },
@@ -61,8 +80,4 @@ export default {
 
   //   return dateSheet;
   // },
-
-
-
-
 };

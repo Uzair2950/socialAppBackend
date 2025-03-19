@@ -1,0 +1,100 @@
+[
+  {
+    "A": " BS(CS), BS(SE),BS(IT) "
+  },
+  {
+    "A": "   Final Exam Date Sheet Spring Semester (2024)"
+  },
+  {
+    "A": "Time: 2:00 PM - 5:00 PM"
+  },
+  {
+    "A": "Venue: BIIT Campus"
+  },
+  {
+    "A": "Day",
+    "B": "Date",
+    "C": "BS(CS)-1A,B,C,D        (GC & AI)",
+    "D": "BS(SE)-1A",
+    "E": "BS(CS)-2A,B,C,D               (GC & AI)",
+    "F": "BS(SE)-2A,B",
+    "G": "BS(CS)-1                                                                                                                                                                                                                                                                                                                                                         BS(SE)-1",
+    "H": "BS(CS)-3A,B,C                (GC & AI)",
+    "I": "BS(SE)-3A                 ",
+    "J": "BS(CS)-4A,B,C,D (GC)",
+    "K": "BS(CS)-4A,B (AI)",
+    "L": "BS(SE)-4A,B",
+    "M": "BS(CS)-5A (GC)",
+    "N": "BS(CS)-5A (AI)",
+    "O": "BS(CS)-6A,B,C (GC)",
+    "P": "BS(CS)-6A (AI)",
+    "Q": "BS(CS)-7A",
+    "R": "BS(CS)-8A,B,C,D",
+    "S": "BSIT-8A,B",
+    "T": "BSCS/BSIT-9",
+    "U": "BSCS/BSIT-10",
+    "V": "BSCS/BSIT-11",
+    "W": "BSCS/BSIT-12",
+    "X": "Total"
+  },
+  {
+    "A": "Mon",
+    "B": "01-07-2024",
+    "H": "CSC-202            Information Security",
+    "I": "CSC-202            Information Security",
+    "M": "CS-666\nWeb Engineering",
+    "N": "CS-405\nArtificial Neural Network",
+    "Q": "CS-497\nInformation Security",
+    "R": "CS-497\nInformation Security",
+    "T": "CS-684            Network Management and Security"
+  },
+  {
+    "A": "Tue",
+    "B": "02-07-2024",
+    "E": "MTH-102\nMultivariable Calculus",
+    "F": "MTH-102\nMultivariable Calculus",
+    "M": "MGT-515\nIntroduction to Human Resource Management",
+    "N": "MGT-515\nIntroduction to Human Resource Management",
+    "O": "MGT-515\nIntroduction to Human Resource Management",
+    "P": "CS-542\nAnalysis of Algorithms"
+  },
+  {
+    "A": "Wed",
+    "B": "03-07-2024",
+    "E": "CSC-111\nDigital Logic Design",
+    "F": "CSC-111\nDigital Logic Design",
+    "J": "CSC-302\nTheory of Automata ",
+    "L": "CSC-302\nTheory of Automata ",
+    "Q": "CS-693\nMobile Application Development",
+    "T": "CS-432\nModern Programming Language"
+  },
+  {
+    "A": "Thu",
+    "B": "04-07-2024",
+    "E": " MTH-103\n Linear Algebra",
+    "F": " MTH-103\n Linear Algebra",
+    "H": "CSC-204\nComputer Networks",
+    "I": "CSC-204\nComputer Networks",
+    "M": "CS-577\nComputer Networks",
+    "N": "CS-577\nComputer Networks"
+  },
+  {
+    "A": "Fri",
+    "B": "05-07-2024",
+    "E": "CSC-102\nObject Oriented Programmig ",
+    "F": "CSC-102\nObject Oriented Programmig ",
+    "J": "IS-201\nIslamic Studies ",
+    "K": "IS-201\nIslamic Studies ",
+    "L": "IS-201\nIslamic Studies "
+  },
+  {
+    "A": "Sat",
+    "B": "06-07-2024",
+    "E": "CSC-103\nDatabase Systems ",
+    "F": "CSC-103\nDatabase Systems ",
+    "J": "CSC-303\nAdvanced Database Management System",
+    "O": "CS-601\nDatabase Administration and Management",
+    "W": "CS-600\nDistributed Database System",
+    "X": "CS-789                (Network Manage Security"
+  }
+]

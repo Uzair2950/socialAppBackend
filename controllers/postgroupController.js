@@ -13,43 +13,34 @@ import chatGroupController from "./chatGroupController.js";
 export default {
 
   getGroup: async function (gId, requesterId) {
-    let group = await PostGroups.findById(gId);
+    let group = await PostGroups.findById(gId)
+      .select("-updatedAt -isSociety -createdAt -isOfficial -updatedAt -__v");
     if (!group) return {};
 
-    /*
-
-        Offical groups handling
-
-    */
-
     let isAdmin = group.admins.includes(requesterId);
+    let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
 
-    if (group.isOfficial) {
-      if (!isAdmin) return { accessible: false };
-    } else {
-      let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
-
-      if (!isMember && group.is_private) {
-        return {
-          name: group.name,
-          imgUrl: group.imgUrl,
-          totalMembers: group.totalMembers,
-          is_private: group.is_private,
-          isMember: false,
-          accessible: true,
-        };
-      }
+    if (!isMember && group.is_private) {
+      return {
+        name: group.name,
+        imgUrl: group.imgUrl,
+        totalMembers: group.totalMembers,
+        is_private: group.is_private,
+        isMember: false,
+      };
     }
+
 
     let isCreator = group.admins[0] == requesterId;
 
+    //TODO: Fix This!!!!!!!!
     // TODO: ADD PAGINATION FOR INIFINITE SCROLLING
     let posts = await Posts.find({ group_id: gId })
       .populate("author", "name avatarURL")
       .select("-group_id -privacyLevel -updatedAt")
       .sort({ /* is_pinned: -1, */ createdAt: -1 }); // TODO: Fix Pin Logic
 
-    return { accessible: true, groupInfo: group, isCreator, isAdmin, posts };
+    return { groupInfo: group, isCreator, isAdmin, isMember: true, posts };
   },
 
   newHybribGroup: async function (

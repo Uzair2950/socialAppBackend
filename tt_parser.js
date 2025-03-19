@@ -55,7 +55,6 @@ for (var day in groupedByDays) {
     for (var timeSlot of daySlot) {
         let time = timeSlot.time.split("-");
         let slots = timeSlot.slots;
-        console.log("Time = " + time);
         for (var slot of slots) {
             let slotData = slot.split("_");
             let code = slotData[0].trim().split("-").join("");

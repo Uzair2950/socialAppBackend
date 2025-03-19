@@ -20,6 +20,7 @@ import {
   VipCollections,
   Friends,
   CourseMap,
+  ChatSettings,
 } from "./database/models/models.js";
 import postgroupController from "./controllers/postgroupController.js";
 import { Types } from "mongoose";
@@ -32,12 +33,15 @@ import {
   vipMessageHandling,
   getFriendsIds,
 } from "./utils/utils.js";
+
+import { writeFile } from "fs";
 import postController from "./controllers/postController.js";
 import chatController from "./controllers/chatController.js";
 
 import { getNewMessageCount, getMessageContent } from "./utils/utils.js";
 import { parseTimetable } from "./xlparser.js";
 import { model, Schema } from "mongoose";
+import { effect } from "zod";
 
 let db = await connectDB();
 
@@ -575,55 +579,182 @@ let currSession = (await getCurrentSession())._id;
 //   ]
 // })
 
-let tts = await TimeTable.aggregate([
-  {
-    $match: { section: new Types.ObjectId("671fca9828d6e955a5ecdbb0") }
-  },
-  {
-    $project: {
-      _id: 1,
-      session: 1,
-      section: 1,
-      "slots.monday": {
-        $filter: {
-          input: "$slots.monday",
-          as: "slot",
-          cond: { $in: ["CS636", "$$slot.courseMap"] }
-        }
-      },
-      "slots.tuesday": {
-        $filter: {
-          input: "$slots.tuesday",
-          as: "slot",
-          cond: { $in: ["CS636", "$$slot.courseMap"] }
-        }
-      },
-      "slots.wednesday": {
-        $filter: {
-          input: "$slots.wednesday",
-          as: "slot",
-          cond: { $in: ["CS636", "$$slot.courseMap"] }
-        }
-      },
-      "slots.thursday": {
-        $filter: {
-          input: "$slots.thursday",
-          as: "slot",
-          cond: { $in: ["CS636", "$$slot.courseMap"] }
-        }
-      },
-      "slots.friday": {
-        $filter: {
-          input: "$slots.friday",
-          as: "slot",
-          cond: { $in: ["CS636", "$$slot.courseMap"] }
-        }
-      },
-    }
-  }
-])
+// let enrol = await Enrollment.aggregate([
+//   {
+//     $match: { student: new Types.ObjectId(myId) },
+//   },
+//   {
+//     $group: { _id: "$section", courses: { $addToSet: "$course" } }
+//   }
+// ])
 
-console.log(JSON.stringify(tts, null, 2))
-// console.log(tts)
+let sectionKeys = {
+  '671fca9828d6e955a5ecdbb0': ['TOQ201', 'ENG401', 'CS636'],
+  '676de49c84c54a58fa7a78d4': ['CSC103'],
+  '671fca9828d6e955a5ecdbb4': ['CS693']
+}
 
+let enrol = Object.keys(sectionKeys)
+// enrol.map(e => (sectionKeys = { ...sectionKeys, [e._id]: e.courses }))
+// console.log(sectionKeys)
+
+
+
+
+// let tts = await TimeTable.aggregate([
+//   {
+//     $match: { section: new Types.ObjectId(section1._id) }
+//   },
+//   {
+//     $lookup: {
+//       from: "courses",
+//       localField: "slots.monday.course",
+//       foreignField: "_id",
+//       as: "course"
+//     }
+//   }
+
+//   // {
+//   //   $project: {
+//   //     _id: 1,
+//   //     session: 1,
+//   //     section: 1,
+//   //     "slots.monday": {
+//   //       $filter: {
+//   //         input: "$slots.monday",
+//   //         as: "slot",
+//   //         cond: {
+//   //           $anyElementTrue: {
+//   //             $setIntersection: [section1.courses, "$$slot.courseMap"]
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //     "slots.tuesday": {
+//   //       $filter: {
+//   //         input: "$slots.tuesday",
+//   //         as: "slot",
+//   //         cond: {
+//   //           $anyElementTrue: {
+//   //             $setIntersection: [section1.courses, "$$slot.courseMap"]
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //     "slots.wednesday": {
+//   //       $filter: {
+//   //         input: "$slots.wednesday",
+//   //         as: "slot",
+//   //         cond: {
+//   //           $anyElementTrue: {
+//   //             $setIntersection: [section1.courses, "$$slot.courseMap"]
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //     "slots.thursday": {
+//   //       $filter: {
+//   //         input: "$slots.thursday",
+//   //         as: "slot",
+//   //         cond: {
+//   //           $anyElementTrue: {
+//   //             $setIntersection: [section1.courses, "$$slot.courseMap"]
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //     "slots.friday": {
+//   //       $filter: {
+//   //         input: "$slots.friday",
+//   //         as: "slot",
+//   //         cond: {
+//   //           $anyElementTrue: {
+//   //             $setIntersection: [section1.courses, "$$slot.courseMap"]
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //   }
+//   // }
+// ])
+
+// let tts = await TimeTable.find({ section: enrol.map(e => e._id) }).populate({
+//   path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
+//   options: { sort: { start_time: 1 } },
+//   populate: [{ path: "course", model: "course", select: "title" }],
+// });
+
+
+// let pipelines = enrol.map(e => ({
+//   $and: [
+//     { section: e._id },//.map(e => e._id),
+//     {
+//       $or: [
+//         { "slots.monday.course": e.courses },
+//         { "slots.tuesday.course": e.courses },
+//         { "slots.wednesday.course": e.courses },
+//         { "slots.thursday.course": e.courses },
+//         { "slots.friday.course": e.courses },
+//       ]
+//     }
+//   ],
+// }))
+
+// console.log(JSON.stringify(pipelines, null, 2))
+// let tts = await TimeTable.find({
+//   // $or: [
+//   //   ...pipelines
+//   // ]
+//   section: enrol.map(e => e._id)
+// }).populate({
+//   path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
+//   options: { sort: { start_time: 1 } },
+//   populate: [{ path: "course", model: "course", select: "title" }],
+// })
+
+// let tts = await TimeTable.find({
+//   section: enrol//enrol.map(e => e._id)
+// }).populate({
+//   path: "slots.monday slots.tuesday slots.wednesday slots.thursday slots.friday",
+//   populate: [{ path: "course", model: "course", select: "title" }],
+// }).lean()
+
+// function intersection(arr1, arr2) {
+//   return (arr1.filter(item => arr2.includes(item))).length > 0;
+// }
+
+// let timetablex = tts.map(e => {
+//   return {
+//     ...e, slots: {
+//       monday: e.slots.monday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+//       tuesday: e.slots.tuesday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+//       wednesday: e.slots.wednesday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+//       thursday: e.slots.thursday.filter(s => intersection(s.courseMap, sectionKeys[e.section])),
+//       friday: e.slots.friday.filter(s => intersection(s.courseMap, sectionKeys[e.section]))
+//     }
+//   }
+// })
+
+// const mergedSlots = {
+//   monday: [],
+//   tuesday: [],
+//   wednesday: [],
+//   thursday: [],
+//   friday: [],
+// };
+// timetablex.forEach((table) => {
+//   Object.keys(table.slots).forEach((day) => {
+//     mergedSlots[day] = mergedSlots[day].concat(table.slots[day]);
+//   });
+// });
+// console.log(mergedSlots.monday.map(e => (e.start_time)).sort((a, b) => a - b))
+// console.log(JSON.stringify(timetablex, null, 2))
+
+// writeFile("tt.json", JSON.stringify(mergedSlots, null, 2), (err) => { })
+
+
+// await Users.updateMany({}, { $unset: { autoReply: "" } });
+// console.log(await Users.updateMany({}, { $unset: { autoReply: "" } }, { strict: false }))
+
+console.log(await ChatSettings.updateMany({}, { autoReply: true }))
 db.disconnect();

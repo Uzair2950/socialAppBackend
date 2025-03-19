@@ -13,7 +13,8 @@ import {
   Courses,
   Friends,
   PostInteraction,
-  CourseMap
+  CourseMap,
+  ChatSettings
 } from "../database/models/models.js";
 
 
@@ -27,11 +28,17 @@ const getCurrentSessionId = async () => {
   return (await getCurrentSession())._id;
 };
 
+const intersection = (arr1, arr2) =>
+  (arr1.filter(item => arr2.includes(item))).length > 0;
 const getStudentSections = async (sid) => {
-  return await Enrollment.find({
-    student: sid,
-    session: (await getCurrentSession())._id,
-  }).distinct("section");
+  return await Enrollment.aggregate([
+    {
+      $match: { $and: [{ session: (await getCurrentSession())._id, }, { student: new Types.ObjectId(sid) }] },
+    },
+    {
+      $group: { _id: "$section", courses: { $addToSet: "$course" } }
+    }
+  ])
 };
 
 const getCourseIdByCode = async (courseCode) => {
@@ -75,8 +82,9 @@ const isGroupChat = async (chatId) => {
   return chat == null ? false : true;
 };
 
-const isAutoReplyEnabled = async (uid) => {
-  let user = await Users.findOne({ _id: uid, autoReply: true }).select("_id");
+const isAutoReplyEnabled = async (uid, chatId) => {
+  let user = await ChatSettings.findOne({ uid, chat: chatId, autoReply: true }).select("_id");
+  console.log(user)
   return user ? true : false;
 };
 
@@ -247,6 +255,24 @@ const vipMessageHandling = async (senderId, messageId, chatId) => {
   );
 };
 
+const sortTimetable = (arr) => arr.sort((a, b) => {
+  const getMinutes = (timeStr) => {
+    let [hours, minutes] = timeStr.split(':').map(Number);
+
+
+    if (hours < 8) {
+      hours += 12; // Assume times like 2:00, 3:00, etc. are PM
+    }
+
+    return hours * 60 + minutes;
+  };
+
+  const aMinutes = getMinutes(a.start_time);
+  const bMinutes = getMinutes(b.start_time);
+
+  return aMinutes - bMinutes;
+});
+
 const getFriendsIds = async (uid) => {
   let friends = await Friends.find({
     status: "accepted",
@@ -257,8 +283,19 @@ const getFriendsIds = async (uid) => {
 };
 
 const getCoursesMapping = async (code) => {
-  return (await CourseMap.findOne({ courses: code }).select("-_id courses")).courses;
+  let courses = await CourseMap.findOne({ courses: code }).select("-_id courses");
+  // console.log(courses)
+  if (courses != null) return courses.courses
+  return [code];
+  // return;
 }
+
+const getSections = async () => Sections.find().select("title _id").then(sections =>
+  sections.reduce((acc, section) => {
+    acc[section.title] = section._id;
+    return acc;
+  }, {})
+);
 
 export {
   getOtherParticipant,
@@ -274,5 +311,9 @@ export {
   getCourseIdByCode,
   getFriendsIds,
   aggregatePosts,
-  getCoursesMapping
+  getCoursesMapping,
+  intersection,
+  getSections,
+  sortTimetable,
+  isAutoReplyEnabled
 };

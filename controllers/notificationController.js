@@ -8,7 +8,9 @@ export default {
     let notifications = await Notifications.find({
       user: uid,
       // isRead: false,
-    }).populate('actor', '-_id name').select("content image1 image2");
+    })
+      .populate('actor', '-_id name').select("content image1 image2 createdAt")
+      .sort({ createdAt: -1 })
     let ids = notifications.map((e) => e._id);
     // update all notifiactions to them as Read
 

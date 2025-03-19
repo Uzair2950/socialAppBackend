@@ -10,7 +10,6 @@ const _User = new Schema({
     enum: ["student", "teacher", "administrator"],
     default: "student",
   },
-  autoReply: { type: Boolean, default: false },
   avatarURL: { type: String, default: "/static/avatars/default_avatar.png" },
   is_private: { type: Boolean, default: false },
   bio: { type: String, default: "" },
@@ -33,6 +32,7 @@ const _VipCollections = new Schema({
 const _ChatSettings = new Schema({
   uid: { type: Types.ObjectId, ref: "user" }, // Whose settings
   chat: { type: Types.ObjectId, ref: "chat" }, // Which Chat
+  autoReply: { type: Boolean, default: false },
   autoDownload: { type: Boolean, default: false },
   autoDownloadDirectory: { type: String, default: "" },
 });
