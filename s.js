@@ -3,11 +3,16 @@ import { writeFile } from "fs";
 import { connectDB } from "./database/db.js";
 import pkg from "xlsx";
 const { readFile, utils } = pkg;
+import { difference, intersection, union } from "set-operations";
 import {
 
+  ChatGroups,
   Chats,
+  Communities,
+  CommunityMembers,
   Courses,
   Enrollment,
+  GroupMembers,
   PostGroups,
   PostInteraction,
   Posts,
@@ -80,68 +85,130 @@ for (let i = 0; i < sheetNames.length; i++) {
 // }))
 
 
-async function getAllChats_short(uid) {
-  let userChats = await Users.findById(uid)
-    .select("activeChats groupChats -_id")
-    .populate({
-      path: "groupChats",
-      select: "chat name avatarURL",
-    });
-  let groupChats = userChats.groupChats.map((e) => e.chat);
-
-  let chats = await Chats.aggregate([{
-    $match: { _id: { $in: [...groupChats, ...userChats.activeChats] } }
-    
-  }])
-
-  // let chats = await Chats.find(
-  //   { _id: [...groupChats, ...userChats.activeChats] },
-  //   {
-  //     isGroup: 1,
-  //     participants: {
-  //       $elemMatch: { $ne: uid },
-  //     },
-  //   },
-  // ).populate([
-  //   {
-  //     path: "participants",
-  //     select: "name avatarURL",
-  //   },
-  // ]);
-
-  console.log(chats)
-
-  // let transformedChats = await Promise.all(
-  //   chats.map(async (e) => {
-  //     let chatInfo = {
-  //       _id: e.participants[0]?._id ?? "",
-  //       name: e.participants[0]?.name ?? "",
-  //       avatarURL: e.participants[0]?.avatarURL ?? "",
-  //     };
-  //     if (e.isGroup) {
-  //       let chatGroupDetails = userChats.groupChats.filter(
-  //         (i) => i.chat.toString() == e._id.toString()
-  //       )[0];
-  //       chatInfo = {
-  //         _id: chatGroupDetails._id,
-  //         name: chatGroupDetails.name,
-  //         avatarURL: chatGroupDetails.avatarURL,
-  //       };
-  //     }
-
-  //     return {
-  //       id: e._id,
-  //       chatInfo,
-  //       isGroup: e.isGroup,
-  //     };
-  //   })
-  // );
 
 
-  // return transformedChats;
+async function getCommunity(cid, requesterId) {
+  let community = await Communities.findById(cid).select("-__v");
+  let isMember = await CommunityMembers.findOne({ cid, uid: requesterId });
 
+
+  if (!isMember) {
+    return {
+      title: community.title,
+      imgUrl: community.imgUrl,
+      totalGroups: community.postgroup.length + community.chatgroup.length,
+      isMember: false,
+    };
+  }
+
+  let usersChatsGroups = (await Users.findById(requesterId).select("-_id groupChats communityGroups"))
+  usersChatsGroups = [...usersChatsGroups.communityGroups.map(String), ...usersChatsGroups.groupChats.map(String)]
+
+  let userPostGroups = (await GroupMembers.find({ uid: requesterId }).select("-_id gid")).map(e => e.gid.toString())
+
+
+  let communityGroupChats = community.chatgroup.map(String)
+  let communityPostGroups = community.postgroup.map(String)
+
+  let excludedChatGroupIds = difference(communityGroupChats, usersChatsGroups).splice(0, 3) // User exists in these chats
+  let excludedPostGroupIds = difference(communityPostGroups, userPostGroups).splice(0, 3)
+
+  let joinedGroupChatsIds = intersection(communityGroupChats, usersChatsGroups).splice(0, 3)
+  let joinedPostGroupIds = intersection(communityPostGroups, userPostGroups).splice(0, 3)
+
+
+  let [excludedChatGroup, joinedGroupChats] = await Promise.all([
+    selectGroupChats(excludedChatGroupIds, "name imgUrl chat"),
+    selectGroupChats(joinedGroupChatsIds, "name imgUrl chat")
+  ])
+
+  let [excludedPostGroup, joinedPostGroup] = await Promise.all([
+    selectPostGroups(excludedPostGroupIds, "name imgUrl"),
+    selectPostGroups(joinedPostGroupIds, "name imgUrl")
+  ])
+
+  let excludedGroups = getRandomThree([...excludedChatGroup, ...excludedPostGroup])
+  let includedGroups = getRandomThree([...joinedGroupChats, ...joinedPostGroup])
+
+  let isAdmin = community.communityAdmins.includes(requesterId);
+  let isCreator = community.communityAdmins[0] == requesterId;
+
+  let comms = (await Communities.aggregate([
+    { $match: { _id: new Types.ObjectId(cid) } },
+    {
+      $lookup: {
+        from: "chatgroups",
+        localField: "annoucementGroup",
+        foreignField: "_id",
+        as: "annoucementGroup",
+        pipeline: [
+          {
+            $lookup: {
+              from: "chats",
+              localField: "chat",
+              foreignField: "_id",
+              as: "chatData"
+            }
+          },
+          { $unwind: { path: "$chatData", preserveNullAndEmptyArrays: true } },
+          {
+            $set: {
+              lastMessage: { $last: "$chatData.messages" }
+            }
+          },
+          {
+            $lookup: {
+              from: "messages",
+              localField: "lastMessage",
+              foreignField: "_id",
+              as: "lastMessage"
+            },
+          },
+          { $unwind: "$lastMessage" },
+          {
+            $lookup: {
+              from: "users",
+              localField: "lastMessage.senderId",
+              foreignField: "_id",
+              as: "lastMessage.senderId"
+            },
+          },
+          { $unwind: "$lastMessage.senderId" },
+          {
+            $project: {
+              _id: 0,
+              "chat": 1,
+              "lastMessage.senderId": "$lastMessage.senderId._id",
+              "lastMessage.senderName": "$lastMessage.senderId.name",
+              "lastMessage.content": 1,
+              "lastMessage.attachments": 1,
+              "lastMessage.createdAt": 1,
+            }
+          },
+        ]
+      },
+    },
+    { $unwind: { path: "$annoucementGroup", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        imgUrl: 1,
+        aboutCommunity: 1,
+        "annoucementGroup": "$annoucementGroup.chat",
+        lastMessage: "$annoucementGroup.lastMessage", // Move lastMessage to root,
+      }
+    }
+  ]))[0];
+
+  let memberCount = await CommunityMembers.countDocuments({ cid })
+
+
+  return { ...comms, memberCount, excludedGroups, includedGroups, isAdmin, isCreator, isMember: true };
 }
 
-await getAllChats_short(myId)
+console.log(JSON.stringify(await getCommunity("67dc761125f6b25740564bec", myId), null, 2))
+
+
 
 await db.disconnect();

@@ -13,6 +13,10 @@ router.get("/getClassWallPosts/:gid/:uid", async (req, res) => {
   );
 });
 
+router.get("/getTeacherWallPosts/:uid", async (req, res) => {
+  return res.json(await feedController.getTeachersWallPosts(req.params.uid));
+});
+
 router.get("/getSocialFeed/:uid", async (req, res) => {
   return res.json(await feedController.getSocialFeed(req.params.uid));
 });

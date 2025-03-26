@@ -354,7 +354,7 @@ let currSession = (await getCurrentSession())._id;
 //       populate: [
 //         {
 //           path: "participants",
-//           select: "name avatarURL",
+//           select: "name imgUrl",
 //           match: { _id: { $ne: uid } }, // Gets the "other" user
 //         },
 //         {
@@ -366,7 +366,7 @@ let currSession = (await getCurrentSession())._id;
 //     },
 //     {
 //       path: "groupChats",
-//       select: "name avatarURL chat",
+//       select: "name imgUrl chat",
 //       populate: {
 //         path: "chat",
 //         select: "type",
@@ -388,7 +388,7 @@ let currSession = (await getCurrentSession())._id;
 //   .select("activeChats groupChats -_id")
 //   .populate({
 //     path: "groupChats",
-//     select: "chat name avatarURL",
+//     select: "chat name imgUrl",
 //   });
 
 // let groupChats = userDetails.groupChats.map((e) => e.chat);
@@ -411,7 +411,7 @@ let currSession = (await getCurrentSession())._id;
 //   },
 //   {
 //     path: "participants",
-//     select: "name avatarURL",
+//     select: "name imgUrl",
 //   },
 // ]);
 
@@ -420,7 +420,7 @@ let currSession = (await getCurrentSession())._id;
 //     let chatInfo = {
 //       _id: e.participants[0]._id,
 //       name: e.participants[0].name,
-//       avatarURL: e.participants[0].avatarURL,
+//       imgUrl: e.participants[0].imgUrl,
 //     };
 //     if (e.isGroup) {
 //       console.log("is group")
@@ -428,7 +428,7 @@ let currSession = (await getCurrentSession())._id;
 //       chatInfo = {
 //         _id: chatGroupDetails._id,
 //         name: chatGroupDetails.name,
-//         avatarURL: chatGroupDetails.avatarURL,
+//         imgUrl: chatGroupDetails.imgUrl,
 //       };
 //     }
 
@@ -502,7 +502,7 @@ let currSession = (await getCurrentSession())._id;
 //   .select("activeChats groupChats -_id")
 //   .populate({
 //     path: "groupChats",
-//     select: "chat name avatarURL",
+//     select: "chat name imgUrl",
 //   });
 // let groupChats = userChats.groupChats.map((e) => e.chat);
 // let chats = await Chats.find(
@@ -530,7 +530,7 @@ let currSession = (await getCurrentSession())._id;
 //   },
 //   {
 //     path: "participants",
-//     select: "name avatarURL",
+//     select: "name imgUrl",
 //   },
 // ]);
 
@@ -541,7 +541,7 @@ let currSession = (await getCurrentSession())._id;
 //     let chatInfo = {
 //       _id: e.participants[0]?._id ?? "",
 //       name: e.participants[0]?.name ?? "",
-//       avatarURL: e.participants[0]?.avatarURL ?? "",
+//       imgUrl: e.participants[0]?.imgUrl ?? "",
 //     };
 //     if (e.isGroup) {
 //       let chatGroupDetails = userChats.groupChats.filter(
@@ -550,7 +550,7 @@ let currSession = (await getCurrentSession())._id;
 //       chatInfo = {
 //         _id: chatGroupDetails._id,
 //         name: chatGroupDetails.name,
-//         avatarURL: chatGroupDetails.avatarURL,
+//         imgUrl: chatGroupDetails.imgUrl,
 //       };
 //     }
 

@@ -13,6 +13,10 @@ export default {
     return await aggregatePosts(uid, "6797ebcc37200dbcdec36ba9");
   },
 
+  getTeachersWallPosts: async function(uid) {
+    return await aggregatePosts(uid, "67e0758ebb156fb388e84a10");
+  },
+
   getClassWallPosts: async function (group_id, uid) {
     return await aggregatePosts(uid, group_id);
   },
@@ -80,7 +84,7 @@ export default {
       .populate([
         {
           path: "author",
-          select: "name avatarURL",
+          select: "name imgUrl",
         },
       ])
       .sort({

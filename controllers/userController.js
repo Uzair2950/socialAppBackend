@@ -41,7 +41,7 @@ export default {
     return await this.getUserData(user._id);
   },
   getUserData: async function (uid) {
-    return await Users.findById(uid).select("name type avatarURL").lean();
+    return await Users.findById(uid).select("name type imgUrl").lean();
   },
 
   updateUser: async function (uid, data) {
@@ -50,8 +50,8 @@ export default {
 
   getProfile: async function (uid, rid) {
     let user_data = await Users.findById(uid).select(
-      "-activeChats -groupChats -password"
-    );
+      "-activeChats -groupChats -communityGroups -password -__v -email -uid"
+    ).lean();
     let isSelf = uid == rid;
     let isFriend = await this.isFriend(uid, rid);
     let isPublic = !user_data.is_private;
@@ -62,9 +62,9 @@ export default {
         isSelf ? 2 : isFriend ? 1 : 0
       );
 
-      return { user_data, friends, posts };
+      return { ...user_data, friends, posts };
     } else {
-      return { user_data };
+      return { ...user_data };
     }
   },
 
@@ -88,7 +88,7 @@ export default {
   getPendingRequests: async function (uid) {
     return await Friends.find({ status: "pending", friend_id: uid })
       .select("uid")
-      .populate("uid", "name avatarURL");
+      .populate("uid", "name imgUrl");
   },
 
   getFriends: async function (uid, splice = false, limit = 0) {
@@ -96,13 +96,13 @@ export default {
 
     let friends = await Friends.find({ status: "accepted", uid })
       .limit(limit)
-      .populate("friend_id", "name avatarURL")
+      .populate("friend_id", "name imgUrl")
       .select("-_id friend_id");
 
     friends = friends.map((friend) => ({
       _id: friend.friend_id._id,
       name: friend.friend_id.name,
-      avatarURL: friend.friend_id.avatarURL,
+      imgUrl: friend.friend_id.imgUrl,
     }));
 
     if (splice) {
@@ -113,13 +113,13 @@ export default {
     // 2. Get Friends who added this user.
     let friends2 = await Friends.find({ status: "accepted", friend_id: uid })
       .limit(limit)
-      .populate("uid", "name avatarURL")
+      .populate("uid", "name imgUrl")
       .select("-_id uid");
 
     friends2 = friends2.map((friend) => ({
       _id: friend.uid._id,
       name: friend.uid.name,
-      avatarURL: friend.uid.avatarURL,
+      imgUrl: friend.uid.imgUrl,
     }));
 
     return [...friends, ...friends2];
@@ -155,7 +155,7 @@ export default {
   getVipCollection: async function (creator) {
     return await VipCollections.findOne({ creator })
       .select("-messages")
-      .populate("people", "name avatarURL")
+      .populate("people", "name imgUrl")
       .lean();
   },
 
@@ -193,7 +193,7 @@ export default {
         sort: { createdAt: -1 },
         populate: {
           path: "senderId",
-          select: "name avatarURL",
+          select: "name imgUrl",
         },
       })
       .lean();

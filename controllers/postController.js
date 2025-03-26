@@ -80,7 +80,7 @@ export default {
     //   privacyLevel: { $lte: num },
     //   group_id: [],
     // })
-    //   .populate("author", "name avatarURL")
+    //   .populate("author", "name imgUrl")
     //   .sort({ /* is_pinned: -1,*/ updatedAt: -1 }); // TODO: Fix Pin Logic
     let posts = await PostInteraction.aggregate([
       {
@@ -111,10 +111,11 @@ export default {
                 content: 1,
                 attachments: 1,
                 createdAt: 1,
+                type: 1,
                 is_pinned: 1,
                 "authorData._id": 1,
                 "authorData.name": 1,
-                "authorData.avatarURL": 1,
+                "authorData.imgUrl": 1,
               },
             },
           ],
@@ -126,6 +127,7 @@ export default {
           _id: 1,
           group_id: 1,
           postData: 1,
+          allowCommenting: 1,
           hasLiked: { $in: [new Types.ObjectId(uid), "$likes"] },
           is_pinned: 1,
           commentCount: { $size: "$comments" },
@@ -235,7 +237,7 @@ export default {
     //     path: "comments",
     //     select: "content likesCount",
     //     populate: [
-    //       { path: "author", select: "name avatarURL" },
+    //       { path: "author", select: "name imgUrl" },
     //       { path: "likes", select: "_id", match: { _id: uid } },
     //     ],
     //   });
@@ -262,7 +264,7 @@ export default {
               $project: {
                 "authorData._id": 1,
                 "authorData.name": 1,
-                "authorData.avatarURL": 1,
+                "authorData.imgUrl": 1,
                 hasLiked: { $in: [new Types.ObjectId(uid), "$likes"] },
                 content: 1,
                 likesCount: 1,

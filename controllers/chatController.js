@@ -18,7 +18,7 @@ export default {
 
   initiateChat: async function (sender, receiver) {
     let receiverDetails = await Users.findById(receiver).select(
-      "name avatarURL"
+      "name imgUrl"
     );
     if (!receiverDetails) return;
     let chat = new Chats({
@@ -51,7 +51,7 @@ export default {
     //   chatInfo: {
     //     _id: receiver,
     //     name: receiverDetails.name,
-    //     avatarURL: receiverDetails.avatarURL,
+    //     imgUrl: receiverDetails.imgUrl,
     //   },
     //   totalParticipants: 2,
     //   isGroup: false,
@@ -99,7 +99,7 @@ export default {
   //   // 4. Groups all replies by their chatId // (+)
   //   // Returns somthing like this:
   //   /*[chatId:string]: {
-  //     details: {name: string, avatarURL: string},
+  //     details: {name: string, imgUrl: string},
   //     messages: [{id: string/objectId, message: string, reply: string}]
   //   }*/
 
@@ -118,7 +118,7 @@ export default {
   //           populate: {
   //             // *
   //             path: "participants",
-  //             select: "name avatarURL -_id",
+  //             select: "name imgUrl -_id",
   //           },
   //         },
   //       ])
@@ -154,7 +154,7 @@ export default {
   //         populate: [
   //           {
   //             path: "participants",
-  //             select: "name avatarURL",
+  //             select: "name imgUrl",
   //             match: { _id: { $ne: uid } }, // Gets the "other" user
   //           },
   //           {
@@ -166,7 +166,7 @@ export default {
   //       },
   //       {
   //         path: "groupChats",
-  //         select: "name avatarURL chat",
+  //         select: "name imgUrl chat",
   //         populate: {
   //           path: "chat",
   //           select: "type",
@@ -217,7 +217,7 @@ export default {
       .select("activeChats groupChats -_id")
       .populate({
         path: "groupChats",
-        select: "chat name avatarURL",
+        select: "chat name imgUrl",
       });
     let groupChats = userChats.groupChats.map((e) => e.chat);
     let chats = await Chats.find(
@@ -245,7 +245,7 @@ export default {
       },
       {
         path: "participants",
-        select: "name avatarURL",
+        select: "name imgUrl",
       },
     ]);
 
@@ -254,7 +254,7 @@ export default {
         let chatInfo = {
           _id: e.participants[0]?._id ?? "",
           name: e.participants[0]?.name ?? "",
-          avatarURL: e.participants[0]?.avatarURL ?? "",
+          imgUrl: e.participants[0]?.imgUrl ?? "",
         };
         if (e.isGroup) {
           let chatGroupDetails = userChats.groupChats.filter(
@@ -263,7 +263,7 @@ export default {
           chatInfo = {
             _id: chatGroupDetails._id,
             name: chatGroupDetails.name,
-            avatarURL: chatGroupDetails.avatarURL,
+            imgUrl: chatGroupDetails.imgUrl,
           };
         }
 
@@ -291,7 +291,7 @@ export default {
       .select("activeChats groupChats -_id")
       .populate({
         path: "groupChats",
-        select: "chat name avatarURL",
+        select: "chat name imgUrl",
       });
     let groupChats = userChats.groupChats.map((e) => e.chat);
 
@@ -308,7 +308,7 @@ export default {
     ).populate([
       {
         path: "participants",
-        select: "name avatarURL",
+        select: "name imgUrl",
       },
     ]);
 
@@ -318,7 +318,7 @@ export default {
         let obj = {
           _id: e._id,
           name: e.participants[0]?.name ?? "",
-          avatarURL: e.participants[0]?.avatarURL ?? "",
+          imgUrl: e.participants[0]?.imgUrl ?? "",
           isGroup: false,
         };
         if (e.isGroup) {
@@ -327,9 +327,8 @@ export default {
           )[0];
 
           obj.name = chatGroupDetails.name
-          obj.avatarURL = chatGroupDetails.avatarURL
+          obj.imgUrl = chatGroupDetails.imgUrl
           obj.isGroup = true
-
         }
 
         return obj;
@@ -359,7 +358,7 @@ export default {
           },
           {
             path: "senderId",
-            select: "name avatarURL",
+            select: "name imgUrl",
           },
         ],
       });
@@ -378,7 +377,7 @@ export default {
         },
         {
           path: "senderId",
-          select: "name avatarURL",
+          select: "name imgUrl",
         },
       ]);
 

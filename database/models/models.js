@@ -10,11 +10,12 @@ const _User = new Schema({
     enum: ["student", "teacher", "administrator"],
     default: "student",
   },
-  avatarURL: { type: String, default: "/static/avatars/default_avatar.png" },
+  imgUrl: { type: String, default: "/static/avatars/default_avatar.png" },
   is_private: { type: Boolean, default: false },
   bio: { type: String, default: "" },
   activeChats: [{ type: Types.ObjectId, ref: "chat", default: [] }], // Personal Chats
   groupChats: [{ type: Types.ObjectId, ref: "chatgroup", default: [] }],
+  communityGroups: [{ type: Types.ObjectId, ref: "chatgroup", default: [] }], //GroupChats joined through community
   uid: {
     type: Types.ObjectId,
     ref: function () {
@@ -185,7 +186,7 @@ const _ChatGroup = new Schema(
     name: { type: String, required: true },
     chat: { type: Types.ObjectId, ref: "chat", required: true },
     allowChatting: { type: Boolean, default: true }, //0 => Everyone can send , 1 => Only admins.
-    avatarURL: { type: String, default: "/static/avatars/default_group.png" },
+    imgUrl: { type: String, default: "/static/avatars/default_group.png" },
     aboutGroup: { type: String, default: "" },
     admins: [{ type: Types.ObjectId, ref: "user", default: [] }],
   },
@@ -213,8 +214,8 @@ const _GroupMembers = new Schema({
 
 const _CommunityMembers = new Schema({
   // easier to lookup
-  uid: { type: Types.ObjectId, required: true, ref: "user" }, // ref => Users
-  cid: { type: Types.ObjectId, required: true, ref: "community" }, // ref => Community
+  uid: { type: Types.ObjectId, required: true, ref: "user" },
+  cid: { type: Types.ObjectId, required: true, ref: "community" },
 });
 
 const _Community = new Schema({
@@ -223,26 +224,8 @@ const _Community = new Schema({
   imgUrl: { type: String, default: "/static/avatars/default_community.png" },
   annoucementGroup: { type: Types.ObjectId, ref: "chatgroup" },
   aboutCommunity: { type: String, default: "" },
-  // await community.populate('groups.gid', 'title imgUrl')
-  groups: [
-    {
-      type: {
-        group_type: {
-          type: String,
-          enum: ["postgroup", "chatgroup"],
-          required: true,
-        },
-        gid: {
-          type: Types.ObjectId,
-          ref: function () {
-            return this.group_type;
-          },
-        },
-      },
-      default: [],
-    },
-  ],
-  // Add announcement channel by default.
+  chatgroup: { type: [Types.ObjectId], ref: "chatgroup", default: [] },
+  postgroup: { type: [Types.ObjectId], ref: "postgroup", default: [] },
 });
 
 const _Notification = new Schema(

@@ -2,8 +2,6 @@ import { Router } from "express";
 import chatController from "../controllers/chatController.js";
 import path from "path";
 import multer, { diskStorage } from "multer";
-import { Filter } from "bad-words";
-import { ChatGroups, Messages } from "../database/models/models.js";
 
 const router = Router();
 

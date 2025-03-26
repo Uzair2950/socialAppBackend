@@ -8,6 +8,7 @@ import {
   Chats,
   Users,
 } from "../database/models/models.js";
+import { aggregatePosts, isJoinRequested } from "../utils/utils.js";
 import chatGroupController from "./chatGroupController.js";
 
 export default {
@@ -15,30 +16,38 @@ export default {
   getGroup: async function (gId, requesterId) {
     let group = await PostGroups.findById(gId)
       .select("-updatedAt -isSociety -createdAt -isOfficial -updatedAt -__v");
-    if (!group) return {};
 
-    let isAdmin = group.admins.includes(requesterId);
+
+
     let isMember = await GroupMembers.findOne({ gid: gId, uid: requesterId });
 
     if (!isMember && group.is_private) {
+
       return {
-        name: group.name,
-        imgUrl: group.imgUrl,
-        totalMembers: group.totalMembers,
-        is_private: group.is_private,
+        groupInfo: {
+          _id: group._id,
+          name: group.name,
+          imgUrl: group.imgUrl,
+          totalMembers: group.totalMembers,
+          is_private: group.is_private,
+          aboutGroup: group.aboutGroup,
+        },
+        isRequested: await isJoinRequested(requesterId, gId),
         isMember: false,
       };
     }
 
+    let isAdmin = group.admins.includes(requesterId);
+
 
     let isCreator = group.admins[0] == requesterId;
 
-    //TODO: Fix This!!!!!!!!
-    // TODO: ADD PAGINATION FOR INIFINITE SCROLLING
-    let posts = await Posts.find({ group_id: gId })
-      .populate("author", "name avatarURL")
-      .select("-group_id -privacyLevel -updatedAt")
-      .sort({ /* is_pinned: -1, */ createdAt: -1 }); // TODO: Fix Pin Logic
+    // let posts = await Posts.find({ group_id: gId })
+    //   .populate("author", "name imgUrl")
+    //   .select("-group_id -privacyLevel -updatedAt")
+    //   .sort({ /* is_pinned: -1, */ createdAt: -1 }); // TODO: Fix Pin Logic
+
+    let posts = await aggregatePosts(requesterId, gId)
 
     return { groupInfo: group, isCreator, isAdmin, isMember: true, posts };
   },
@@ -181,7 +190,7 @@ export default {
   getPendingRequests: async function (gid) {
     return await GroupRequests.find({ gid })
       .select("-gid")
-      .populate("user", "name avatarURL");
+      .populate("user", "name imgUrl");
   },
 
   approveRequest: async function (reqId) {

@@ -10,7 +10,7 @@ import chatController from "./chatController.js";
 export default {
   getGroupChat: async function (gid, uid) {
     let group = await ChatGroups.findById(gid).select(
-      "name avatarURL aboutGroup allowChatting admins chat"
+      "name imgUrl aboutGroup allowChatting admins chat"
     );
 
     let isAdmin = group.admins.includes(uid);
@@ -20,7 +20,7 @@ export default {
     return {
       groupInfo: {
         name: group.name,
-        avatarURL: group.avatarURL,
+        imgUrl: group.imgUrl,
         aboutGroup: group.aboutGroup,
         canChat: group.allowChatting || isAdmin,
         isAdmin,
@@ -34,12 +34,12 @@ export default {
 
     let chatParticipants = await Chats.findById(group.chat)
       .select("participants")
-      .populate("participants", "name avatarURL");
+      .populate("participants", "name imgUrl");
 
     return chatParticipants.participants.map((e) => ({
       id: e._id,
       name: e.name,
-      avatarURL: e.avatarURL,
+      imgUrl: e.imgUrl,
       isAdmin: group.admins.includes(e._id),
     }));
   },
@@ -60,7 +60,7 @@ export default {
     });
     let group = new ChatGroups({
       name,
-      avatarURL: imgUrl,
+      imgUrl: imgUrl,
       aboutGroup,
       allowChatting,
       admins: [creator_id],
@@ -99,7 +99,7 @@ export default {
   getAdmins: async function (gid) {
     let group = await ChatGroups.findById(gid)
       .select("admins")
-      .populate("admins", "name avatarURL");
+      .populate("admins", "name imgUrl");
 
     return group.admins;
   },

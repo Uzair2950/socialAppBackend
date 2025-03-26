@@ -14,7 +14,10 @@ import {
   Friends,
   PostInteraction,
   CourseMap,
-  ChatSettings
+  ChatSettings,
+  ChatGroups,
+  PostGroups,
+  GroupRequests,
 } from "../database/models/models.js";
 
 
@@ -150,6 +153,10 @@ const getAutoReply = async (chatId, sender, message) => {
   // No autoreply was found
 };
 
+const isJoinRequested = async (uid, gid) => {
+  return await GroupRequests.countDocuments({ user: uid, gid }) > 0;
+}
+
 const aggregatePosts = async (uid, group_id) => {
   let posts = await PostInteraction.aggregate([
     {
@@ -196,7 +203,7 @@ const aggregatePosts = async (uid, group_id) => {
               is_pinned: 1,
               "authorData._id": 1,
               "authorData.name": 1,
-              "authorData.avatarURL": 1,
+              "authorData.imgUrl": 1,
             },
           },
         ],
@@ -297,7 +304,21 @@ const getSections = async () => Sections.find().select("title _id").then(section
   }, {})
 );
 
+const selectGroupChats = async (ids, fields) => {
+  return (await ChatGroups.find({ _id: ids }).select(fields).lean()).map(e => ({ ...e, type: "chat" }))
+}
+
+const selectPostGroups = async (ids, fields) => {
+  return (await PostGroups.find({ _id: ids }).select(fields).lean()).map(e => ({ ...e, type: "post" }))
+}
+
+const getRandomThree = (arr) =>
+  arr.sort(() => Math.random() - 0.5).slice(0, 3);
+
 export {
+  selectGroupChats,
+  selectPostGroups,
+  getRandomThree,
   getOtherParticipant,
   getAutoReply,
   getCurrentSession,
@@ -315,5 +336,6 @@ export {
   intersection,
   getSections,
   sortTimetable,
-  isAutoReplyEnabled
+  isAutoReplyEnabled,
+  isJoinRequested
 };

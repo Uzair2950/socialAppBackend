@@ -286,7 +286,7 @@
 // let chat = await Chats.findById('67189d68adbe4c6469fa4e8f').populate([
 //   {
 //     path: 'participants',
-//     select: '_id name avatarURL',
+//     select: '_id name imgUrl',
 //   },
 //   {
 //     path: 'messages',
@@ -402,7 +402,7 @@
 //   username: "epsilon",
 //   password: "123",
 //   name: "Wow",
-//   avatarURL: "https://localhost:100",
+//   imgUrl: "https://localhost:100",
 //   bio: "",
 // });
 
