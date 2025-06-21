@@ -12,6 +12,11 @@ router.get("/getClassWallPosts/:gid/:uid", async (req, res) => {
     await feedController.getClassWallPosts(req.params.gid, req.params.uid)
   );
 });
+router.get("/getClassPosts/:gid/:uid", async (req, res) => {
+  return res.json(
+    await feedController.getClassWallPosts(req.params.gid, req.params.uid)
+  );
+});
 
 router.get("/getTeacherWallPosts/:uid", async (req, res) => {
   return res.json(await feedController.getTeachersWallPosts(req.params.uid));
@@ -27,10 +32,5 @@ router.get("/getClassWallsData/:type/:uid", async (req, res) => {
   );
 });
 
-router.get("/getClassPosts/:gid/:uid", async (req, res) => {
-  return res.json(
-    await feedController.getClassWallPosts(req.params.gid, req.params.uid)
-  );
-});
 
 export default router;

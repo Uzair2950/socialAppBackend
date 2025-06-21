@@ -22,7 +22,7 @@ const router = express.Router();
 //Routes
 
 // Authorize User {username, password}
-router.put(
+router.post(
   "/authorize",
   validateRequest({
     body: z.object({
@@ -156,7 +156,6 @@ router.get("/getProfile/:id/:requester_id", async (req, res) => {
 
 // ✅
 
-
 router.get("/getGroups/:uid", async (req, res) => {
   return res.json(await userController.getGroups(req.params.uid));
 });
@@ -172,31 +171,26 @@ router.post("/toggleAutoReply/:uid/:chatId", async (req, res) => {
   return res.json({ message: "success" });
 });
 
-
-
 // == VIP COLLECTION
 // ✅
-
 
 router.get("/getVipChat/:uid", async (req, res) => {
   return res.json(await userController.getVipChat(req.params.uid));
 });
 
 router.get("/getPeopleNotInCollection/:uid", async (req, res) => {
-  return res.json(await userController.getPeopleNotInVip(req.params.uid))
-})
-
-
-router.get("/getVipCollection/:uid", async (req, res) => {
-  return res.json(await userController.getVipCollection(req.params.uid));
+  return res.json(await userController.getPeopleNotInVip(req.params.uid));
 });
 
+router.get("/getVipCollections/:uid", async (req, res) => {
+  return res.json(await userController.getVipCollections(req.params.uid));
+});
 
 router.post("/createVipCollection/:uid", async (req, res) => {
   return res.json({
     id: await userController.createVipCollection(
       req.params.uid,
-      req.body.people
+      req.body.person
     ),
   });
 });
@@ -212,27 +206,37 @@ router.delete("/deleteVipCollection/:collection_id", async (req, res) => {
 
 // ✅
 
-router.put("/addPeopleInCollection/:collection_id", async (req, res) => {
-  await userController.addPeopleInVipCollection(
-    req.params.collection_id,
-    req.body.people
-  );
-  console.log(req.body)
-  return res.json({ message: "success" });
-});
+// router.put("/addPeopleInCollection/:collection_id", async (req, res) => {
+//   await userController.addPeopleInVipCollection(
+//     req.params.collection_id,
+//     req.body.people
+//   );
+//   console.log(req.body);
+//   return res.json({ message: "success" });
+// });
 
-// ✅
+// // ✅
 
-router.put("/removePeopleFromCollection/:collection_id", async (req, res) => {
-  await userController.removeFromVipCollection(
-    req.params.collection_id,
-    req.body.people
-  );
-  return res.json({ message: "success" });
-});
+// router.put("/removePeopleFromCollection/:collection_id", async (req, res) => {
+//   await userController.removeFromVipCollection(
+//     req.params.collection_id,
+//     req.body.people
+//   );
+//   return res.json({ message: "success" });
+// });
 
 router.get("/getAdminGroups/:uid", async (req, res) => {
-  return res.json(await userController.getAdminGroups(req.params.uid))
+  return res.json(await userController.getAdminGroups(req.params.uid));
 });
 
+router.get("/getAllUsers", async (req, res) => {
+  try {
+    const users = await userController.getAllUsers();
+    console.log(users);
+    return res.json(users);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 export default router;

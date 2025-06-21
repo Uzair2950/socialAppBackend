@@ -17,9 +17,7 @@ export default {
   // Personal Chats
 
   initiateChat: async function (sender, receiver) {
-    let receiverDetails = await Users.findById(receiver).select(
-      "name imgUrl"
-    );
+    let receiverDetails = await Users.findById(receiver).select("name imgUrl");
     if (!receiverDetails) return;
     let chat = new Chats({
       participants: [sender, receiver],
@@ -70,10 +68,12 @@ export default {
   },
 
   getAutoReplies: async function (user, chat) {
-    let isEnabled = await isAutoReplyEnabled(user, chat);
+    let isEnabled = true; //await isAutoReplyEnabled(user, chat);
 
-    let chats = await AutoReply.find({ user, chat }).select("_id message reply");
-    return { isEnabled, autoReplies: chats }
+    let chats = await AutoReply.find({ user, chat }).select(
+      "_id message reply"
+    );
+    return { isEnabled, autoReplies: chats };
   },
 
   addAutoReply: async function (uid, chat, autoreplies) {
@@ -295,8 +295,6 @@ export default {
       });
     let groupChats = userChats.groupChats.map((e) => e.chat);
 
-
-
     let chats = await Chats.find(
       { _id: [...groupChats, ...userChats.activeChats] },
       {
@@ -304,14 +302,13 @@ export default {
         participants: {
           $elemMatch: { $ne: uid },
         },
-      },
+      }
     ).populate([
       {
         path: "participants",
         select: "name imgUrl",
       },
     ]);
-
 
     let transformedChats = await Promise.all(
       chats.map(async (e) => {
@@ -326,9 +323,9 @@ export default {
             (i) => i.chat.toString() == e._id.toString()
           )[0];
 
-          obj.name = chatGroupDetails.name
-          obj.imgUrl = chatGroupDetails.imgUrl
-          obj.isGroup = true
+          obj.name = chatGroupDetails.name;
+          obj.imgUrl = chatGroupDetails.imgUrl;
+          obj.isGroup = true;
         }
 
         return obj;
@@ -336,7 +333,6 @@ export default {
     );
 
     return transformedChats;
-
   },
 
   // NOTE: Read Logic will be handled on frontned.
@@ -365,7 +361,6 @@ export default {
 
     return chat;
   },
-
 
   getMessage: async function (mid, uid) {
     let message = await Messages.findById(mid)
@@ -444,8 +439,32 @@ export default {
   },
 
   // Scheduler;
+  // scheduleMessages: async function (
+  //   chats,
+  //   messageContent,
+  //   messageAttchments = [],
+  //   senderId,
+  //   pushTime
+  // ) {
+  //   let message = new Messages({
+  //     content: filter.clean(messageContent),
+  //     attachments: messageAttchments,
+  //     senderId,
+  //   });
+
+  //   await message.save();
+
+  //   let sMessage = new ScheduledMessages({
+  //     chat: chats,
+  //     sender: senderId,
+  //     message: message._id,
+  //     pushTime,
+  //   });
+  //   await sMessage.save();
+  //   return sMessage._id;
+  // },
   scheduleMessages: async function (
-    chats,
+    chats, // Now expects combined array
     messageContent,
     messageAttchments = [],
     senderId,
@@ -460,15 +479,15 @@ export default {
     await message.save();
 
     let sMessage = new ScheduledMessages({
-      chat: chats,
+      chat: chats, // Directly use the combined array
       sender: senderId,
       message: message._id,
       pushTime,
     });
+
     await sMessage.save();
     return sMessage._id;
   },
-
   deleteScheduledMessage: async function (mid) {
     await ScheduledMessages.findByIdAndDelete(mid);
   },
@@ -477,14 +496,45 @@ export default {
 
   modifyAutoReplies: async function (obj) {
     let { uid, chatId, autoReply, edits, newreplies } = obj;
-    console.log(uid, chatId, autoReply, edits, newreplies)
-    await ChatSettings.updateOne({ uid, chat: chatId }, { autoReply }) // Toggle
+    console.log(uid, chatId, autoReply, edits, newreplies);
+    await ChatSettings.updateOne({ uid, chat: chatId }, { autoReply }); // Toggle
 
     if (edits.length > 0)
-      await Promise.all(edits.map(async e => {
-        console.log(await AutoReply.findByIdAndUpdate(e.id, { message: e.message, reply: e.reply }))
-      }))
+      await Promise.all(
+        edits.map(async (e) => {
+          console.log(
+            await AutoReply.findByIdAndUpdate(e.id, {
+              message: e.message,
+              reply: e.reply,
+            })
+          );
+        })
+      );
     if (newreplies.length > 0)
-      console.log(await AutoReply.insertMany(newreplies))
-  }
+      console.log(await AutoReply.insertMany(newreplies));
+  },
+
+  getChatParticipant: async function (chatId, uid) {
+    try {
+      const chat = await Chats.findById(chatId).select("participants");
+
+      if (!chat) {
+        throw new Error("Chat not found");
+      }
+
+      // Find the participant who is not the current user
+      const otherParticipant = chat.participants.find(
+        (participant) => participant.toString() !== uid
+      );
+
+      if (!otherParticipant) {
+        throw new Error("No other participant found");
+      }
+
+      return { participantId: otherParticipant };
+    } catch (error) {
+      console.error("Error getting chat participant:", error);
+      throw error;
+    }
+  },
 };

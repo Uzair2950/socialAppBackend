@@ -26,8 +26,8 @@ const _User = new Schema({
 
 const _VipCollections = new Schema({
   creator: { type: Types.ObjectId, ref: "user" },
-  people: [{ type: Types.ObjectId, ref: "user", default: [] }],
-  messages: [{ type: Types.ObjectId, ref: "message", default: [] }],
+  person: { type: Types.ObjectId, ref: "user", required: true },
+  messages: { type: [Types.ObjectId], ref: "message", default: [] },
 });
 
 const _ChatSettings = new Schema({

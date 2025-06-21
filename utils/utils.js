@@ -1,4 +1,3 @@
-
 import { Types } from "mongoose";
 
 import {
@@ -20,7 +19,6 @@ import {
   GroupRequests,
 } from "../database/models/models.js";
 
-
 import chatController from "../controllers/chatController.js";
 
 const getCurrentSession = async () => {
@@ -32,16 +30,21 @@ const getCurrentSessionId = async () => {
 };
 
 const intersection = (arr1, arr2) =>
-  (arr1.filter(item => arr2.includes(item))).length > 0;
+  arr1.filter((item) => arr2.includes(item)).length > 0;
 const getStudentSections = async (sid) => {
   return await Enrollment.aggregate([
     {
-      $match: { $and: [{ session: (await getCurrentSession())._id, }, { student: new Types.ObjectId(sid) }] },
+      $match: {
+        $and: [
+          { session: (await getCurrentSession())._id },
+          { student: new Types.ObjectId(sid) },
+        ],
+      },
     },
     {
-      $group: { _id: "$section", courses: { $addToSet: "$course" } }
-    }
-  ])
+      $group: { _id: "$section", courses: { $addToSet: "$course" } },
+    },
+  ]);
 };
 
 const getCourseIdByCode = async (courseCode) => {
@@ -86,8 +89,12 @@ const isGroupChat = async (chatId) => {
 };
 
 const isAutoReplyEnabled = async (uid, chatId) => {
-  let user = await ChatSettings.findOne({ uid, chat: chatId, autoReply: true }).select("_id");
-  console.log(user)
+  let user = await ChatSettings.findOne({
+    uid,
+    chat: chatId,
+    autoReply: true,
+  }).select("_id");
+  console.log(user);
   return user ? true : false;
 };
 
@@ -154,8 +161,8 @@ const getAutoReply = async (chatId, sender, message) => {
 };
 
 const isJoinRequested = async (uid, gid) => {
-  return await GroupRequests.countDocuments({ user: uid, gid }) > 0;
-}
+  return (await GroupRequests.countDocuments({ user: uid, gid })) > 0;
+};
 
 const aggregatePosts = async (uid, group_id) => {
   let posts = await PostInteraction.aggregate([
@@ -262,23 +269,23 @@ const vipMessageHandling = async (senderId, messageId, chatId) => {
   );
 };
 
-const sortTimetable = (arr) => arr.sort((a, b) => {
-  const getMinutes = (timeStr) => {
-    let [hours, minutes] = timeStr.split(':').map(Number);
+const sortTimetable = (arr) =>
+  arr.sort((a, b) => {
+    const getMinutes = (timeStr) => {
+      let [hours, minutes] = timeStr.split(":").map(Number);
 
+      if (hours < 8) {
+        hours += 12; // Assume times like 2:00, 3:00, etc. are PM
+      }
 
-    if (hours < 8) {
-      hours += 12; // Assume times like 2:00, 3:00, etc. are PM
-    }
+      return hours * 60 + minutes;
+    };
 
-    return hours * 60 + minutes;
-  };
+    const aMinutes = getMinutes(a.start_time);
+    const bMinutes = getMinutes(b.start_time);
 
-  const aMinutes = getMinutes(a.start_time);
-  const bMinutes = getMinutes(b.start_time);
-
-  return aMinutes - bMinutes;
-});
+    return aMinutes - bMinutes;
+  });
 
 const getFriendsIds = async (uid) => {
   let friends = await Friends.find({
@@ -290,30 +297,38 @@ const getFriendsIds = async (uid) => {
 };
 
 const getCoursesMapping = async (code) => {
-  let courses = await CourseMap.findOne({ courses: code }).select("-_id courses");
+  let courses = await CourseMap.findOne({ courses: code }).select(
+    "-_id courses"
+  );
   // console.log(courses)
-  if (courses != null) return courses.courses
+  if (courses != null) return courses.courses;
   return [code];
   // return;
-}
+};
 
-const getSections = async () => Sections.find().select("title _id").then(sections =>
-  sections.reduce((acc, section) => {
-    acc[section.title] = section._id;
-    return acc;
-  }, {})
-);
+const getSections = async () =>
+  Sections.find()
+    .select("title _id")
+    .then((sections) =>
+      sections.reduce((acc, section) => {
+        acc[section.title] = section._id;
+        return acc;
+      }, {})
+    );
 
 const selectGroupChats = async (ids, fields) => {
-  return (await ChatGroups.find({ _id: ids }).select(fields).lean()).map(e => ({ ...e, type: "chat" }))
-}
+  return (await ChatGroups.find({ _id: ids }).select(fields).lean()).map(
+    (e) => ({ ...e, type: "chat" })
+  );
+};
 
 const selectPostGroups = async (ids, fields) => {
-  return (await PostGroups.find({ _id: ids }).select(fields).lean()).map(e => ({ ...e, type: "post" }))
-}
+  return (await PostGroups.find({ _id: ids }).select(fields).lean()).map(
+    (e) => ({ ...e, type: "post" })
+  );
+};
 
-const getRandomThree = (arr) =>
-  arr.sort(() => Math.random() - 0.5).slice(0, 3);
+const getRandomThree = (arr) => arr.sort(() => Math.random() - 0.5).slice(0, 3);
 
 export {
   selectGroupChats,
@@ -337,5 +352,5 @@ export {
   getSections,
   sortTimetable,
   isAutoReplyEnabled,
-  isJoinRequested
+  isJoinRequested,
 };

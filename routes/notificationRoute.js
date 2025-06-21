@@ -14,7 +14,7 @@ router.get("/getNotifications/:uid", async (req, res) => {
     await notificationController.getNotifications(req.params.uid)
   );
 });
-
+ 
 router.post("/pushNotification/", async (req, res) => {
   let { user, actor, content, image1, image2 } = req.body;
   return res.json({

@@ -6,7 +6,7 @@ import { validateRequest } from "zod-express-middleware";
 import { z } from "zod";
 
 const destination = "/static/posts";
-
+ 
 const storage = multer.diskStorage({
   destination: `.${destination}`,
   filename: function (req, file, cb) {

@@ -49,9 +49,11 @@ export default {
   },
 
   getProfile: async function (uid, rid) {
-    let user_data = await Users.findById(uid).select(
-      "-activeChats -groupChats -communityGroups -password -__v -email -uid"
-    ).lean();
+    let user_data = await Users.findById(uid)
+      .select(
+        "-activeChats -groupChats -communityGroups -password -__v -email -uid"
+      )
+      .lean();
     let isSelf = uid == rid;
     let isFriend = await this.isFriend(uid, rid);
     let isPublic = !user_data.is_private;
@@ -127,12 +129,23 @@ export default {
 
   getPeopleNotInVip: async function (uid) {
     let friends = await this.getFriends(uid);
-    let vipCollectionIds = (await this.getVipCollection(uid))?.people.map(e => e._id.toString());
-    console.log(vipCollectionIds)
-    let notInVip = friends.filter(e => !vipCollectionIds.includes(e._id.toString()))
+    console.log(friends);
+    // let vipCollectionIds = (await this.getVipCollection(uid))?.people.map((e) =>
+    //   e._id.toString()
+    // );
+    // console.log(vipCollectionIds);
+    // let notInVip = friends.filter(
+    //   (e) => !vipCollectionIds.includes(e._id.toString())
+    // );
+    let inVipCollectons = (
+      await VipCollections.find({ creator: uid }).select("person")
+    ).map((e) => e.person.toString());
+
+    let notInVip = friends.filter(
+      (e) => !inVipCollectons.includes(e._id.toString())
+    );
 
     return notInVip;
-
   },
 
   toggleAutoReply: async function (uid, chatId) {
@@ -152,58 +165,72 @@ export default {
   // VIP Collection Handling
   ////////////////////////////////////////
 
-  getVipCollection: async function (creator) {
-    return await VipCollections.findOne({ creator })
-      .select("-messages")
-      .populate("people", "name imgUrl")
+  getVipCollections: async function (creator) {
+    return await VipCollections.find({ creator })
+      .select("-messages -__v")
+      .populate("person", "name imgUrl")
       .lean();
   },
 
-  createVipCollection: async function (creator, people) {
+  createVipCollection: async function (creator, person) {
     let vipCollection = new VipCollections({
       creator,
-      people,
+      person,
     });
     await vipCollection.save();
-    return vipCollection._id;
+    await vipCollection.populate("person", "name imgUrl");
+    return { _id: vipCollection._id, person: vipCollection.person };
   },
 
   deleteVipCollection: async function (collection_id) {
     await VipCollections.findByIdAndDelete(collection_id);
   },
 
-  addPeopleInVipCollection: async function (collection_id, people) {
-    await VipCollections.findByIdAndUpdate(collection_id, {
-      $addToSet: { people: people },
-    });
-  },
+  // addPeopleInVipCollection: async function (collection_id, people) {
+  //   await VipCollections.findByIdAndUpdate(collection_id, {
+  //     $addToSet: { people: people },
+  //   });
+  // },
 
-  removeFromVipCollection: async function (collection_id, people) {
-    await VipCollections.findByIdAndUpdate(collection_id, {
-      $pullAll: { people: people },
-    });
-  },
+  // removeFromVipCollection: async function (collection_id, people) {
+  //   await VipCollections.findByIdAndUpdate(collection_id, {
+  //     $pullAll: { people: people },
+  //   });
+  // },
 
-  getVipChat: async function (creator) {
-    let vipChat = await VipCollections.findOne({ creator })
+  getVipChat: async function (id) {
+    let vipChat = await VipCollections.findById(id)
       .select("messages")
       .populate({
         path: "messages",
-        select: "content attachments createdAt senderId",
+        select: "content attachments createdAt",
+        populate: [
+          {
+            path: "senderId",
+            select: "name imgUrl",
+          },
+        ],
         sort: { createdAt: -1 },
-        populate: {
-          path: "senderId",
-          select: "name imgUrl",
-        },
       })
       .lean();
 
-    return vipChat;
+    return {
+      _id: vipChat._id,
+      messages: vipChat.messages,
+      totalParticipants: 0,
+      isGroup: false,
+      hasDownloads: false,
+    };
   },
 
   getAdminGroups: async function (uid) {
-    console.log(uid)
-    let groups_ids = await PostGroups.find({ admins: uid }).select("_id name imgUrl isOfficial");
+    console.log(uid);
+    let groups_ids = await PostGroups.find({ admins: uid }).select(
+      "_id name imgUrl isOfficial"
+    );
     return groups_ids;
+  },
+  getAllUsers: async function () {
+    return await Users.find({}).select("name type imgUrl").lean();
   },
 };

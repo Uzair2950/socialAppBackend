@@ -17,9 +17,9 @@ const startMessageScheduler = () => {
       });
 
       if (scheduledMessages.length > 0) {
-        console.log("==================================================")
-        console.log("SCHEDULER AT WORK")
-        console.log("==================================================")
+        console.log("==================================================");
+        console.log("SCHEDULER AT WORK");
+        console.log("==================================================");
         console.log(scheduledMessages);
       }
 
@@ -37,7 +37,11 @@ const startMessageScheduler = () => {
                 $push: { messages: messageId },
               });
               // TODO: Create a new message for each scheduled message with same content obv
-              console.log("EMITTING MESSAGE", { chatId: c, messageId, senderId });
+              console.log("EMITTING MESSAGE", {
+                chatId: c,
+                messageId,
+                senderId,
+              });
               client.emit("sendMessage", { chatId: c, messageId, senderId });
             })
           );

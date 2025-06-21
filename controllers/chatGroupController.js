@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {
   Chats,
   ChatGroups,
@@ -114,8 +115,28 @@ export default {
     await ChatGroups.findByIdAndUpdate(gid, { $pull: { admins: admin } });
   },
 
-  updateGroupSettings: async function (gid, settings) {
-    await ChatGroups.findByIdAndUpdate(gid, settings);
+  // updateGroupSettings: async function (gid, settings) {
+  //   await ChatGroups.findByIdAndUpdate(gid, settings);
+  // },
+  updateGroupSettings: async function (gid, settings, file) {
+    try {
+      const updateData = {
+        name: settings.name,
+        aboutGroup: settings.aboutGroup,
+        allowChatting: settings.allowChatting === 'true'
+      };
+  
+      // Handle file upload if present
+      if (file) {
+        updateData.imgUrl = `/${file.path.replaceAll('\\', '/')}`;
+      }
+  
+      await ChatGroups.findByIdAndUpdate(gid, updateData);
+      return { success: true };
+    } catch (error) {
+      console.error('Update group error:', error);
+      throw error;
+    }
   },
 
   removeMember: async function (gid, uid) {
@@ -129,5 +150,58 @@ export default {
     await Users.findByIdAndUpdate(uid, {
       $pull: { groupChats: chatid._id },
     }); // Remove from users
+  },
+
+  getGroupByChatId: async function (chatId) {
+    try {
+      const group = await ChatGroups.findOne({ chat: chatId })
+        .select("-__v") // Exclude version key
+        .lean(); // Return plain JavaScript object
+
+      if (!group) {
+        return null;
+      }
+
+      // Convert MongoDB ObjectId and Date to strings for better client handling
+      group._id = group._id.toString();
+      group.chat = group.chat.toString();
+      group.createdAt = group.createdAt.toISOString();
+      group.updatedAt = group.updatedAt.toISOString();
+
+      return group;
+    } catch (error) {
+      console.error("Error fetching group by chat ID:", error);
+      throw error;
+    }
+  },
+  // Add this method to your existing chatGroupController
+  getNonAdminMembers: async function (groupId) {
+    try {
+      // Get the group with admins
+      const group = await ChatGroups.findById(groupId).select("admins chat");
+      if (!group) {
+        throw new Error("Group not found");
+      }
+
+      // Get all participants in the chat
+      const chat = await Chats.findById(group.chat)
+        .select("participants")
+        .populate("participants", "name imgUrl type");
+
+      // Filter out admins and return regular members
+      const nonAdminMembers = chat.participants.filter(
+        (participant) => !group.admins.includes(participant._id)
+      );
+
+      return nonAdminMembers.map((member) => ({
+        _id: member._id,
+        name: member.name,
+        imgUrl: member.imgUrl,
+        type: member.type,
+      }));
+    } catch (error) {
+      console.error("Error in getNonAdminMembers:", error);
+      throw error;
+    }
   },
 };

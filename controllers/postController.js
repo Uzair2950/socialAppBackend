@@ -40,7 +40,7 @@ export default {
           // Delete old
           let session = (await getCurrentSession())._id;
           await TimeTable.deleteMany({ session });
-          await TimeTable.insertMany(Object.values(timetable))
+          await TimeTable.insertMany(Object.values(timetable));
         }
       } else {
         console.log("Invalid File");
